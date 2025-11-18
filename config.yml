@@ -1,5 +1,5 @@
-baseURL: https://fivestone.github.io/hugo-papermod-beginning
-title: 新的 Hugo 站点 # 网站标题
+baseURL: https://liangyi-x.github.io/drunk/
+title: 良有以也x
 theme: [PaperMod]
 languageCode: 'en'
 
@@ -46,7 +46,7 @@ outputs:
 params:
   env: production # to enable google analytics, opengraph, twitter-cards and schema.
   description: 
-  author: somebody
+  author: 霧雨退之.
 
   defaultTheme: auto
   # disableThemeToggle: true
@@ -67,9 +67,9 @@ params:
   ShowLastMod: false #显示文章更新时间
 
   homeInfoParams:
-    Title: "一个空的 hugo 站点"
-    Content: >
-      这些文字可以在 config.yml 文件里更改。
+    Title: "LOST & FOUND"
+    Content: 像水消失在水中
+    
 
   profileMode:
     enabled: false
