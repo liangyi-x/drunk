@@ -1,6 +1,6 @@
 baseURL: https://liangyi-x.github.io/drunk/
 title: 良有以也x
-theme: [PaperMod]
+theme: PaperMod
 languageCode: 'en'
 
 enableInlineShortcodes: true
@@ -10,12 +10,46 @@ hasCJKLanguage: true
 paginate: 10
 mainsections: ["posts"]
 
+# ---------------------------
+# 首页功能菜单
+# ---------------------------
+menu:
+  main:
+    - name: Archive
+      url: /archives
+      weight: 5
+    - name: Search
+      url: /search/
+      weight: 10
+    - name: Tags
+      url: /tags/
+      weight: 15
+    - name: About
+      url: /about/
+      weight: 20
+    - name: RSS
+      url: /index.xml
+      weight: 25
+
+# ---------------------------
+# 输出设置
+# ---------------------------
+outputs:
+  home:
+    - HTML
+    - RSS
+    - JSON
+
+# ---------------------------
+# 主题参数
+# ---------------------------
 params:
   showPostExcerpts: true
-  summaryLength: 30
+  summaryLength: 30  # 首页显示摘要长度
   env: production
   author: 霧雨退之.
   defaultTheme: auto
+  ShowShareButtons: false
   ShowReadingTime: true
   ShowPostNavLinks: true
   ShowBreadCrumbs: true
@@ -26,26 +60,40 @@ params:
   hideFooter: false
   ShowLastMod: false
 
+  # 首页介绍文字
   homeInfoParams:
     Title: "LOST & FOUND"
     Content: 像水消失在水中
 
+  profileMode:
+    enabled: false
+    title: PaperMod
+    imageUrl: "#"
+    imageTitle: my image
+    buttons:
+      - name: Archives
+        url: /archives
+      - name: Tags
+        url: /tags
+
+  # 关闭主题内置高亮（可选）
   assets:
     disableHLJS: true
-    customCSS: ["css/extended/magazine.css"]
+    customCSS:
+      - "css/extended/magazine.css"  # 杂志化首页摘要
 
-  # -------------------------
-  # 评论功能（Giscus）
-  # -------------------------
-  comments: true
-  giscus:
-    repo: "liangyi-x/drunk"
-    repoID: "R_kgDOQX6njg"
-    category: "Announcements"
-    categoryID: "DIC_kwDOQX6njs4CyABK"
-    mapping: "pathname"
-    reactionsEnabled: "1"
-    emitMetadata: "0"
-    inputPosition: "bottom"
-    lang: "zh-CN"
-    loading: "lazy"
+# ---------------------------
+# 评论功能（Giscus）
+# ---------------------------
+comments: true
+giscus:
+  repo: "liangyi-x/drunk"
+  repoID: "R_kgDOQX6njg"
+  category: "Announcements"
+  categoryID: "DIC_kwDOQX6njs4CyABK"
+  mapping: "pathname"
+  reactionsEnabled: "1"
+  emitMetadata: "0"
+  inputPosition: "bottom"
+  lang: "zh-CN"
+  loading: "lazy"
