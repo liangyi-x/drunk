@@ -47,6 +47,7 @@ outputs:
 # 主题参数
 # ---------------------------
 params:
+  comments: true  # 全局开启文章评论
   showPostExcerpts: true
   summaryLength: 30
   env: production
@@ -83,7 +84,4 @@ params:
     customCSS:
       - "css/extended/magazine.css"
 
-# ---------------------------
-# 评论功能
-# ---------------------------
 comments: true  # 全局开启文章评论
