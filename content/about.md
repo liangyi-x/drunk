@@ -9,4 +9,4 @@ tags: ["climb", "listen", "read", "life", "music", "drunk", "pain", "death", "tr
 秉烛夜游
 
 
-tech support by xiaoming zhang 
+tech support by Qi Zhang 
