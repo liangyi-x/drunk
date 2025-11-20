@@ -1,0 +1,30 @@
+/* Magazine Style Summary for PaperMod */
+.post-entry .entry-content {
+    max-width: 45em;
+    margin-top: 0.5rem;
+    line-height: 1.75;
+    font-size: 0.95rem;
+    color: #444;
+}
+
+.post-entry .entry-content p:first-child {
+    font-weight: 500;
+    letter-spacing: 0.2px;
+}
+
+.post-entry {
+    padding-bottom: 2.2rem;
+    border-bottom: 1px solid #eaeaea;
+    margin-bottom: 2.2rem;
+}
+
+.post-entry .entry-header {
+    margin-bottom: 0.8rem;
+}
+
+.post-entry .entry-title a {
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+
+.post-
