@@ -11,7 +11,7 @@ paginate: 10
 mainsections: ["posts"]
 
 # ---------------------------
-# 首页功能菜单
+# 菜单
 # ---------------------------
 menu:
   main:
@@ -27,12 +27,15 @@ menu:
     - name: About
       url: /about/
       weight: 20
+    - name: 留言
+      url: /posts/example-post/#comments   # 跳到某篇文章的评论区
+      weight: 22
     - name: RSS
       url: /index.xml
       weight: 25
 
 # ---------------------------
-# 输出设置
+# 输出
 # ---------------------------
 outputs:
   home:
@@ -45,7 +48,7 @@ outputs:
 # ---------------------------
 params:
   showPostExcerpts: true
-  summaryLength: 30  # 首页显示摘要长度
+  summaryLength: 30
   env: production
   author: 霧雨退之.
   defaultTheme: auto
@@ -60,7 +63,6 @@ params:
   hideFooter: false
   ShowLastMod: false
 
-  # 首页介绍文字
   homeInfoParams:
     Title: "LOST & FOUND"
     Content: 像水消失在水中
@@ -76,24 +78,12 @@ params:
       - name: Tags
         url: /tags
 
-  # 关闭主题内置高亮（可选）
   assets:
     disableHLJS: true
     customCSS:
-      - "css/extended/magazine.css"  # 杂志化首页摘要
+      - "css/extended/magazine.css"
 
 # ---------------------------
-# 评论功能（Giscus）
+# 评论功能
 # ---------------------------
-comments: true
-giscus:
-  repo: "liangyi-x/drunk"
-  repoID: "R_kgDOQX6njg"
-  category: "Announcements"
-  categoryID: "DIC_kwDOQX6njs4CyABK"
-  mapping: "pathname"
-  reactionsEnabled: "1"
-  emitMetadata: "0"
-  inputPosition: "bottom"
-  lang: "zh-CN"
-  loading: "lazy"
+comments: true  # 全局开启文章评论
