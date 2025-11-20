@@ -90,10 +90,10 @@ params:
   comments: true
 
   giscus:
-    repo: "liangyi-x/drunk"  # 改成你的仓库
-    repoID: ""               # 去 giscus.app 生成
-    category: "General"
-    categoryID: ""           # 去 giscus.app 生成
+    repo: "liangyi-x/drunk" 
+    repoID: "R_kgDOQX6njg"   
+    category: "Announcements"
+    categoryID: "DIC_kwDOQX6njs4CyABK"          
     mapping: "pathname"
     reactionsEnabled: "1"
     emitMetadata: "0"
