@@ -1,3 +1,19 @@
 {{- /* Comments area start */ -}}
 {{- /* to add comments read => https://gohugo.io/content-management/comments/ */ -}}
 {{- /* Comments area end */ -}}
+{{ if .Page.Params.comments | default .Site.Params.comments }}
+<script src="https://giscus.app/client.js"
+        data-repo="{{ .Site.Params.giscus.repo }}"
+        data-repo-id="{{ .Site.Params.giscus.repoID }}"
+        data-category="{{ .Site.Params.giscus.category }}"
+        data-category-id="{{ .Site.Params.giscus.categoryID }}"
+        data-mapping="{{ .Site.Params.giscus.mapping }}"
+        data-reactions-enabled="{{ .Site.Params.giscus.reactionsEnabled }}"
+        data-emit-metadata="{{ .Site.Params.giscus.emitMetadata }}"
+        data-input-position="{{ .Site.Params.giscus.inputPosition }}"
+        data-lang="{{ .Site.Params.giscus.lang }}"
+        data-loading="{{ .Site.Params.giscus.loading }}"
+        crossorigin="anonymous"
+        async>
+</script>
+{{ end }}
