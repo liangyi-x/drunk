@@ -1,8 +1,14 @@
+{{/* 
+  _default/single.html
+  覆盖主题 single.html，安全方式添加评论
+*/}}
+
 {{ define "main" }}
+
+  {{/* 调用主题自带 single.html 渲染文章内容 */}}
   {{ partial "single.html" . }}
+
+  {{/* 调用评论区 partial */}}
   {{ partial "comments.html" . }}
+
 {{ end }}
-
-
-
-
