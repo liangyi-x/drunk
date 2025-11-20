@@ -45,7 +45,7 @@ outputs:
 
 params:
   showPostExcerpts: true # 显示摘要
-  summaryLength: 150 # 主题级别的摘要长度
+  summaryLength: 30   # 摘要只显示一句话
   env: production # to enable google analytics, opengraph, twitter-cards and schema.
   description: 
   author: 霧雨退之.
