@@ -63,3 +63,7 @@
 </article>
 
 {{- end }}{{/* end main */}}
+{{ define "main" }}
+  {{ partial "single.html" . }}
+  {{ partial "comments.html" . }}
+{{ end }}
