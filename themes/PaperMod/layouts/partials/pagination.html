@@ -1,34 +1,19 @@
 {{ $paginator := .paginator }}
-{{ if gt $paginator.TotalPages 1 }}
-<nav class="pagination" role="navigation" aria-label="Pagination">
-  <ul>
-    {{ if $paginator.HasPrev }}
-    <li class="prev">
-      <a href="{{ $paginator.Prev.URL }}" aria-label="Previous page">&laquo; Prev</a>
-    </li>
-    {{ else }}
-    <li class="prev disabled"><span>&laquo; Prev</span></li>
-    {{ end }}
 
-    {{ range $i, $p := $paginator.Pagers }}
-      {{ $isCurrent := eq $p.PageNumber $paginator.PageNumber }}
-      <li class="{{ if $isCurrent }}active{{ end }}">
-        {{ if $isCurrent }}
-          <span>{{ $p.PageNumber }}</span>
-        {{ else }}
-          <a href="{{ $p.URL }}">{{ $p.PageNumber }}</a>
-        {{ end }}
-      </li>
-    {{ end }}
+<nav class="pagination">
+  {{ with $paginator.HasPrev }}
+  <a class="prev" href="{{ .URL }}">← 上一页</a>
+  {{ end }}
 
-    {{ if $paginator.HasNext }}
-    <li class="next">
-      <a href="{{ $paginator.Next.URL }}" aria-label="Next page">Next &raquo;</a>
-    </li>
+  {{ range $paginator.Pagers }}
+    {{ if eq . $paginator }}
+      <span class="current">{{ .PageNumber }}</span>
     {{ else }}
-    <li class="next disabled"><span>Next &raquo;</span></li>
+      <a href="{{ .URL }}">{{ .PageNumber }}</a>
     {{ end }}
-  </ul>
+  {{ end }}
+
+  {{ with $paginator.HasNext }}
+  <a class="next" href="{{ .URL }}">下一页 →</a>
+  {{ end }}
 </nav>
-{{ end }}
-
