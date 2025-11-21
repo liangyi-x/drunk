@@ -206,7 +206,7 @@
   </div>
 </div>
 
-<!-- 彩蛋：It'll pass -->
+<!-- 彩蛋：It'll pass 全屏焚烧 + 火花 + 灰烬 -->
 {{ $fire := `
 <div id="fire-pass" style="
   position:fixed;
@@ -234,87 +234,100 @@ It'll pass
 (function(){
   const fireText = document.getElementById('fire-pass');
   const canvas = document.getElementById('fire-canvas');
-  if (!fireText || !canvas) return;
+  if(!fireText||!canvas) return;
   const ctx = canvas.getContext('2d');
 
   function resizeCanvas(){
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-    const fontSize = Math.min(window.innerWidth, window.innerHeight) * 0.2;
+    const fontSize = Math.min(window.innerWidth, window.innerHeight)*0.2;
     fireText.style.fontSize = fontSize + 'px';
   }
   window.addEventListener('resize', resizeCanvas);
   resizeCanvas();
 
-  const centerX = canvas.width / 2;
-  const centerY = canvas.height / 2;
+  const centerX = canvas.width/2;
+  const centerY = canvas.height/2;
 
   class Particle {
-    constructor(x,y,char){
-      this.x = x;
-      this.y = y;
-      this.vx = (Math.random()-0.5) * 4;
-      this.vy = (Math.random()*-2) - 1;
-      this.alpha = 1;
-      this.size = parseFloat(fireText.style.fontSize);
-      this.char = char;
+    constructor(x,y,char,type='text'){
+      this.x=x; this.y=y;
+      this.vx=(Math.random()-0.5)*10;
+      this.vy=Math.random()*-4-1;
+      this.alpha=1;
+      this.size=parseFloat(fireText.style.fontSize);
+      this.char=char;
+      this.age=0;
+      this.life=Math.random()*80+60;
+      this.type=type;
     }
     update(){
-      this.x += this.vx;
-      this.y += this.vy;
-      this.alpha -= 0.015;
-      if (this.alpha < 0) this.alpha = 0;
-      if (this.age < this.life/3){
-        this.color = 'white';
-      } else if (this.age < 2*this.life/3){
-        this.color = 'orange';
-      } else {
-        this.color = 'gray';
-      }
-      this.size *= 0.96;
+      this.x+=this.vx;
+      this.y+=this.vy;
+      if(this.type==='text'){ this.vy+=0.05; } 
+      else { this.vy+=0.02; this.vx+=(Math.random()-0.5)*0.3; }
+      this.alpha-=0.009;
+      this.size*=0.96;
       this.age++;
+      let progress=this.age/this.life;
+      if(progress<0.3) this.color='white';
+      else if(progress<0.6) this.color='orange';
+      else this.color='gray';
     }
     draw(){
-      ctx.globalAlpha = this.alpha;
-      ctx.fillStyle = this.color || 'gray';
-      ctx.font = this.size + 'px sans-serif';
-      ctx.fillText(this.char, this.x, this.y);
+      ctx.globalAlpha=this.alpha;
+      ctx.fillStyle=this.color||'gray';
+      ctx.font=this.type==='text'?this.size+'px sans-serif':'4px sans-serif';
+      ctx.fillText(this.char,this.x,this.y);
     }
   }
 
   function explodeText(){
-    const text = fireText.textContent;
-    fireText.style.display = 'none';
-    const fontSize = parseFloat(fireText.style.fontSize);
-    let particles = [];
-    for (let i = 0; i < text.length; i++){
-      const x = centerX - text.length * fontSize/2 + i*fontSize;
-      particles.push(new Particle(x, centerY, text[i]));
-      particles[particles.length-1].life = Math.random()*50 + 50;
-      particles[particles.length-1].age = 0;
+    const text=fireText.textContent;
+    fireText.style.display='none';
+    const fontSize=parseFloat(fireText.style.fontSize);
+    let particles=[];
+
+    // 文字粒子
+    for(let i=0;i<text.length;i++){
+      const x=centerX-text.length*fontSize/2+i*fontSize;
+      const y=centerY;
+      for(let j=0;j<6;j++){ // 每个字符更多粒子
+        particles.push(new Particle(x,y,text[i],'text'));
+      }
     }
+
+    // 火花粒子
+    for(let i=0;i<100;i++){
+      particles.push(new Particle(centerX,centerY,'•','spark'));
+    }
+
+    // 灰烬粒子
+    for(let i=0;i<150;i++){
+      let p = new Particle(centerX,centerY,'•','ash');
+      p.vx=(Math.random()-0.5)*2;
+      p.vy=Math.random()*-1;
+      p.size=2+Math.random()*3;
+      particles.push(p);
+    }
+
     animate(particles);
   }
 
   function animate(particles){
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    particles.forEach(p => { p.draw(); p.update(); });
-    particles = particles.filter(p => p.alpha > 0 && p.size > 2);
-    if (particles.length > 0){
-      requestAnimationFrame(()=>animate(particles));
-    } else {
-      fireText.style.display = 'none';
-      canvas.style.display = 'none';
-    }
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    particles.forEach(p=>{p.draw(); p.update();});
+    particles = particles.filter(p=>p.alpha>0 && (p.size>2||p.type!=='text'));
+    if(particles.length>0) requestAnimationFrame(()=>animate(particles));
+    else canvas.style.display='none';
   }
 
-  window.addEventListener('load', () => {
-    setTimeout(explodeText, 500);
-  });
+  window.addEventListener('load',()=>{ setTimeout(explodeText,500); });
 })();
 </script>
 `}}
 {{ $fire | safeHTML }}
+
 
 
 
