@@ -1,0 +1,21 @@
+{{/* 简单分页模板 */}}
+{{ if gt .paginator.TotalPages 1 }}
+<nav class="pagination">
+  {{ if .paginator.HasPrev }}
+    <a class="prev" href="{{ .paginator.Prev.URL }}">« 上一页</a>
+  {{ end }}
+
+  {{ range $i, $page := seq 1 .paginator.TotalPages }}
+    {{ $url := .paginator.PageURL $i }}
+    {{ if eq $i $.paginator.PageNumber }}
+      <span class="current">{{ $i }}</span>
+    {{ else }}
+      <a href="{{ $url }}">{{ $i }}</a>
+    {{ end }}
+  {{ end }}
+
+  {{ if .paginator.HasNext }}
+    <a class="next" href="{{ .paginator.Next.URL }}">下一页 »</a>
+  {{ end }}
+</nav>
+{{ end }}
