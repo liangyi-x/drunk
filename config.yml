@@ -1,3 +1,4 @@
+# 根级别
 baseURL: https://liangyi-x.github.io/drunk/
 title: 良有以也x
 theme: PaperMod
@@ -10,9 +11,6 @@ hasCJKLanguage: true
 paginate: 10
 mainsections: ["posts"]
 
-# ---------------------------
-# 菜单
-# ---------------------------
 menu:
   main:
     - name: Archive
@@ -25,3 +23,56 @@ menu:
       url: /tags/
       weight: 15
     - name: About
+      url: /about/
+      weight: 20
+    - name: 留言
+      url: /guestbook/   # 新增一个留言页
+      weight: 22
+    - name: RSS
+      url: /index.xml
+      weight: 25
+
+outputs:
+  home:
+    - HTML
+    - RSS
+    - JSON
+
+params:
+  comments: true
+  showPostExcerpts: true
+  summaryLength: 30
+  env: production
+  author: 霧雨退之.
+  defaultTheme: auto
+  ShowShareButtons: false
+  ShowReadingTime: true
+  ShowPostNavLinks: true
+  ShowBreadCrumbs: true
+  ShowCodeCopyButtons: true
+  ShowAllPagesInArchive: true
+  ShowPageNums: true
+  ShowToc: false
+  hideFooter: false
+  ShowLastMod: false
+
+  homeInfoParams:
+    Title: "LOST & FOUND"
+    Content: 像水消失在水中
+
+  profileMode:
+    enabled: false
+    title: PaperMod
+    imageUrl: "#"
+    imageTitle: my image
+    buttons:
+      - name: Archives
+        url: /archives
+      - name: Tags
+        url: /tags
+
+  assets:
+    disableHLJS: true
+    customCSS:
+      - "css/extended/magazine.css"
+
