@@ -5,15 +5,26 @@
   {{ $paginator := .Paginate (where .Pages "Type" "posts") }}
 
   {{ range $paginator.Pages }}
-  <article class="post-summary">
-    <h2><a href="{{ .Permalink }}">{{ .Title }}</a></h2>
-    {{ with .Summary }}
-    <p class="post-excerpt">{{ . }}</p>
+  <article class="post-card">
+    {{ with .Params.cover }}
+      <a href="{{ .Permalink }}">
+        <img src="{{ . }}" alt="{{ $.Title }}" class="post-card-img">
+      </a>
     {{ end }}
-    <div class="post-meta">
-      <span>{{ .Date.Format "2006-01-02" }}</span>
-      {{ with .Params.tags }}
-      | <span class="post-tags">{{ range . }}<a href="/tags/{{ . | urlize }}">{{ . }}</a> {{ end }}</span>
+    <div class="post-card-content">
+      <h2 class="post-card-title">
+        <a href="{{ .Permalink }}">{{ .Title }}</a>
+      </h2>
+      <div class="post-card-meta">
+        <span>{{ .Date.Format "2006-01-02" }}</span>
+        {{ with .Params.tags }}
+        | <span class="post-tags">
+            {{ range . }}<a href="/tags/{{ . | urlize }}">{{ . }}</a> {{ end }}
+          </span>
+        {{ end }}
+      </div>
+      {{ with .Summary }}
+        <p class="post-card-excerpt">{{ . }}</p>
       {{ end }}
     </div>
   </article>
