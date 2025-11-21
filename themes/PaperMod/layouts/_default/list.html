@@ -3,7 +3,7 @@
 /* 首页容器 */
 .home-featured-posts {
   max-width: 900px;
-  margin: 3rem auto; /* 顶部留空更多 */
+  margin: 4rem auto; /* 顶部留空更多，让页面呼吸感更好 */
   padding: 0 1rem;
 }
 
@@ -12,44 +12,44 @@
   text-align: center;
   font-size: 2rem;
   font-weight: 500;
-  margin-bottom: 2rem;
+  margin-bottom: 2.5rem; /* 标题与文章网格间距增加 */
   color: #333;
 }
 
 /* 卡片网格布局 */
 .posts-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2.5rem; /* 卡片间距 */
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2.5rem 2rem; /* 行列间距分开，更自然 */
 }
 
 /* 单篇文章卡片 */
 .post-card {
   background: #fff;
   border-radius: 12px;
-  padding: 1.2rem;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.05);
+  padding: 1.4rem;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.06);
   transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
 /* 悬停效果 */
 .post-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 28px rgba(0,0,0,0.08);
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
 }
 
 /* 标题 */
 .post-card h3 {
   margin-top: 0;
-  font-size: 1.35rem;
+  font-size: 1.4rem;
   color: #222;
 }
 
 /* 摘要文字 */
 .post-card .post-excerpt {
-  margin: 0.6rem 0 0;
+  margin: 0.7rem 0 0;
   font-size: 1rem;
-  line-height: 1.5;
+  line-height: 1.6;
   color: #555;
 }
 
@@ -59,13 +59,35 @@
   text-decoration: none;
 }
 
+/* 查看更多按钮 */
+.more-posts {
+  display: inline-block;
+  margin: 3.5rem auto 0;
+  padding: 0.75rem 1.8rem;
+  background-color: #222;
+  color: #fff;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 1rem;
+  transition: background-color 0.25s ease, transform 0.2s ease;
+}
+
+.more-posts:hover {
+  background-color: #555;
+  transform: translateY(-2px);
+}
+
 /* 响应式优化 */
 @media (max-width: 480px) {
   .posts-grid {
-    gap: 1.5rem;
+    gap: 1.8rem 1rem;
   }
   .post-card {
-    padding: 1rem;
+    padding: 1.1rem;
+  }
+  .home-featured-posts {
+    margin: 3rem auto;
   }
 }
 </style>
@@ -73,7 +95,7 @@
 <div class="home-featured-posts">
   <div class="home-title">Article</div>
   <div class="posts-grid">
-    {{ $featured := first 3 (where .Site.RegularPages "Type" "posts") }}
+    {{ $featured := first 6 (where .Site.RegularPages "Type" "posts") }}
     {{ range $featured }}
     <div class="post-card">
       <h3><a href="{{ .RelPermalink }}">{{ .Title }}</a></h3>
@@ -85,5 +107,7 @@
     </div>
     {{ end }}
   </div>
+
+  <a href="/posts/" class="more-posts">查看更多文章</a>
 </div>
 {{ end }}
