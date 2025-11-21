@@ -206,9 +206,6 @@
   </div>
 </div>
 
-<!-- 彩蛋：It'll pass 超炫酷焚烧 -->
-{{ if .IsHome }}
-{{ $fire := `
 <!-- 彩蛋：It'll pass 全屏焚烧 + 火舌 + 灰烬漂烟 -->
 <div id="fire-pass" style="
   position:fixed;
@@ -252,8 +249,7 @@
 
   class Particle {
     constructor(x,y,char,type='text'){
-      this.x = x;
-      this.y = y;
+      this.x = x; this.y = y;
       this.vx = (Math.random()-0.5)*6;
       this.vy = Math.random()*-2-0.5;
       this.alpha = 1;
@@ -282,13 +278,6 @@
     }
     draw(){
       ctx.globalAlpha = this.alpha;
-      if(this.type==='text'){
-        for(let i=0;i<3;i++){
-          ctx.fillStyle = `rgba(255, ${150+Math.random()*105}, 0, ${this.alpha*0.3})`;
-          ctx.font = (this.size*(0.8+Math.random()*0.4))+'px sans-serif';
-          ctx.fillText(this.char, this.x+Math.random()*4-2, this.y+Math.random()*4-2);
-        }
-      }
       ctx.fillStyle = this.color;
       ctx.font = (this.type==='text'?this.size:(this.size*0.1))+'px sans-serif';
       ctx.fillText(this.char,this.x,this.y);
@@ -301,14 +290,12 @@
     const fontSize = parseFloat(fireText.style.fontSize);
     let particles = [];
 
-    // 文字粒子
     for(let i=0;i<text.length;i++){
       const x = centerX - text.length*fontSize/2 + i*fontSize;
       const y = centerY;
       for(let j=0;j<5;j++) particles.push(new Particle(x,y,text[i],'text'));
     }
 
-    // 火花粒子
     for(let i=0;i<150;i++){
       const p = new Particle(centerX, centerY, '•','spark');
       p.vx = (Math.random()-0.5)*6;
@@ -317,11 +304,10 @@
       particles.push(p);
     }
 
-    // 灰烬粒子（升空漂动）
     for(let i=0;i<200;i++){
       const p = new Particle(centerX, centerY, '•','ash');
       p.vx = (Math.random()-0.5)*2;
-      p.vy = Math.random()*-0.5 - 0.5; // 轻微上升
+      p.vy = Math.random()*-0.5 - 0.5;
       p.size = 2+Math.random()*2;
       p.color = 'gray';
       particles.push(p);
@@ -341,14 +327,8 @@
   window.addEventListener('load',()=>{ setTimeout(explodeText,500); });
 })();
 </script>
-`}}
 {{ $fire | safeHTML }}
 {{ end }}
-
-
-
-
-
 
 
 
