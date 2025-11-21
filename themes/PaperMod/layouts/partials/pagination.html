@@ -2,7 +2,7 @@
 
 <nav class="pagination">
   {{ with $paginator.HasPrev }}
-  <a class="prev" href="{{ .URL }}">← 上一页</a>
+    <a class="prev" href="{{ .URL }}">← 上一页</a>
   {{ end }}
 
   {{ range $paginator.Pagers }}
@@ -14,6 +14,6 @@
   {{ end }}
 
   {{ with $paginator.HasNext }}
-  <a class="next" href="{{ .URL }}">下一页 →</a>
+    <a class="next" href="{{ .URL }}">下一页 →</a>
   {{ end }}
 </nav>
