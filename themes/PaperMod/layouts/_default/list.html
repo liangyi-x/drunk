@@ -1,48 +1,21 @@
 {{ define "main" }}
 
-<main class="main-content">
+<div class="post-list">
 
-  {{- /* 首页不显示 breadcrumbs */ -}}
-  {{- if not .IsHome }}
-    {{ partial "breadcrumbs.html" . }}
-  {{- end }}
+  {{/* 生成分页对象 */}}
+  {{ $paginator := .Paginate .Pages }}
 
-  {{- /* 分页文章列表 */ -}}
-  {{- $paginator := .Paginate (where .Pages "Section" "posts") }}
-
-  {{- range $paginator.Pages }}
-    <article class="post-entry">
-
-      {{- /* 封面 */ -}}
-      {{- $isHidden := (.Param "cover.hiddenInList") | default (.Param "cover.hidden") | default false }}
-      {{- partial "cover.html" (dict "cxt" . "IsHome" false "isHidden" $isHidden) }}
-
-      <header class="entry-header">
-        <h2><a href="{{ .Permalink }}">{{ .Title }}</a></h2>
-      </header>
-
-      <div class="entry-content">
-        {{- /* 显示摘要：优先 summary，否则正文第一行 */ -}}
-        {{- if .Params.summary }}
-          <p>{{ .Params.summary }}</p>
-        {{- else }}
-          {{- $firstLine := index (split (.Plain) "\n") 0 }}
-          <p>{{ $firstLine }}</p>
-        {{- end }}
-      </div>
-
-      <footer class="entry-footer">
-        {{ partial "post_meta.html" . }}
-        <a class="entry-link" href="{{ .Permalink }}">阅读全文</a>
-      </footer>
-
+  {{/* 遍历当前页文章 */}}
+  {{ range $paginator.Pages }}
+    <article class="post-preview">
+      <h2><a href="{{ .Permalink }}">{{ .Title }}</a></h2>
+      <p>{{ if .Summary }}{{ .Summary }}{{ else }}{{ .Plain | truncate 150 }}{{ end }}</p>
     </article>
-  {{- end }}
+  {{ end }}
 
-  {{- /* 分页 */ -}}
-  {{- with partial "pagination.html" (dict "paginator" $paginator "context" .) }}
-  {{- end }}
+  {{/* 调用分页 partial */}}
+  {{ partial "pagination.html" (dict "paginator" $paginator "context" .) }}
 
-</main>
+</div>
 
 {{ end }}
