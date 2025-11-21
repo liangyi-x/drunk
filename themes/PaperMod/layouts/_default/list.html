@@ -8,7 +8,6 @@
   max-width: 960px;
   margin: 3rem auto;
   padding: 0 1rem;
-  background: linear-gradient(to bottom, #f9f9f9, #fff);
 }
 
 /* 首页标题 */
@@ -145,7 +144,7 @@
 </style>
 
 {{ $isHome := eq .Kind "home" }}
-{{ $isPosts := eq .Type "posts" }}
+{{ $isPosts := or (eq .Type "posts") (eq .Kind "taxonomy") }}
 
 {{ if $isHome }}
 <!-- 首页显示三篇精选文章 -->
@@ -166,13 +165,13 @@
     </div>
   {{ end }}
 </div>
-<div class="lost-found">lost & found 像水消失在水中</div>
+<div class="lost-found">LOST & FOUND 像水消失在水中</div>
 
-{{ else }}
-<!-- posts、tag等页面 -->
+{{ else if $isPosts }}
+<!-- posts和tag页面列表 -->
 <div class="all-posts-list">
   <div class="home-title" style="font-size:2rem; text-align:center; margin-bottom:2rem;">All Posts</div>
-  
+
   {{ $pages := .Pages }}
   {{ if eq .Kind "taxonomy" }}
     {{ $pages = .Pages }}
@@ -213,7 +212,7 @@
     {{ end }}
   </div>
 
-  <div class="lost-found">lost & found 像水消失在水中</div>
+  <div class="lost-found">LOST & FOUND 像水消失在水中</div>
 </div>
 
 {{ end }}
