@@ -71,7 +71,7 @@
 </style>
 
 <div class="home-featured-posts">
-  <div class="home-title">精选文章</div>
+  <div class="home-title">Article</div>
   <div class="posts-grid">
     {{ $featured := first 3 (where .Site.RegularPages "Type" "posts") }}
     {{ range $featured }}
