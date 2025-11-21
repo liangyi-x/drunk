@@ -307,60 +307,93 @@ document.querySelector('.subscribe-overlay').addEventListener('click', function(
 });
 
 // 彩蛋火焰文字
-window.addEventListener('load', () => {
+<div id="fire-pass">It'll pass</div>
+<canvas id="fire-canvas"></canvas>
+
+<style>
+#fire-pass {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 10vw;
+  font-weight: bold;
+  color: white;
+  pointer-events: none;
+  z-index: 1000;
+  white-space: nowrap;
+}
+#fire-canvas {
+  position: fixed;
+  top:0; left:0;
+  width:100%;
+  height:100%;
+  pointer-events:none;
+  z-index: 999;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
   const fireText = document.getElementById('fire-pass');
   const canvas = document.getElementById('fire-canvas');
   const ctx = canvas.getContext('2d');
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
 
-  const rect = fireText.getBoundingClientRect();
-  const centerX = rect.left + rect.width/2;
-  const centerY = rect.top + rect.height/2;
+  const centerX = canvas.width / 2;
+  const centerY = canvas.height / 2;
+  const text = fireText.textContent;
+  fireText.style.display = 'none';
 
   class Particle {
-    constructor(x, y, char) {
-      this.x = x; this.y = y;
-      this.vx = (Math.random()-0.5)*2;
-      this.vy = Math.random()*-1-0.5;
+    constructor(x,y,char){
+      this.x = x;
+      this.y = y;
+      this.vx = (Math.random()-0.5)*3;
+      this.vy = Math.random()*-1.5-0.5;
       this.alpha = 1;
       this.char = char;
-      this.color = 'white';
+      this.size = 10*window.innerWidth/100;
     }
-    update() {
+    update(){
       this.x += this.vx;
       this.y += this.vy;
-      this.alpha -= 0.02;
+      this.alpha -= 0.015;
     }
-    draw() {
+    draw(){
+      // 根据 alpha 渐变颜色：白 -> 橙黄 -> 灰
+      let r,g,b;
+      if(this.alpha > 0.6){          // 初始白
+        r = 255; g = 255; b = 255;
+      } else if(this.alpha > 0.3){   // 橙黄
+        r = 255; g = Math.floor(150 + 105*(this.alpha-0.3)/0.3); b = 0;
+      } else {                        // 灰色
+        let gray = Math.floor(255*this.alpha);
+        r = gray; g = gray; b = gray;
+      }
       ctx.globalAlpha = this.alpha;
-      ctx.fillStyle = `rgba(100,100,100,${this.alpha})`;
-      ctx.font = "10vw sans-serif";
+      ctx.fillStyle = `rgb(${r},${g},${b})`;
+      ctx.font = `${this.size}px sans-serif`;
       ctx.fillText(this.char, this.x, this.y);
     }
   }
 
   let particles = [];
-  const text = fireText.textContent;
-  fireText.style.display = 'none';
-  const fontSize = 100;
-
+  const fontSize = 10*window.innerWidth/100;
   for(let i=0;i<text.length;i++){
-    const charX = centerX - text.length*fontSize/2 + i*fontSize;
-    const charY = centerY;
-    particles.push(new Particle(charX,charY,text[i]));
+    particles.push(new Particle(centerX - text.length*fontSize/2 + i*fontSize, centerY, text[i]));
   }
 
-  function animate() {
+  function animate(){
     ctx.clearRect(0,0,canvas.width,canvas.height);
-    particles.forEach(p=>{p.update();p.draw();});
+    particles.forEach(p=>{p.update(); p.draw();});
     if(particles.some(p=>p.alpha>0)) requestAnimationFrame(animate);
-    else {
-      canvas.remove(); fireText.remove();
-    }
+    else { canvas.remove(); fireText.remove(); }
   }
   animate();
 });
 </script>
+
 
 {{ end }}
