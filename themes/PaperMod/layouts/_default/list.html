@@ -58,9 +58,9 @@
 }
 
 /* More 按钮 */
-.more-posts-button, .subscribe-button {
+.more-posts-button {
   display: inline-block;
-  margin: 1rem auto;
+  margin: 1.5rem auto;
   padding: 0.55rem 1.5rem;
   background: #222;
   color: #fff;
@@ -71,12 +71,12 @@
   transition: background 0.25s ease, transform 0.2s ease;
 }
 
-.more-posts-button:hover, .subscribe-button:hover {
+.more-posts-button:hover {
   background: #444;
   transform: translateY(-2px);
 }
 
-/* posts 列表页 */
+/* posts 列表页：一行一行 */
 .all-posts-list {
   max-width: 700px;
   margin: 2rem auto;
@@ -132,6 +132,24 @@
 }
 
 /* 弹窗订阅 */
+.subscribe-button {
+  display: inline-block;
+  margin: 1rem auto 2rem auto;
+  padding: 0.55rem 1.5rem;
+  background: #222;
+  color: #fff;
+  font-weight: 500;
+  border-radius: 8px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.25s ease, transform 0.2s ease;
+}
+
+.subscribe-button:hover {
+  background: #444;
+  transform: translateY(-2px);
+}
+
 .subscribe-overlay {
   display: none;
   position: fixed;
@@ -169,7 +187,29 @@
   background: white;
 }
 
-/* 移动端 */
+/* 彩蛋文字 */
+#fire-pass {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 10vw;
+  font-weight: bold;
+  color: white;
+  pointer-events: none;
+  z-index: 1000;
+  white-space: nowrap;
+}
+
+#fire-canvas {
+  position: fixed;
+  top:0; left:0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 999;
+}
+
 @media (max-width: 480px) {
   .posts-grid { gap: 2rem; padding-top:1rem; padding-bottom:1rem; }
   .post-card { padding: 1rem; }
@@ -210,9 +250,7 @@
   </ul>
   <div class="pagination" style="text-align:center; margin-top:1.5rem;">
     {{ if $paginator.HasPrev }}<a href="{{ $paginator.Prev.URL }}">← Prev</a>{{ end }}
-    {{ range $paginator.Pagers }}
-      {{ if eq . $paginator }}<strong>{{ .PageNumber }}</strong>{{ else }}<a href="{{ .URL }}">{{ .PageNumber }}</a>{{ end }}
-    {{ end }}
+    <strong>{{ $paginator.PageNumber }}</strong>
     {{ if $paginator.HasNext }}<a href="{{ $paginator.Next.URL }}">Next →</a>{{ end }}
   </div>
 </div>
@@ -231,9 +269,7 @@
   </ul>
   <div class="pagination" style="text-align:center; margin-top:1.5rem;">
     {{ if $paginator.HasPrev }}<a href="{{ $paginator.Prev.URL }}">← Prev</a>{{ end }}
-    {{ range $paginator.Pagers }}
-      {{ if eq . $paginator }}<strong>{{ .PageNumber }}</strong>{{ else }}<a href="{{ .URL }}">{{ .PageNumber }}</a>{{ end }}
-    {{ end }}
+    <strong>{{ $paginator.PageNumber }}</strong>
     {{ if $paginator.HasNext }}<a href="{{ $paginator.Next.URL }}">Next →</a>{{ end }}
   </div>
 </div>
@@ -254,32 +290,9 @@
 <div class="subscribe-overlay">
   <div class="subscribe-popup">
     <div class="close-btn">&times;</div>
-    <iframe src="https://364951749.substack.com/embed" scrolling="no" frameborder="0" allowtransparency="true"></iframe>
+    <iframe src="https://364951749.substack.com/embed" scrolling="no"></iframe>
   </div>
 </div>
-
-<!-- 彩蛋 It'll pass 火焰消失 -->
-<div id="fire-pass" style="
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 2rem;
-  font-weight: bold;
-  color: #ff4500;
-  pointer-events: none;
-  z-index: 1000;
-  white-space: nowrap;
-">It'll pass</div>
-
-<canvas id="fire-canvas" style="
-  position: fixed;
-  top:0; left:0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 999;
-"></canvas>
 
 <script>
 // 弹窗订阅
@@ -293,31 +306,7 @@ document.querySelector('.subscribe-overlay').addEventListener('click', function(
   if(e.target === this){ this.style.display = 'none'; }
 });
 
-<!-- 彩蛋 It'll pass：火焰燃烧 + 灰烬飘散效果 -->
-<div id="fire-pass" style="
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 15vw;
-  font-weight: bold;
-  color: #fff;
-  pointer-events: none;
-  z-index: 1000;
-  white-space: nowrap;
-  text-align: center;
-">It'll pass</div>
-
-<canvas id="fire-canvas" style="
-  position: fixed;
-  top:0; left:0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 999;
-"></canvas>
-
-<script>
+// 彩蛋火焰文字
 window.addEventListener('load', () => {
   const fireText = document.getElementById('fire-pass');
   const canvas = document.getElementById('fire-canvas');
@@ -331,59 +320,47 @@ window.addEventListener('load', () => {
 
   class Particle {
     constructor(x, y, char) {
-      this.x = x;
-      this.y = y;
-      this.vx = (Math.random() - 0.5) * 3;
-      this.vy = Math.random() * -3 - 1;
+      this.x = x; this.y = y;
+      this.vx = (Math.random()-0.5)*2;
+      this.vy = Math.random()*-1-0.5;
       this.alpha = 1;
-      this.size = Math.random() * 20 + 30;
       this.char = char;
-      this.color = 'rgba(255,255,255,1)';
-      this.gravity = 0.02;
+      this.color = 'white';
     }
     update() {
-      this.x += this.vx + Math.sin(this.y*0.05)*0.5;
+      this.x += this.vx;
       this.y += this.vy;
-      this.vy += this.gravity; // 模拟重力
-      this.alpha -= 0.015;
-      const grey = Math.floor(255 * this.alpha);
-      this.color = `rgba(${grey},${grey},${grey},${this.alpha})`;
+      this.alpha -= 0.02;
     }
     draw() {
-      ctx.fillStyle = this.color;
-      ctx.font = `${this.size}px sans-serif`;
+      ctx.globalAlpha = this.alpha;
+      ctx.fillStyle = `rgba(100,100,100,${this.alpha})`;
+      ctx.font = "10vw sans-serif";
       ctx.fillText(this.char, this.x, this.y);
     }
   }
 
   let particles = [];
+  const text = fireText.textContent;
+  fireText.style.display = 'none';
+  const fontSize = 100;
 
-  function explodeText() {
-    const text = fireText.textContent;
-    fireText.style.display = 'none';
-    const fontSize = canvas.width / text.length * 0.8;
-    for (let i = 0; i < text.length; i++) {
-      const charX = centerX - text.length*fontSize/2 + i*fontSize;
-      const charY = centerY;
-      particles.push(new Particle(charX, charY, text[i]));
-    }
-    animate();
+  for(let i=0;i<text.length;i++){
+    const charX = centerX - text.length*fontSize/2 + i*fontSize;
+    const charY = centerY;
+    particles.push(new Particle(charX,charY,text[i]));
   }
 
   function animate() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    particles.forEach((p, idx) => {
-      p.update();
-      p.draw();
-      if (p.alpha <= 0) particles.splice(idx, 1);
-    });
-    if (particles.length > 0) requestAnimationFrame(animate);
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    particles.forEach(p=>{p.update();p.draw();});
+    if(particles.some(p=>p.alpha>0)) requestAnimationFrame(animate);
+    else {
+      canvas.remove(); fireText.remove();
+    }
   }
-
-  // 延迟 0.5 秒再触发爆炸
-  setTimeout(explodeText, 500);
+  animate();
 });
 </script>
-
 
 {{ end }}
