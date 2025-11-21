@@ -31,25 +31,28 @@ body {
 
 /* 单篇文章卡片 */
 .post-card {
-  background: linear-gradient(135deg, #ffffff 0%, #f7f7f7 100%);
+  background: linear-gradient(135deg, #ffffff 0%, #f9f9f9 100%);
   border-radius: 12px;
   padding: 1.5rem;
   box-shadow: 0 4px 14px rgba(0,0,0,0.05);
-  transition: transform 0.3s ease, box-shadow 0.3s ease, background 1.5s ease;
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+              background 0.6s ease;
 }
 
+/* 悬停效果 */
 .post-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 10px 28px rgba(0,0,0,0.1);
-  background: linear-gradient(135deg, #fefefe 0%, #f0f0f0 100%);
+  transform: translateY(-8px);
+  box-shadow: 0 14px 36px rgba(0,0,0,0.12);
+  background: linear-gradient(135deg, #fff 0%, #f0f0f0 100%);
 }
 
 /* 标题 */
 .post-card h3 {
   margin-top: 0;
-  font-size: 1.4rem;
+  font-size: 1.45rem;
   color: #222;
-  transition: color 0.25s ease;
+  transition: color 0.3s ease;
 }
 
 .post-card h3:hover {
@@ -109,6 +112,7 @@ body {
   font-size: 1.1rem;
   color: #222;
   text-decoration: none;
+  transition: color 0.25s ease;
 }
 
 .all-posts-list a:hover {
