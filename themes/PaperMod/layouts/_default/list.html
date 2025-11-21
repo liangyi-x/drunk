@@ -209,7 +209,7 @@
 <!-- 彩蛋：It'll pass -->
 {{ $fire := `
 <div id="fire-pass" style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
-font-size:6rem;font-weight:bold;color:white;text-align:center;pointer-events:none;z-index:1000;white-space:nowrap;">
+font-weight:bold;color:white;text-align:center;pointer-events:none;z-index:1000;white-space:nowrap;">
 It'll pass
 </div>
 <canvas id="fire-canvas" style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:999;"></canvas>
@@ -218,8 +218,15 @@ It'll pass
   const fireText = document.getElementById('fire-pass');
   const canvas = document.getElementById('fire-canvas');
   const ctx = canvas.getContext('2d');
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    const fontSize = Math.min(window.innerWidth, window.innerHeight) * 0.2; // 占屏幕 20%
+    fireText.style.fontSize = fontSize + 'px';
+  }
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
 
   const rect = fireText.getBoundingClientRect();
   const centerX = rect.left + rect.width/2;
@@ -227,24 +234,42 @@ It'll pass
 
   class Particle {
     constructor(x,y,char){
-      this.x=x;this.y=y;
+      this.x=x; this.y=y;
       this.vx=(Math.random()-0.5)*2;
-      this.vy=Math.random()*-1-0.5;
-      this.alpha=1;this.char=char;
+      this.vy=Math.random()*-1.5-0.5; // 上升漂浮
+      this.alpha=1;
+      this.size=parseFloat(fireText.style.fontSize);
+      this.char=char;
       this.color='white';
+      this.life=Math.random()*50+50;
+      this.age=0;
     }
-    update(){this.x+=this.vx;this.y+=this.vy;this.alpha-=0.02;}
-    draw(){ctx.globalAlpha=this.alpha;ctx.fillStyle=this.color;ctx.font="64px sans-serif";ctx.fillText(this.char,this.x,this.y);}
+    update(){
+      this.x+=this.vx;
+      this.y+=this.vy;
+      this.age++;
+      this.alpha = Math.max(0, 1 - this.age/this.life);
+      if(this.age < this.life/3){ this.color='white'; }
+      else if(this.age < 2*this.life/3){ this.color='orange'; }
+      else{ this.color='gray'; }
+      this.size *= 0.97;
+    }
+    draw(){
+      ctx.globalAlpha=this.alpha;
+      ctx.fillStyle=this.color;
+      ctx.font=this.size+'px sans-serif';
+      ctx.fillText(this.char,this.x,this.y);
+    }
   }
 
   let particles=[];
 
   function explodeText(){
     const text = fireText.textContent;
-    const fontSize=64;
+    const fontSize = parseFloat(fireText.style.fontSize);
     fireText.style.display='none';
     for(let i=0;i<text.length;i++){
-      const charX = centerX - text.length*fontSize/4 + i*fontSize*0.6;
+      const charX = centerX - text.length*fontSize/2 + i*fontSize;
       const charY = centerY;
       particles.push(new Particle(charX,charY,text[i]));
     }
@@ -254,15 +279,22 @@ It'll pass
   function animate(){
     ctx.clearRect(0,0,canvas.width,canvas.height);
     particles.forEach(p=>{p.draw();p.update();});
-    particles = particles.filter(p=>p.alpha>0);
-    if(particles.length>0){requestAnimationFrame(animate);}else{canvas.style.display='none';}
+    particles = particles.filter(p=>p.alpha>0 && p.size>1);
+    if(particles.length>0){
+      requestAnimationFrame(animate);
+    } else {
+      canvas.style.display='none';
+    }
   }
 
-  window.addEventListener('load', ()=>{explodeText();});
+  window.addEventListener('load',()=>{
+    setTimeout(()=>{ explodeText(); }, 500);
+  });
 })();
 </script>
 `}}
 {{ $fire | safeHTML }}
+
 
 <script>
 // 弹窗订阅逻辑
