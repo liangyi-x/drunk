@@ -261,14 +261,16 @@ It'll pass
       this.age=0;
       this.life=Math.random()*80+60;
       this.type=type;
+      this.angle = Math.random()*Math.PI*2;
     }
     update(){
-      this.x += this.vx + (Math.random()-0.5)*0.5; // 随机晃动
-      this.y += this.vy;
+      this.x += this.vx + Math.sin(this.angle)*0.5;
+      this.y += this.vy + Math.cos(this.angle)*0.5;
+      this.angle += 0.1;
       if(this.type==='text'){ this.vy += 0.05; } 
       else { this.vy += 0.02; }
-      this.alpha -= 0.009;
-      this.size *= 0.95;
+      this.alpha -= 0.008;
+      this.size *= 0.96;
       this.age++;
       let progress = this.age / this.life;
       if(this.type==='text'){
@@ -276,11 +278,11 @@ It'll pass
         else if(progress<0.6) this.color='orange';
         else this.color='gray';
       } else if(this.type==='spark'){
-        this.color = `hsl(${Math.random()*40+20},100%,50%)`;
+        this.color = "hsl(" + (Math.random()*40+20) + ",100%,50%)";
       } else if(this.type==='ash'){
-        this.color = `rgba(120,120,120,${this.alpha})`;
-        this.vx += (Math.random()-0.5)*0.2; // 烟雾晃动
-        this.vy -= 0.05; // 上升
+        this.color = "rgba(120,120,120,"+this.alpha+")";
+        this.vx += (Math.random()-0.5)*0.2;
+        this.vy -= 0.05;
       }
     }
     draw(){
@@ -301,24 +303,25 @@ It'll pass
     for(let i=0;i<text.length;i++){
       const x=centerX-text.length*fontSize/2 + i*fontSize;
       const y=centerY;
-      for(let j=0;j<6;j++){
+      for(let j=0;j<8;j++){ //更多粒子
         particles.push(new Particle(x,y,text[i],'text'));
       }
     }
 
-    // 火焰粒子
-    for(let i=0;i<200;i++){
+    // 火花粒子
+    for(let i=0;i<250;i++){
       let p = new Particle(centerX,centerY,'•','spark');
       p.life=Math.random()*60+40;
       particles.push(p);
     }
 
     // 灰烬粒子
-    for(let i=0;i<250;i++){
+    for(let i=0;i<400;i++){
       let p = new Particle(centerX,centerY,'•','ash');
-      p.life=Math.random()*120+60;
-      p.vx=(Math.random()-0.5)*1.5;
+      p.life=Math.random()*150+50;
+      p.vx=(Math.random()-0.5)*2;
       p.vy=Math.random()*-1;
+      p.size=2+Math.random()*3;
       particles.push(p);
     }
 
@@ -343,6 +346,7 @@ It'll pass
 `}}
 {{ $fire | safeHTML }}
 {{ end }}
+
 
 
 
