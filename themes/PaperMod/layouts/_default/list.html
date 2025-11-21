@@ -1,36 +1,26 @@
 {{ define "main" }}
+
 <section class="post-list">
 
-  {{ range .Paginator.Pages }}
-  <article class="post-card" style="margin-bottom: 3rem; padding-bottom: 1.5rem; border-bottom: 1px solid #e2e2e2;">
-    <header>
-      <h2 class="post-title" style="margin-bottom: 0.5rem;">
-        <a href="{{ .Permalink }}" style="text-decoration:none; color:#222;">{{ .Title }}</a>
-      </h2>
-      <small style="color:#555;">
-        {{ .Date.Format "2006-01-02" }}
-        {{ with .Params.tags }} | 
-          {{ range $i, $tag := . }}
-            {{ if $i }}, {{ end }}
-            <a href="/tags/{{ $tag | urlize }}/" style="color:#888;">{{ $tag }}</a>
-          {{ end }}
-        {{ end }}
-      </small>
-    </header>
+  {{ $paginator := .Paginate (where .Pages "Type" "posts") }}
 
-    <p class="post-summary" style="margin-top:0.75rem; color:#444;">
-      {{ if .Summary }}
-        {{ .Summary }}
-      {{ else }}
-        {{ .Plain | truncate 120 }}
+  {{ range $paginator.Pages }}
+  <article class="post-summary">
+    <h2><a href="{{ .Permalink }}">{{ .Title }}</a></h2>
+    {{ with .Summary }}
+    <p class="post-excerpt">{{ . }}</p>
+    {{ end }}
+    <div class="post-meta">
+      <span>{{ .Date.Format "2006-01-02" }}</span>
+      {{ with .Params.tags }}
+      | <span class="post-tags">{{ range . }}<a href="/tags/{{ . | urlize }}">{{ . }}</a> {{ end }}</span>
       {{ end }}
-    </p>
+    </div>
   </article>
   {{ end }}
 
-  <nav class="pagination" style="margin-top:3rem;">
-    {{ partial "pagination.html" . }}
-  </nav>
+  {{ partial "pagination.html" (dict "paginator" $paginator "context" .) }}
 
 </section>
+
 {{ end }}
