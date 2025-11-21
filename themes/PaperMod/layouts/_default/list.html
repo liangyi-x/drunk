@@ -1,5 +1,7 @@
 {{ define "main" }}
-<main>
+<main class="homepage">
+
+  <!-- 精选文章 -->
   <section class="featured-posts">
     <h2>精选文章</h2>
     <div class="featured-grid">
@@ -7,20 +9,35 @@
         <article class="post-card">
           <a href="{{ .Permalink }}">
             <h3>{{ .Title }}</h3>
-            {{ with .Params.description }}<p>{{ . }}</p>{{ end }}
+            {{ with .Params.description }}
+            <p>{{ . }}</p>
+            {{ end }}
           </a>
         </article>
       {{ end }}
     </div>
   </section>
 
+  <!-- 所有文章列表 -->
   <section class="all-posts">
     <h2>所有文章</h2>
     <ul>
       {{ range .Paginator.Pages }}
-        <li><a href="{{ .Permalink }}">{{ .Title }}</a></li>
+        <li>
+          <a href="{{ .Permalink }}">{{ .Title }}</a>
+          {{ with .Params.description }} - {{ . }}{{ end }}
+        </li>
       {{ end }}
     </ul>
+
+    <!-- 分页 -->
+    {{ if .Paginator.HasPrev }}
+      <a href="{{ .Paginator.Prev.URL }}">上一页</a>
+    {{ end }}
+    {{ if .Paginator.HasNext }}
+      <a href="{{ .Paginator.Next.URL }}">下一页</a>
+    {{ end }}
   </section>
+
 </main>
 {{ end }}
