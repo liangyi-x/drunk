@@ -1,7 +1,7 @@
 {{ define "main" }}
 
 <style>
-/* 容器：首页卡片 grid */
+/* 首页卡片 grid */
 .posts-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -61,7 +61,7 @@
 /* 首页 More 按钮 */
 .more-posts-button {
   display: inline-block;
-  margin-top: 0.5rem;
+  margin-top: 1rem;
   padding: 0.55rem 1.3rem;
   background: #222;
   color: #fff;
@@ -75,7 +75,7 @@
   background: #444;
 }
 
-/* posts 列表页：一行一行 */
+/* posts/tag 列表页：一行一行 */
 .all-posts-list {
   max-width: 700px;
   margin: 2rem auto;
@@ -103,7 +103,6 @@
   color: #000;
 }
 
-/* 摘要控制（tag + posts 页面） */
 .excerpt {
   font-size: 0.95rem;
   color: #666;
@@ -131,33 +130,24 @@
   font-weight: bold;
 }
 
+/* Newsletter iframe */
+.newsletter-iframe {
+  display: block;
+  margin: 3rem auto;
+  max-width: 480px;
+  width: 90%;
+  height: 320px;
+  border: 1px solid #EEE;
+  background: white;
+  box-sizing: border-box;
+}
+
 /* 全站 footer */
 .global-footer {
   text-align: center;
   margin: 3rem 0 1rem 0;
   font-style: italic;
   color: #777;
-}
-
-/* Newsletter */
-.newsletter-box {
-  margin: 3rem auto;
-  padding: 1.5rem;
-  max-width: 500px;
-  text-align: center;
-}
-
-.newsletter-box a {
-  display: inline-block;
-  padding: 0.6rem 1.3rem;
-  background: #111;
-  color: #fff;
-  text-decoration: none;
-  border-radius: 8px;
-}
-
-.newsletter-box a:hover {
-  background: #333;
 }
 
 /* 移动端优化 */
@@ -173,14 +163,12 @@
 }
 </style>
 
-
 {{ $isHome := .IsHome }}
 {{ $isPosts := eq .Type "posts" }}
 {{ $isTag := eq .Kind "term" }}
 
-
 {{/* ---------------------------
-      首页：三篇精选文章 + More
+      首页：三篇精选文章 + More 按钮
 ---------------------------- */}}
 {{ if $isHome }}
 <div class="home-title">Article</div>
@@ -198,9 +186,15 @@
   {{ end }}
 </div>
 
+<!-- Substack Newsletter -->
+<iframe class="newsletter-iframe" src="https://364951749.substack.com/embed" frameborder="0" scrolling="no"></iframe>
+
+<div class="global-footer">
+  LOST & FOUND 像水消失在水中
+</div>
 
 {{/* ---------------------------
-      posts 页面：普通列表
+      posts 页面：普通列表 + 分页
 ---------------------------- */}}
 {{ else if $isPosts }}
 <div class="all-posts-list">
@@ -218,14 +212,26 @@
 
   <div class="pagination" style="text-align:center; margin-top:1.5rem;">
     {{ if $paginator.HasPrev }}<a href="{{ $paginator.Prev.URL }}">← Prev</a>{{ end }}
-    <strong>{{ $paginator.PageNumber }}</strong>
+    {{ range $paginator.Pagers }}
+      {{ if eq . $paginator }}
+        <strong>{{ .PageNumber }}</strong>
+      {{ else }}
+        <a href="{{ .URL }}">{{ .PageNumber }}</a>
+      {{ end }}
+    {{ end }}
     {{ if $paginator.HasNext }}<a href="{{ $paginator.Next.URL }}">Next →</a>{{ end }}
+  </div>
+
+  <!-- Substack Newsletter -->
+  <iframe class="newsletter-iframe" src="https://364951749.substack.com/embed" frameborder="0" scrolling="no"></iframe>
+
+  <div class="global-footer">
+    LOST & FOUND 像水消失在水中
   </div>
 </div>
 
-
 {{/* ---------------------------
-      Tag 页面修复：正常显示文章
+      tag 页面修复：正常显示文章
 ---------------------------- */}}
 {{ else if $isTag }}
 <div class="all-posts-list">
@@ -243,35 +249,36 @@
 
   <div class="pagination" style="text-align:center; margin-top:1.5rem;">
     {{ if $paginator.HasPrev }}<a href="{{ $paginator.Prev.URL }}">← Prev</a>{{ end }}
-    <strong>{{ $paginator.PageNumber }}</strong>
+    {{ range $paginator.Pagers }}
+      {{ if eq . $paginator }}
+        <strong>{{ .PageNumber }}</strong>
+      {{ else }}
+        <a href="{{ .URL }}">{{ .PageNumber }}</a>
+      {{ end }}
+    {{ end }}
     {{ if $paginator.HasNext }}<a href="{{ $paginator.Next.URL }}">Next →</a>{{ end }}
+  </div>
+
+  <!-- Substack Newsletter -->
+  <iframe class="newsletter-iframe" src="https://364951749.substack.com/embed" frameborder="0" scrolling="no"></iframe>
+
+  <div class="global-footer">
+    LOST & FOUND 像水消失在水中
   </div>
 </div>
 
-
 {{/* ---------------------------
-      其他页面 fallback
+      fallback 其他页面
 ---------------------------- */}}
 {{ else }}
 {{ .Content }}
-{{ end }}
 
+<!-- Substack Newsletter -->
+<iframe class="newsletter-iframe" src="https://364951749.substack.com/embed" frameborder="0" scrolling="no"></iframe>
 
-{{/* ---------------------------
-      Newsletter（全站）
----------------------------- */}}
-<div class="newsletter-box">
-  <div style="margin-bottom:0.7rem; font-size:1rem; color:#444;">Subscribe for updates</div>
-  <a href="https://liangyi1219.substack.com/subscribe" target="_blank">
-    Subscribe on Substack
-  </a>
-</div>
-
-{{/* ---------------------------
-      全站 Footer
----------------------------- */}}
 <div class="global-footer">
   LOST & FOUND 像水消失在水中
 </div>
+{{ end }}
 
 {{ end }}
