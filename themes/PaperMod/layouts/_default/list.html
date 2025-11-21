@@ -1,34 +1,36 @@
 {{ define "main" }}
-
 <section class="post-list">
-  {{ if .Paginator.Pages }}
-    {{ range .Paginator.Pages }}
-    <article class="post">
-      <header>
-        <h2 class="post-title">
-          <a href="{{ .Permalink }}">{{ .Title }}</a>
-        </h2>
-      </header>
-      {{ if .Summary }}
-      <p class="post-summary">{{ .Summary }}</p>
-      {{ else }}
-      <p class="post-summary">{{ .Plain | truncate 120 }}</p>
-      {{ end }}
-      <footer>
-        <small>
-          发布于 {{ .Date.Format "2006-01-02" }} |
-          {{ range $i, $tag := .Params.tags }}
-            {{ if $i }}, {{ end }}<a href="/tags/{{ $tag | urlize }}/">{{ $tag }}</a>
+
+  {{ range .Paginator.Pages }}
+  <article class="post-card" style="margin-bottom: 3rem; padding-bottom: 1.5rem; border-bottom: 1px solid #e2e2e2;">
+    <header>
+      <h2 class="post-title" style="margin-bottom: 0.5rem;">
+        <a href="{{ .Permalink }}" style="text-decoration:none; color:#222;">{{ .Title }}</a>
+      </h2>
+      <small style="color:#555;">
+        {{ .Date.Format "2006-01-02" }}
+        {{ with .Params.tags }} | 
+          {{ range $i, $tag := . }}
+            {{ if $i }}, {{ end }}
+            <a href="/tags/{{ $tag | urlize }}/" style="color:#888;">{{ $tag }}</a>
           {{ end }}
-        </small>
-      </footer>
-    </article>
-    {{ end }}
+        {{ end }}
+      </small>
+    </header>
 
-    {{ partial "pagination.html" . }}
-  {{ else }}
-    <p>没有文章</p>
+    <p class="post-summary" style="margin-top:0.75rem; color:#444;">
+      {{ if .Summary }}
+        {{ .Summary }}
+      {{ else }}
+        {{ .Plain | truncate 120 }}
+      {{ end }}
+    </p>
+  </article>
   {{ end }}
-</section>
 
+  <nav class="pagination" style="margin-top:3rem;">
+    {{ partial "pagination.html" . }}
+  </nav>
+
+</section>
 {{ end }}
