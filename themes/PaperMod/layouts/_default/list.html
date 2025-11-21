@@ -1,21 +1,34 @@
 {{ define "main" }}
 
-<div class="post-list">
-
-  {{/* 生成分页对象 */}}
-  {{ $paginator := .Paginate .Pages }}
-
-  {{/* 遍历当前页文章 */}}
-  {{ range $paginator.Pages }}
-    <article class="post-preview">
-      <h2><a href="{{ .Permalink }}">{{ .Title }}</a></h2>
-      <p>{{ if .Summary }}{{ .Summary }}{{ else }}{{ .Plain | truncate 150 }}{{ end }}</p>
+<section class="post-list">
+  {{ if .Paginator.Pages }}
+    {{ range .Paginator.Pages }}
+    <article class="post">
+      <header>
+        <h2 class="post-title">
+          <a href="{{ .Permalink }}">{{ .Title }}</a>
+        </h2>
+      </header>
+      {{ if .Summary }}
+      <p class="post-summary">{{ .Summary }}</p>
+      {{ else }}
+      <p class="post-summary">{{ .Plain | truncate 120 }}</p>
+      {{ end }}
+      <footer>
+        <small>
+          发布于 {{ .Date.Format "2006-01-02" }} |
+          {{ range $i, $tag := .Params.tags }}
+            {{ if $i }}, {{ end }}<a href="/tags/{{ $tag | urlize }}/">{{ $tag }}</a>
+          {{ end }}
+        </small>
+      </footer>
     </article>
+    {{ end }}
+
+    {{ partial "pagination.html" . }}
+  {{ else }}
+    <p>没有文章</p>
   {{ end }}
-
-  {{/* 调用分页 partial */}}
-  {{ partial "pagination.html" (dict "paginator" $paginator "context" .) }}
-
-</div>
+</section>
 
 {{ end }}
