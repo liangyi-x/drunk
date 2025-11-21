@@ -58,9 +58,9 @@
 }
 
 /* More 按钮 */
-.more-posts-button {
+.more-posts-button, .subscribe-button {
   display: inline-block;
-  margin: 1.5rem auto;
+  margin: 1rem auto;
   padding: 0.55rem 1.5rem;
   background: #222;
   color: #fff;
@@ -71,12 +71,12 @@
   transition: background 0.25s ease, transform 0.2s ease;
 }
 
-.more-posts-button:hover {
+.more-posts-button:hover, .subscribe-button:hover {
   background: #444;
   transform: translateY(-2px);
 }
 
-/* posts 列表页：一行一行 */
+/* posts 列表页 */
 .all-posts-list {
   max-width: 700px;
   margin: 2rem auto;
@@ -132,24 +132,6 @@
 }
 
 /* 弹窗订阅 */
-.subscribe-button {
-  display: inline-block;
-  margin: 1rem auto 2rem auto;
-  padding: 0.55rem 1.5rem;
-  background: #222;
-  color: #fff;
-  font-weight: 500;
-  border-radius: 8px;
-  cursor: pointer;
-  text-decoration: none;
-  transition: background 0.25s ease, transform 0.2s ease;
-}
-
-.subscribe-button:hover {
-  background: #444;
-  transform: translateY(-2px);
-}
-
 .subscribe-overlay {
   display: none;
   position: fixed;
@@ -187,6 +169,7 @@
   background: white;
 }
 
+/* 移动端 */
 @media (max-width: 480px) {
   .posts-grid { gap: 2rem; padding-top:1rem; padding-bottom:1rem; }
   .post-card { padding: 1rem; }
@@ -227,7 +210,9 @@
   </ul>
   <div class="pagination" style="text-align:center; margin-top:1.5rem;">
     {{ if $paginator.HasPrev }}<a href="{{ $paginator.Prev.URL }}">← Prev</a>{{ end }}
-    <strong>{{ $paginator.PageNumber }}</strong>
+    {{ range $paginator.Pagers }}
+      {{ if eq . $paginator }}<strong>{{ .PageNumber }}</strong>{{ else }}<a href="{{ .URL }}">{{ .PageNumber }}</a>{{ end }}
+    {{ end }}
     {{ if $paginator.HasNext }}<a href="{{ $paginator.Next.URL }}">Next →</a>{{ end }}
   </div>
 </div>
@@ -246,7 +231,9 @@
   </ul>
   <div class="pagination" style="text-align:center; margin-top:1.5rem;">
     {{ if $paginator.HasPrev }}<a href="{{ $paginator.Prev.URL }}">← Prev</a>{{ end }}
-    <strong>{{ $paginator.PageNumber }}</strong>
+    {{ range $paginator.Pagers }}
+      {{ if eq . $paginator }}<strong>{{ .PageNumber }}</strong>{{ else }}<a href="{{ .URL }}">{{ .PageNumber }}</a>{{ end }}
+    {{ end }}
     {{ if $paginator.HasNext }}<a href="{{ $paginator.Next.URL }}">Next →</a>{{ end }}
   </div>
 </div>
@@ -255,7 +242,7 @@
 {{ .Content }}
 {{ end }}
 
-<!-- 全站 footer -->
+<!-- Footer -->
 <div class="global-footer">
   LOST & FOUND 像水消失在水中
 </div>
@@ -267,25 +254,11 @@
 <div class="subscribe-overlay">
   <div class="subscribe-popup">
     <div class="close-btn">&times;</div>
-    <iframe src="https://364951749.substack.com/embed" scrolling="no"></iframe>
+    <iframe src="https://364951749.substack.com/embed" scrolling="no" frameborder="0" allowtransparency="true"></iframe>
   </div>
 </div>
 
-<script>
-// 弹窗打开
-document.querySelector('.subscribe-button').addEventListener('click', function(){
-  document.querySelector('.subscribe-overlay').style.display = 'flex';
-});
-// 弹窗关闭
-document.querySelector('.subscribe-overlay .close-btn').addEventListener('click', function(){
-  document.querySelector('.subscribe-overlay').style.display = 'none';
-});
-document.querySelector('.subscribe-overlay').addEventListener('click', function(e){
-  if(e.target === this){ this.style.display = 'none'; }
-});
-</script>
-
-<!-- 彩蛋：It'll pass 火焰消失效果 -->
+<!-- 彩蛋 It'll pass 火焰消失 -->
 <div id="fire-pass" style="
   position: fixed;
   top: 50%;
@@ -309,6 +282,18 @@ document.querySelector('.subscribe-overlay').addEventListener('click', function(
 "></canvas>
 
 <script>
+// 弹窗订阅
+document.querySelector('.subscribe-button').addEventListener('click', function(){
+  document.querySelector('.subscribe-overlay').style.display = 'flex';
+});
+document.querySelector('.subscribe-overlay .close-btn').addEventListener('click', function(){
+  document.querySelector('.subscribe-overlay').style.display = 'none';
+});
+document.querySelector('.subscribe-overlay').addEventListener('click', function(e){
+  if(e.target === this){ this.style.display = 'none'; }
+});
+
+// 彩蛋 It'll pass
 window.addEventListener('load', () => {
   const fireText = document.getElementById('fire-pass');
   const canvas = document.getElementById('fire-canvas');
@@ -316,47 +301,47 @@ window.addEventListener('load', () => {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
 
-  // 获取文字位置
   const rect = fireText.getBoundingClientRect();
   const centerX = rect.left + rect.width/2;
   const centerY = rect.top + rect.height/2;
 
-  // 粒子类
   class Particle {
     constructor(x, y, char) {
-      this.x = x;
-      this.y = y;
-      this.vx = (Math.random() - 0.5) * 2;
-      this.vy = Math.random() * -1 - 0.5;
+      this.x = x; this.y = y;
+      this.vx = (Math.random()-0.5)*2;
+      this.vy = Math.random()*-1-0.5;
       this.alpha = 1;
       this.char = char;
-      this.color = `hsl(${Math.random()*50}, 100%, 50%)`;
+      this.color = `hsl(${Math.random()*50},100%,50%)`;
     }
-    update() {
-      this.x += this.vx;
-      this.y += this.vy;
-      this.alpha -= 0.02;
-    }
-    draw() {
-      ctx.globalAlpha = this.alpha;
-      ctx.fillStyle = this.color;
-      ctx.font = "20px sans-serif";
-      ctx.fillText(this.char, this.x, this.y);
-    }
+    update() { this.x+=this.vx; this.y+=this.vy; this.alpha-=0.02; }
+    draw() { ctx.globalAlpha=this.alpha; ctx.fillStyle=this.color; ctx.font="32px sans-serif"; ctx.fillText(this.char,this.x,this.y);}
   }
 
   let particles = [];
-
-  // 将文字拆成字符粒子
   function explodeText() {
     const text = fireText.textContent;
-    const fontSize = 32;
     fireText.style.display = 'none';
-
-    for(let i=0; i<text.length; i++){
+    const fontSize = 32;
+    for(let i=0;i<text.length;i++){
       const charX = centerX - text.length*fontSize/4 + i*fontSize*0.6;
       const charY = centerY;
-      particles.push(new P
+      particles.push(new Particle(charX,charY,text[i]));
+    }
+    animate();
+  }
 
+  function animate() {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    particles.forEach((p,idx)=>{
+      p.update(); p.draw();
+      if(p.alpha<=0) particles.splice(idx,1);
+    });
+    if(particles.length>0) requestAnimationFrame(animate);
+  }
+
+  setTimeout(explodeText, 1500);
+});
+</script>
 
 {{ end }}
