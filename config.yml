@@ -77,5 +77,10 @@ params:
   assets:
     disableHLJS: true
     customCSS:
-      - "css/extended/magazine.css"
+     params:
+  assets:
+    disableHLJS: true
+    customCSS:
+      - "css/extended/spacing.css"
+
 
