@@ -1,35 +1,26 @@
-{{- define "main" -}}
+{{ define "main" }}
+<main>
+  <section class="featured-posts">
+    <h2>精选文章</h2>
+    <div class="featured-grid">
+      {{ range first 3 (where .Site.RegularPages "Params.featured" true) }}
+        <article class="post-card">
+          <a href="{{ .Permalink }}">
+            <h3>{{ .Title }}</h3>
+            {{ with .Params.description }}<p>{{ . }}</p>{{ end }}
+          </a>
+        </article>
+      {{ end }}
+    </div>
+  </section>
 
-<div class="post-list">
-
-  {{ $posts := where .Pages "Type" "posts" }}
-  {{ $paginator := .Paginate $posts }}
-
-  {{ range $paginator.Pages }}
-    <article class="post-card" style="margin-bottom:2rem;">
-      <header>
-        <h2><a href="{{ .Permalink }}">{{ .Title }}</a></h2>
-        {{ with .Summary }}
-          <p class="post-summary">{{ . }}</p>
-        {{ end }}
-        <div class="post-meta">
-          <span>{{ .Date.Format "2006-01-02" }}</span>
-          {{ with .Params.tags }}
-          <span>· Tags: 
-            {{ range $i, $tag := . }}
-              {{ if $i }}, {{ end }}<a href="/tags/{{ $tag | urlize }}">{{ $tag }}</a>
-            {{ end }}
-          </span>
-          {{ end }}
-        </div>
-      </header>
-    </article>
-  {{ end }}
-
-</div>
-
-{{ if $paginator }}
-  {{ partial "pagination.html" (dict "paginator" $paginator "context" .) }}
+  <section class="all-posts">
+    <h2>所有文章</h2>
+    <ul>
+      {{ range .Paginator.Pages }}
+        <li><a href="{{ .Permalink }}">{{ .Title }}</a></li>
+      {{ end }}
+    </ul>
+  </section>
+</main>
 {{ end }}
-
-{{- end -}}
