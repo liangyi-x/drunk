@@ -26,6 +26,12 @@
       {{ with .Summary }}
         <p class="post-card-excerpt">{{ . }}</p>
       {{ end }}
+
+      <!-- 点赞按钮 -->
+      <button class="like-button" data-post="{{ .File.Path }}">
+        ❤️ <span class="like-count">0</span>
+      </button>
+
     </div>
   </article>
   {{ end }}
@@ -33,5 +39,23 @@
   {{ partial "pagination.html" (dict "paginator" $paginator "context" .) }}
 
 </section>
+
+<!-- 点赞脚本 -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const buttons = document.querySelectorAll(".like-button");
+  buttons.forEach(btn => {
+    const post = btn.dataset.post;
+    const key = `like-${post}`;
+    // 初始化
+    btn.querySelector(".like-count").textContent = localStorage.getItem(key) || 0;
+    btn.addEventListener("click", () => {
+      let count = parseInt(localStorage.getItem(key) || "0") + 1;
+      localStorage.setItem(key, count);
+      btn.querySelector(".like-count").textContent = count;
+    });
+  });
+});
+</script>
 
 {{ end }}
