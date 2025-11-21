@@ -283,19 +283,79 @@
   LOST & FOUND 像水消失在水中
 </div>
 
-<!-- 订阅触发放在 footer 下面 -->
-<div style="text-align:center; margin-bottom:3rem;">
+<!-- 优雅订阅按钮 -->
+<div style="text-align:center; margin:2.5rem 0;">
   <span class="subscribe-trigger" onclick="openModal()">Get updates from my site</span>
 </div>
 
-<!-- 弹窗 -->
-<div id="subscribeModal" class="modal">
-  <div class="modal-content">
-    <span class="close-modal" onclick="closeModal()">&times;</span>
-    <iframe src="https://364951749.substack.com/embed" frameborder="0" scrolling="no"></iframe>
-  </div>
-</div>
+<style>
+/* 优雅订阅按钮 */
+.subscribe-trigger {
+  display: inline-block;
+  padding: 0.55rem 1.2rem;
+  background: #111;
+  color: #fff;
+  font-weight: 500;
+  font-size: 0.95rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.12);
+}
 
+.subscribe-trigger:hover {
+  background: #333;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+}
+
+/* 弹窗背景 */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 999;
+  left: 0; top: 0;
+  width: 100%; height: 100%;
+  background-color: rgba(0,0,0,0.55);
+}
+
+/* 弹窗内容 */
+.modal-content {
+  background-color: #fff;
+  margin: 10% auto;
+  padding: 1rem;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 420px;
+  box-shadow: 0 12px 28px rgba(0,0,0,0.16);
+  position: relative;
+}
+
+/* 关闭按钮 */
+.close-modal {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.8rem;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #888;
+  cursor: pointer;
+}
+
+.close-modal:hover {
+  color: #222;
+}
+
+/* iframe 自适应 */
+.modal iframe {
+  width: 100%;
+  height: 280px;
+  border: 1px solid #EEE;
+  border-radius: 6px;
+}
+</style>
+
+<!-- 弹窗脚本 -->
 <script>
 function openModal() {
   document.getElementById("subscribeModal").style.display = "block";
@@ -310,5 +370,14 @@ window.onclick = function(event) {
   }
 }
 </script>
+
+<!-- 弹窗 HTML -->
+<div id="subscribeModal" class="modal">
+  <div class="modal-content">
+    <span class="close-modal" onclick="closeModal()">&times;</span>
+    <iframe src="https://364951749.substack.com/embed" frameborder="0" scrolling="no"></iframe>
+  </div>
+</div>
+
 
 {{ end }}
