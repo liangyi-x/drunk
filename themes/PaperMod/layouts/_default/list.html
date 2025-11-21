@@ -1,9 +1,9 @@
 {{ define "main" }}
 
 <style>
-/* ------------------------
-   首页卡片 Grid
--------------------------*/
+/* -------------------
+   首页卡片 grid
+------------------- */
 .posts-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -141,52 +141,23 @@
   color: #777;
 }
 
-/* Newsletter 弹窗 */
-.newsletter-popup {
-  display: none;
-  position: fixed;
-  top:0; left:0;
-  width:100%;
-  height:100%;
-  background: rgba(0,0,0,0.5);
-  z-index: 9999;
-  justify-content: center;
-  align-items: center;
-}
-
-.popup-content {
-  background: #fff;
-  border-radius: 12px;
-  padding: 2rem;
-  max-width: 400px;
-  width: 90%;
+/* Newsletter 优化 */
+.newsletter-box {
+  margin: 3rem auto;
+  padding: 1.5rem;
+  max-width: 480px;
   text-align: center;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-  position: relative;
-  animation: fadeIn 0.4s ease;
+  background: #fdfdfd;
+  border-radius: 12px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.05);
 }
 
-.popup-content iframe {
+.newsletter-box iframe {
+  border-radius: 8px;
   width: 100%;
   height: 200px;
-  border: none;
-  border-radius: 8px;
-  margin-top: 1rem;
-}
-
-.close-btn {
-  position: absolute;
-  top: 0.6rem;
-  right: 0.8rem;
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  cursor: pointer;
-}
-
-@keyframes fadeIn {
-  from {opacity:0; transform: translateY(-10px);}
-  to {opacity:1; transform: translateY(0);}
+  border: 1px solid #EEE;
+  background: white;
 }
 
 /* 移动端优化 */
@@ -198,6 +169,13 @@
   }
   .post-card {
     padding: 1rem;
+  }
+  .newsletter-box {
+    max-width: 95%;
+    padding: 1rem;
+  }
+  .newsletter-box iframe {
+    height: 180px;
   }
 }
 </style>
@@ -212,7 +190,7 @@
 {{ if $isHome }}
 <div class="home-title">Article</div>
 
-<div style="text-align:center; margin-bottom:1rem;">
+<div style="text-align:center;">
   <a class="more-posts-button" href="/drunk/posts/">More</a>
 </div>
 
@@ -223,6 +201,10 @@
     <p class="post-excerpt">{{ .Summary }}</p>
   </div>
   {{ end }}
+</div>
+
+<div class="global-footer">
+  LOST & FOUND 像水消失在水中
 </div>
 
 {{/* ---------------------------
@@ -247,10 +229,13 @@
     <strong>{{ $paginator.PageNumber }}</strong>
     {{ if $paginator.HasNext }}<a href="{{ $paginator.Next.URL }}">Next →</a>{{ end }}
   </div>
-</div>
+
+  <div class="global-footer">
+    LOST & FOUND 像水消失在水中
+  </div>
 
 {{/* ---------------------------
-      Tag 页面修复
+      Tag 页面修复：正常显示文章
 ---------------------------- */}}
 {{ else if $isTag }}
 <div class="all-posts-list">
@@ -271,39 +256,27 @@
     <strong>{{ $paginator.PageNumber }}</strong>
     {{ if $paginator.HasNext }}<a href="{{ $paginator.Next.URL }}">Next →</a>{{ end }}
   </div>
-</div>
 
+  <div class="global-footer">
+    LOST & FOUND 像水消失在水中
+  </div>
+
+{{/* ---------------------------
+      其他页面 fallback
+---------------------------- */}}
 {{ else }}
 {{ .Content }}
-{{ end }}
-
-<!-- ---------------------------
-     Newsletter 弹窗（首页触发）
----------------------------- -->
-<div id="newsletter-popup" class="newsletter-popup">
-  <div class="popup-content">
-    <button class="close-btn" onclick="document.getElementById('newsletter-popup').style.display='none'">&times;</button>
-    <h3>Subscribe for updates</h3>
-    <p>Stay updated with new posts and insights.</p>
-    <iframe src="https://364951749.substack.com/embed" frameborder="0" scrolling="no"></iframe>
-  </div>
-</div>
-
-<!-- ---------------------------
-     全站 Footer
----------------------------- -->
 <div class="global-footer">
   LOST & FOUND 像水消失在水中
 </div>
+{{ end }}
 
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-  if ({{ $isHome }}) {
-    setTimeout(function() {
-      document.getElementById('newsletter-popup').style.display = 'flex';
-    }, 2000);
-  }
-});
-</script>
+{{/* ---------------------------
+      Newsletter（全站）
+---------------------------- */}}
+<div class="newsletter-box">
+  <div style="margin-bottom:0.7rem; font-size:1rem; color:#444;">Get updates from my site</div>
+  <iframe src="https://364951749.substack.com/embed" frameborder="0" scrolling="no"></iframe>
+</div>
 
 {{ end }}
