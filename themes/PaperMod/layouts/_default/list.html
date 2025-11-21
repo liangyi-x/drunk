@@ -2,11 +2,17 @@
 
 <main class="main-content">
 
-  {{- /* 首页文章列表 */ -}}
+  {{- /* 首页不显示 breadcrumbs */ -}}
+  {{- if not .IsHome }}
+    {{ partial "breadcrumbs.html" . }}
+  {{- end }}
+
+  {{- /* 分页文章列表 */ -}}
   {{- $paginator := .Paginate (where .Pages "Section" "posts") }}
 
   {{- range $paginator.Pages }}
     <article class="post-entry">
+
       {{- /* 封面 */ -}}
       {{- $isHidden := (.Param "cover.hiddenInList") | default (.Param "cover.hidden") | default false }}
       {{- partial "cover.html" (dict "cxt" . "IsHome" false "isHidden" $isHidden) }}
@@ -16,7 +22,7 @@
       </header>
 
       <div class="entry-content">
-        {{- /* 显示摘要：优先 summary，否则取正文第一行 */ -}}
+        {{- /* 显示摘要：优先 summary，否则正文第一行 */ -}}
         {{- if .Params.summary }}
           <p>{{ .Params.summary }}</p>
         {{- else }}
@@ -26,7 +32,7 @@
       </div>
 
       <footer class="entry-footer">
-        {{- partial "post_meta.html" . }}
+        {{ partial "post_meta.html" . }}
         <a class="entry-link" href="{{ .Permalink }}">阅读全文</a>
       </footer>
 
