@@ -4,10 +4,14 @@
 .posts-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 3rem;
+  gap: 3rem; /* 卡片间距微调 */
   max-width: 960px;
   margin: 3rem auto;
   padding: 0 1rem;
+  background: linear-gradient(to bottom, #fdfcfb, #f7f7f7); /* 轻微渐变背景 */
+  border-radius: 12px;
+  padding-top: 2rem;
+  padding-bottom: 2rem;
 }
 
 /* 首页标题 */
@@ -66,26 +70,21 @@
   text-decoration: none;
 }
 
-/* More 按钮 */
-.more-posts-button {
-  display:inline-block;
-  padding:0.65rem 1.3rem;
-  border-radius:10px;
-  background:#222;
-  color:#fff;
-  text-decoration:none;
-  font-weight:500;
-  transition: background 0.25s ease;
-  margin-top:2rem;
-}
-.more-posts-button:hover {
-  background:#444;
+/* 首页说明文字 */
+.home-note {
+  text-align: center;
+  margin-top: 2rem;
+  font-size: 1rem;
+  color: #777;
+  font-style: italic;
 }
 
 /* 响应式优化 */
 @media (max-width: 480px) {
   .posts-grid {
     gap: 2rem;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
   }
   .post-card {
     padding: 1rem;
@@ -97,6 +96,7 @@
 {{ $isPosts := eq .Type "posts" }}
 
 {{ if $isHome }}
+<!-- 首页显示三篇精选文章 -->
 <div class="home-title">Article</div>
 
 <div class="posts-grid">
@@ -117,8 +117,14 @@
   <a href="/drunk/posts/" class="more-posts-button">More</a>
 </div>
 
+<div class="home-footer">
+  LOST & FOUND 
+  
+  像水消失在水中
+</div>
+
 {{ else if $isPosts }}
-<!-- posts 页面列表 -->
+<!-- posts 页面列表，一行一篇文章 -->
 <div class="all-posts-list" style="max-width:700px; margin:2rem auto; padding:0 1rem;">
   <div class="home-title" style="font-size:2rem; text-align:center; margin-bottom:2rem;">All Posts</div>
 
@@ -130,6 +136,7 @@
           {{ .Title }}
         </a>
         <span style="color:#888; font-size:0.9rem;"> — {{ .Date.Format "2006-01-02" }}</span>
+        <p style="margin:0.3rem 0 0; color:#555;">{{ if .Params.excerpt }}{{ .Params.excerpt }}{{ else }}{{ .Summary }}{{ end }}</p>
       </li>
     {{ end }}
   </ul>
