@@ -1,61 +1,35 @@
-{{ define "main" }}
+{{- define "main" -}}
 
-<section class="post-list">
+<div class="post-list">
 
-  {{ $paginator := .Paginate (where .Pages "Type" "posts") }}
+  {{ $posts := where .Pages "Type" "posts" }}
+  {{ $paginator := .Paginate $posts }}
 
   {{ range $paginator.Pages }}
-  <article class="post-card">
-    {{ with .Params.cover }}
-      <a href="{{ .Permalink }}">
-        <img src="{{ . }}" alt="{{ $.Title }}" class="post-card-img">
-      </a>
-    {{ end }}
-    <div class="post-card-content">
-      <h2 class="post-card-title">
-        <a href="{{ .Permalink }}">{{ .Title }}</a>
-      </h2>
-      <div class="post-card-meta">
-        <span>{{ .Date.Format "2006-01-02" }}</span>
-        {{ with .Params.tags }}
-        | <span class="post-tags">
-            {{ range . }}<a href="/tags/{{ . | urlize }}">{{ . }}</a> {{ end }}
-          </span>
+    <article class="post-card" style="margin-bottom:2rem;">
+      <header>
+        <h2><a href="{{ .Permalink }}">{{ .Title }}</a></h2>
+        {{ with .Summary }}
+          <p class="post-summary">{{ . }}</p>
         {{ end }}
-      </div>
-      {{ with .Summary }}
-        <p class="post-card-excerpt">{{ . }}</p>
-      {{ end }}
-
-      <!-- 点赞按钮 -->
-      <button class="like-button" data-post="{{ .File.Path }}">
-        ❤️ <span class="like-count">0</span>
-      </button>
-
-    </div>
-  </article>
+        <div class="post-meta">
+          <span>{{ .Date.Format "2006-01-02" }}</span>
+          {{ with .Params.tags }}
+          <span>· Tags: 
+            {{ range $i, $tag := . }}
+              {{ if $i }}, {{ end }}<a href="/tags/{{ $tag | urlize }}">{{ $tag }}</a>
+            {{ end }}
+          </span>
+          {{ end }}
+        </div>
+      </header>
+    </article>
   {{ end }}
 
+</div>
+
+{{ if $paginator }}
   {{ partial "pagination.html" (dict "paginator" $paginator "context" .) }}
-
-</section>
-
-<!-- 点赞脚本 -->
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  const buttons = document.querySelectorAll(".like-button");
-  buttons.forEach(btn => {
-    const post = btn.dataset.post;
-    const key = `like-${post}`;
-    // 初始化
-    btn.querySelector(".like-count").textContent = localStorage.getItem(key) || 0;
-    btn.addEventListener("click", () => {
-      let count = parseInt(localStorage.getItem(key) || "0") + 1;
-      localStorage.setItem(key, count);
-      btn.querySelector(".like-count").textContent = count;
-    });
-  });
-});
-</script>
-
 {{ end }}
+
+{{- end -}}
