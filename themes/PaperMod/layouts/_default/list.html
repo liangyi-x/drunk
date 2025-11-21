@@ -1,7 +1,7 @@
 {{ define "main" }}
 
 <style>
-/* 首页/列表容器 */
+/* 首页卡片 grid */
 .posts-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -57,83 +57,26 @@
   text-decoration: none;
 }
 
-/* 首页 More 按钮 */
+/* More 按钮 */
 .more-posts-button {
   display: inline-block;
-  margin-top: 1rem;
-  padding: 0.55rem 1.3rem;
+  margin: 1.5rem auto;
+  padding: 0.55rem 1.5rem;
   background: #222;
   color: #fff;
-  text-decoration: none;
-  border-radius: 8px;
   font-weight: 500;
-  transition: background 0.25s ease;
+  border-radius: 8px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.25s ease, transform 0.2s ease;
 }
 
 .more-posts-button:hover {
   background: #444;
+  transform: translateY(-2px);
 }
 
-/* 弹窗样式 */
-.modal {
-  display: none; 
-  position: fixed; 
-  z-index: 999; 
-  left: 0;
-  top: 0;
-  width: 100%; 
-  height: 100%; 
-  overflow: auto; 
-  background-color: rgba(0,0,0,0.5); 
-}
-
-.modal-content {
-  background-color: #fff;
-  margin: 10% auto; 
-  padding: 1rem;
-  border-radius: 12px;
-  width: 90%;
-  max-width: 480px;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.1);
-  position: relative;
-}
-
-.close-modal {
-  position: absolute;
-  top: 0.5rem;
-  right: 1rem;
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #888;
-  cursor: pointer;
-}
-
-.close-modal:hover {
-  color: #000;
-}
-
-.subscribe-trigger {
-  display: inline-block;
-  margin-top: 0.5rem;
-  color: #222;
-  font-weight: 500;
-  cursor: pointer;
-  text-decoration: underline;
-  transition: color 0.25s ease;
-}
-
-.subscribe-trigger:hover {
-  color: #000;
-}
-
-.modal iframe {
-  width: 100%;
-  height: 300px;
-  border: 1px solid #EEE;
-  border-radius: 8px;
-}
-
-/* posts 列表页样式 */
+/* posts 列表页：一行一行 */
 .all-posts-list {
   max-width: 700px;
   margin: 2rem auto;
@@ -161,6 +104,7 @@
   color: #000;
 }
 
+/* 摘要 */
 .excerpt {
   font-size: 0.95rem;
   color: #666;
@@ -175,37 +119,77 @@
   text-decoration: none;
 }
 
-.pagination a {
-  color: #444;
-}
+.pagination a { color: #444; }
+.pagination a:hover { color: #000; }
+.pagination strong { color: #000; font-weight: bold; }
 
-.pagination a:hover {
-  color: #000;
-}
-
-.pagination strong {
-  color: #000;
-  font-weight: bold;
-}
-
-/* 全站 footer */
+/* Footer 文本 */
 .global-footer {
   text-align: center;
-  margin: 3rem 0 1rem 0;
+  margin: 2.5rem 0 0.5rem 0;
   font-style: italic;
   color: #777;
 }
 
-/* 移动端优化 */
+/* 弹窗订阅 */
+.subscribe-button {
+  display: inline-block;
+  margin: 1rem auto 2rem auto;
+  padding: 0.55rem 1.5rem;
+  background: #222;
+  color: #fff;
+  font-weight: 500;
+  border-radius: 8px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.25s ease, transform 0.2s ease;
+}
+
+.subscribe-button:hover {
+  background: #444;
+  transform: translateY(-2px);
+}
+
+.subscribe-overlay {
+  display: none;
+  position: fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  background: rgba(0,0,0,0.6);
+  z-index: 999;
+  justify-content: center;
+  align-items: center;
+}
+
+.subscribe-popup {
+  background: #fff;
+  padding: 1rem;
+  border-radius: 12px;
+  max-width: 480px;
+  width: 90%;
+  text-align: center;
+  position: relative;
+}
+
+.subscribe-popup .close-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  font-size: 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.subscribe-popup iframe {
+  width: 100%;
+  height: 320px;
+  border: none;
+  background: white;
+}
+
 @media (max-width: 480px) {
-  .posts-grid {
-    gap: 2rem;
-    padding-top: 1rem;
-    padding-bottom: 1rem;
-  }
-  .post-card {
-    padding: 1rem;
-  }
+  .posts-grid { gap: 2rem; padding-top:1rem; padding-bottom:1rem; }
+  .post-card { padding: 1rem; }
 }
 </style>
 
@@ -214,7 +198,6 @@
 {{ $isTag := eq .Kind "term" }}
 
 {{ if $isHome }}
-<!-- 首页三篇精选文章 + More -->
 <div class="home-title">Article</div>
 
 <div class="posts-grid">
@@ -226,25 +209,22 @@
   {{ end }}
 </div>
 
-<div style="text-align:center; margin-top:1.5rem;">
+<div style="text-align:center;">
   <a class="more-posts-button" href="/drunk/posts/">More</a>
 </div>
 
 {{ else if $isPosts }}
-<!-- posts 页面 -->
 <div class="all-posts-list">
   <div class="home-title">All Posts</div>
-
   {{ $paginator := .Paginate (where .Site.RegularPages "Type" "posts") }}
   <ul>
     {{ range $paginator.Pages }}
-    <li>
-      <a href="{{ .RelPermalink }}">{{ .Title }}</a>
-      <div class="excerpt">{{ .Summary }}</div>
-    </li>
+      <li>
+        <a href="{{ .RelPermalink }}">{{ .Title }}</a>
+        <div class="excerpt">{{ .Summary }}</div>
+      </li>
     {{ end }}
   </ul>
-
   <div class="pagination" style="text-align:center; margin-top:1.5rem;">
     {{ if $paginator.HasPrev }}<a href="{{ $paginator.Prev.URL }}">← Prev</a>{{ end }}
     <strong>{{ $paginator.PageNumber }}</strong>
@@ -253,20 +233,17 @@
 </div>
 
 {{ else if $isTag }}
-<!-- tag 页面 -->
 <div class="all-posts-list">
   <div class="home-title">#{{ .Title }}</div>
-
   {{ $paginator := .Paginate .Pages }}
   <ul>
     {{ range $paginator.Pages }}
-    <li>
-      <a href="{{ .RelPermalink }}">{{ .Title }}</a>
-      <div class="excerpt">{{ .Summary }}</div>
-    </li>
+      <li>
+        <a href="{{ .RelPermalink }}">{{ .Title }}</a>
+        <div class="excerpt">{{ .Summary }}</div>
+      </li>
     {{ end }}
   </ul>
-
   <div class="pagination" style="text-align:center; margin-top:1.5rem;">
     {{ if $paginator.HasPrev }}<a href="{{ $paginator.Prev.URL }}">← Prev</a>{{ end }}
     <strong>{{ $paginator.PageNumber }}</strong>
@@ -283,101 +260,103 @@
   LOST & FOUND 像水消失在水中
 </div>
 
-<!-- 优雅订阅按钮 -->
-<div style="text-align:center; margin:2.5rem 0;">
-  <span class="subscribe-trigger" onclick="openModal()">Get updates from my site</span>
+<!-- 弹窗订阅按钮 -->
+<div style="text-align:center;">
+  <div class="subscribe-button">Get updates from my site</div>
 </div>
-
-<style>
-/* 优雅订阅按钮 */
-.subscribe-trigger {
-  display: inline-block;
-  padding: 0.55rem 1.2rem;
-  background: #111;
-  color: #fff;
-  font-weight: 500;
-  font-size: 0.95rem;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 3px 12px rgba(0,0,0,0.12);
-}
-
-.subscribe-trigger:hover {
-  background: #333;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 18px rgba(0,0,0,0.18);
-}
-
-/* 弹窗背景 */
-.modal {
-  display: none;
-  position: fixed;
-  z-index: 999;
-  left: 0; top: 0;
-  width: 100%; height: 100%;
-  background-color: rgba(0,0,0,0.55);
-}
-
-/* 弹窗内容 */
-.modal-content {
-  background-color: #fff;
-  margin: 10% auto;
-  padding: 1rem;
-  border-radius: 12px;
-  width: 90%;
-  max-width: 420px;
-  box-shadow: 0 12px 28px rgba(0,0,0,0.16);
-  position: relative;
-}
-
-/* 关闭按钮 */
-.close-modal {
-  position: absolute;
-  top: 0.5rem;
-  right: 0.8rem;
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #888;
-  cursor: pointer;
-}
-
-.close-modal:hover {
-  color: #222;
-}
-
-/* iframe 自适应 */
-.modal iframe {
-  width: 100%;
-  height: 280px;
-  border: 1px solid #EEE;
-  border-radius: 6px;
-}
-</style>
-
-<!-- 弹窗脚本 -->
-<script>
-function openModal() {
-  document.getElementById("subscribeModal").style.display = "block";
-}
-function closeModal() {
-  document.getElementById("subscribeModal").style.display = "none";
-}
-window.onclick = function(event) {
-  var modal = document.getElementById("subscribeModal");
-  if (event.target == modal) {
-    modal.style.display = "none";
-  }
-}
-</script>
-
-<!-- 弹窗 HTML -->
-<div id="subscribeModal" class="modal">
-  <div class="modal-content">
-    <span class="close-modal" onclick="closeModal()">&times;</span>
-    <iframe src="https://364951749.substack.com/embed" frameborder="0" scrolling="no"></iframe>
+<div class="subscribe-overlay">
+  <div class="subscribe-popup">
+    <div class="close-btn">&times;</div>
+    <iframe src="https://364951749.substack.com/embed" scrolling="no"></iframe>
   </div>
 </div>
+
+<script>
+// 弹窗打开
+document.querySelector('.subscribe-button').addEventListener('click', function(){
+  document.querySelector('.subscribe-overlay').style.display = 'flex';
+});
+// 弹窗关闭
+document.querySelector('.subscribe-overlay .close-btn').addEventListener('click', function(){
+  document.querySelector('.subscribe-overlay').style.display = 'none';
+});
+document.querySelector('.subscribe-overlay').addEventListener('click', function(e){
+  if(e.target === this){ this.style.display = 'none'; }
+});
+</script>
+
+<!-- 彩蛋：It'll pass 火焰消失效果 -->
+<div id="fire-pass" style="
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 2rem;
+  font-weight: bold;
+  color: #ff4500;
+  pointer-events: none;
+  z-index: 1000;
+  white-space: nowrap;
+">It'll pass</div>
+
+<canvas id="fire-canvas" style="
+  position: fixed;
+  top:0; left:0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 999;
+"></canvas>
+
+<script>
+window.addEventListener('load', () => {
+  const fireText = document.getElementById('fire-pass');
+  const canvas = document.getElementById('fire-canvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  // 获取文字位置
+  const rect = fireText.getBoundingClientRect();
+  const centerX = rect.left + rect.width/2;
+  const centerY = rect.top + rect.height/2;
+
+  // 粒子类
+  class Particle {
+    constructor(x, y, char) {
+      this.x = x;
+      this.y = y;
+      this.vx = (Math.random() - 0.5) * 2;
+      this.vy = Math.random() * -1 - 0.5;
+      this.alpha = 1;
+      this.char = char;
+      this.color = `hsl(${Math.random()*50}, 100%, 50%)`;
+    }
+    update() {
+      this.x += this.vx;
+      this.y += this.vy;
+      this.alpha -= 0.02;
+    }
+    draw() {
+      ctx.globalAlpha = this.alpha;
+      ctx.fillStyle = this.color;
+      ctx.font = "20px sans-serif";
+      ctx.fillText(this.char, this.x, this.y);
+    }
+  }
+
+  let particles = [];
+
+  // 将文字拆成字符粒子
+  function explodeText() {
+    const text = fireText.textContent;
+    const fontSize = 32;
+    fireText.style.display = 'none';
+
+    for(let i=0; i<text.length; i++){
+      const charX = centerX - text.length*fontSize/4 + i*fontSize*0.6;
+      const charY = centerY;
+      particles.push(new P
 
 
 {{ end }}
