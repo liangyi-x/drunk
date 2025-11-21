@@ -33,6 +33,7 @@ menu:
       url: /index.xml
       weight: 25
 
+
 outputs:
   home:
     - HTML
