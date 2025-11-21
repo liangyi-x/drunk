@@ -209,6 +209,7 @@
 <!-- 彩蛋：It'll pass 超炫酷焚烧 -->
 {{ if .IsHome }}
 {{ $fire := `
+<!-- 彩蛋：It'll pass 全屏焚烧 + 火舌 + 灰烬漂烟 -->
 <div id="fire-pass" style="
   position:fixed;
   top:50%;
@@ -219,9 +220,8 @@
   text-align:center;
   pointer-events:none;
   z-index:1000;
-  white-space:nowrap;">
-It'll pass
-</div>
+  white-space:nowrap;
+">It'll pass</div>
 <canvas id="fire-canvas" style="
   position:fixed;
   top:0;
@@ -241,7 +241,7 @@ It'll pass
   function resizeCanvas(){
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-    const fontSize = Math.min(window.innerWidth, window.innerHeight)*0.25;
+    const fontSize = Math.min(window.innerWidth, window.innerHeight) * 0.2;
     fireText.style.fontSize = fontSize + 'px';
   }
   window.addEventListener('resize', resizeCanvas);
@@ -252,43 +252,45 @@ It'll pass
 
   class Particle {
     constructor(x,y,char,type='text'){
-      this.x=x; this.y=y;
-      this.vx=(Math.random()-0.5)*(type==='text'?10:6);
-      this.vy=(Math.random()*-2-1)*(type==='text'?1:0.7);
-      this.alpha=1;
-      this.size=type==='text'?parseFloat(fireText.style.fontSize):4+Math.random()*3;
-      this.char=char;
-      this.age=0;
-      this.life=Math.random()*80+60;
-      this.type=type;
-      this.angle = Math.random()*Math.PI*2;
+      this.x = x;
+      this.y = y;
+      this.vx = (Math.random()-0.5)*6;
+      this.vy = Math.random()*-2-0.5;
+      this.alpha = 1;
+      this.size = parseFloat(fireText.style.fontSize);
+      this.char = char;
+      this.age = 0;
+      this.life = Math.random()*80+60;
+      this.type = type;
+      this.color = 'white';
     }
     update(){
-      this.x += this.vx + Math.sin(this.angle)*0.5;
-      this.y += this.vy + Math.cos(this.angle)*0.5;
-      this.angle += 0.1;
+      this.x += this.vx;
+      this.y += this.vy;
       if(this.type==='text'){ this.vy += 0.05; } 
-      else { this.vy += 0.02; }
+      else if(this.type==='spark'){ this.vy += 0.02; this.vx += (Math.random()-0.5)*0.2; } 
+      else if(this.type==='ash'){ this.vy -= 0.1; this.vx += (Math.random()-0.5)*0.3; }
       this.alpha -= 0.008;
       this.size *= 0.96;
       this.age++;
-      let progress = this.age / this.life;
+      const progress = this.age / this.life;
       if(this.type==='text'){
         if(progress<0.3) this.color='white';
         else if(progress<0.6) this.color='orange';
         else this.color='gray';
-      } else if(this.type==='spark'){
-        this.color = "hsl(" + (Math.random()*40+20) + ",100%,50%)";
-      } else if(this.type==='ash'){
-        this.color = "rgba(120,120,120,"+this.alpha+")";
-        this.vx += (Math.random()-0.5)*0.2;
-        this.vy -= 0.05;
       }
     }
     draw(){
-      ctx.globalAlpha=this.alpha;
-      ctx.fillStyle=this.color||'gray';
-      ctx.font = this.type==='text'? this.size+'px sans-serif':'4px sans-serif';
+      ctx.globalAlpha = this.alpha;
+      if(this.type==='text'){
+        for(let i=0;i<3;i++){
+          ctx.fillStyle = `rgba(255, ${150+Math.random()*105}, 0, ${this.alpha*0.3})`;
+          ctx.font = (this.size*(0.8+Math.random()*0.4))+'px sans-serif';
+          ctx.fillText(this.char, this.x+Math.random()*4-2, this.y+Math.random()*4-2);
+        }
+      }
+      ctx.fillStyle = this.color;
+      ctx.font = (this.type==='text'?this.size:(this.size*0.1))+'px sans-serif';
       ctx.fillText(this.char,this.x,this.y);
     }
   }
@@ -297,31 +299,31 @@ It'll pass
     const text = fireText.textContent;
     fireText.style.display='none';
     const fontSize = parseFloat(fireText.style.fontSize);
-    let particles=[];
+    let particles = [];
 
     // 文字粒子
     for(let i=0;i<text.length;i++){
-      const x=centerX-text.length*fontSize/2 + i*fontSize;
-      const y=centerY;
-      for(let j=0;j<8;j++){ //更多粒子
-        particles.push(new Particle(x,y,text[i],'text'));
-      }
+      const x = centerX - text.length*fontSize/2 + i*fontSize;
+      const y = centerY;
+      for(let j=0;j<5;j++) particles.push(new Particle(x,y,text[i],'text'));
     }
 
     // 火花粒子
-    for(let i=0;i<250;i++){
-      let p = new Particle(centerX,centerY,'•','spark');
-      p.life=Math.random()*60+40;
+    for(let i=0;i<150;i++){
+      const p = new Particle(centerX, centerY, '•','spark');
+      p.vx = (Math.random()-0.5)*6;
+      p.vy = Math.random()*-3-1;
+      p.size = 2+Math.random()*3;
       particles.push(p);
     }
 
-    // 灰烬粒子
-    for(let i=0;i<400;i++){
-      let p = new Particle(centerX,centerY,'•','ash');
-      p.life=Math.random()*150+50;
-      p.vx=(Math.random()-0.5)*2;
-      p.vy=Math.random()*-1;
-      p.size=2+Math.random()*3;
+    // 灰烬粒子（升空漂动）
+    for(let i=0;i<200;i++){
+      const p = new Particle(centerX, centerY, '•','ash');
+      p.vx = (Math.random()-0.5)*2;
+      p.vy = Math.random()*-0.5 - 0.5; // 轻微上升
+      p.size = 2+Math.random()*2;
+      p.color = 'gray';
       particles.push(p);
     }
 
@@ -332,12 +334,8 @@ It'll pass
     ctx.clearRect(0,0,canvas.width,canvas.height);
     particles.forEach(p=>{p.draw(); p.update();});
     particles = particles.filter(p=>p.alpha>0 && (p.size>2 || p.type!=='text'));
-    if(particles.length>0){
-      requestAnimationFrame(()=>animate(particles));
-    } else {
-      canvas.style.display='none';
-      fireText.style.display='none';
-    }
+    if(particles.length>0) requestAnimationFrame(()=>animate(particles));
+    else canvas.style.display='none';
   }
 
   window.addEventListener('load',()=>{ setTimeout(explodeText,500); });
@@ -346,6 +344,7 @@ It'll pass
 `}}
 {{ $fire | safeHTML }}
 {{ end }}
+
 
 
 
