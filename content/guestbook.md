@@ -1,6 +1,6 @@
 ---
-title: 留言板
+title:Message
 draft: false
 comments: true
 ---
-欢迎留言 💌
+祈求风和雨,吹我到理想的远处
