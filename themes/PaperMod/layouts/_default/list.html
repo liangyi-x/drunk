@@ -206,127 +206,140 @@
   </div>
 </div>
 
-<!-- 彩蛋：It'll pass 全屏焚烧 + 火舌 + 灰烬漂烟 -->
+<!-- ==== It'll pass Fire Burn Effect (Homepage Only) ==== -->
+{{ if .IsHome }}
+{{ $fire := `
 <div id="fire-pass" style="
   position:fixed;
-  top:50%;
-  left:50%;
-  transform:translate(-50%, -50%);
+  top:50%; left:50%;
+  transform:translate(-50%,-50%);
   font-weight:bold;
   color:white;
   text-align:center;
   pointer-events:none;
   z-index:1000;
-  white-space:nowrap;
-">It'll pass</div>
+  white-space:nowrap;">
+It'll pass
+</div>
+
 <canvas id="fire-canvas" style="
   position:fixed;
-  top:0;
-  left:0;
-  width:100%;
-  height:100%;
+  inset:0;
+  width:100%; height:100%;
   pointer-events:none;
   z-index:999;">
 </canvas>
+
 <script>
 (function(){
-  const fireText = document.getElementById('fire-pass');
-  const canvas = document.getElementById('fire-canvas');
-  if(!fireText||!canvas) return;
-  const ctx = canvas.getContext('2d');
+  const txt = document.getElementById("fire-pass");
+  const canvas = document.getElementById("fire-canvas");
+  if(!txt || !canvas) return;
+  const ctx = canvas.getContext("2d");
 
-  function resizeCanvas(){
+  function resize(){
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-    const fontSize = Math.min(window.innerWidth, window.innerHeight) * 0.2;
-    fireText.style.fontSize = fontSize + 'px';
+    const fs = Math.min(canvas.width, canvas.height) * 0.22;
+    txt.style.fontSize = fs + "px";
   }
-  window.addEventListener('resize', resizeCanvas);
-  resizeCanvas();
+  window.addEventListener("resize", resize);
+  resize();
 
-  const centerX = canvas.width/2;
-  const centerY = canvas.height/2;
-
-  class Particle {
-    constructor(x,y,char,type='text'){
-      this.x = x; this.y = y;
-      this.vx = (Math.random()-0.5)*6;
-      this.vy = Math.random()*-2-0.5;
-      this.alpha = 1;
-      this.size = parseFloat(fireText.style.fontSize);
-      this.char = char;
-      this.age = 0;
-      this.life = Math.random()*80+60;
-      this.type = type;
-      this.color = 'white';
+  class P {
+    constructor(x,y,char,type="text"){
+      this.x=x; this.y=y; this.char=char; this.type=type;
+      this.vx=(Math.random()-0.5)*2;   // 更集中
+      this.vy=Math.random()*-1 - 0.5;
+      this.alpha=1;
+      this.age=0;
+      this.life=90 + Math.random()*40;
+      this.size=parseFloat(txt.style.fontSize);
+      this.spin = (Math.random()-0.5)*0.02; // 卷曲感
+      this.angle = 0;
+      if(type==="ash"){
+        this.vy = Math.random()*2 + 1; // 灰烬坠落
+        this.vx *= 0.3;
+        this.size = 2 + Math.random()*2;
+      }
     }
     update(){
       this.x += this.vx;
       this.y += this.vy;
-      if(this.type==='text'){ this.vy += 0.05; } 
-      else if(this.type==='spark'){ this.vy += 0.02; this.vx += (Math.random()-0.5)*0.2; } 
-      else if(this.type==='ash'){ this.vy -= 0.1; this.vx += (Math.random()-0.5)*0.3; }
-      this.alpha -= 0.008;
-      this.size *= 0.96;
+      this.angle += this.spin;
+      this.size *= 0.985;
+
+      const p = this.age / this.life;
+      if(p < 0.2) this.color = "white";
+      else if(p < 0.4) this.color = "rgb(255,240,180)";
+      else if(p < 0.6) this.color = "rgb(255,180,60)";
+      else if(p < 0.8) this.color = "rgb(255,70,30)";
+      else this.color = "rgb(80,80,80)";
+
+      this.alpha = 1 - p;
       this.age++;
-      const progress = this.age / this.life;
-      if(this.type==='text'){
-        if(progress<0.3) this.color='white';
-        else if(progress<0.6) this.color='orange';
-        else this.color='gray';
-      }
     }
     draw(){
+      ctx.save();
       ctx.globalAlpha = this.alpha;
+      ctx.translate(this.x, this.y);
+      ctx.rotate(this.angle);
       ctx.fillStyle = this.color;
-      ctx.font = (this.type==='text'?this.size:(this.size*0.1))+'px sans-serif';
-      ctx.fillText(this.char,this.x,this.y);
+      ctx.font = (this.type==="text" ? this.size : 4) + "px sans-serif";
+      ctx.fillText(this.char, 0, 0);
+      ctx.restore();
     }
   }
 
-  function explodeText(){
-    const text = fireText.textContent;
-    fireText.style.display='none';
-    const fontSize = parseFloat(fireText.style.fontSize);
-    let particles = [];
+  function burn(){
+    const text = txt.textContent;
+    txt.style.display="none";
+    const fs = parseFloat(txt.style.fontSize);
+    const cx = canvas.width/2;
+    const cy = canvas.height/2;
+    let arr=[];
 
+    // 文字主粒子
     for(let i=0;i<text.length;i++){
-      const x = centerX - text.length*fontSize/2 + i*fontSize;
-      const y = centerY;
-      for(let j=0;j<5;j++) particles.push(new Particle(x,y,text[i],'text'));
+      const x = cx - text.length*(fs*0.7)/2 + i*(fs*0.7);
+      const y = cy;
+      for(let k=0;k<10;k++){
+        arr.push(new P(x,y,text[i]));
+      }
     }
 
-    for(let i=0;i<150;i++){
-      const p = new Particle(centerX, centerY, '•','spark');
-      p.vx = (Math.random()-0.5)*6;
-      p.vy = Math.random()*-3-1;
-      p.size = 2+Math.random()*3;
-      particles.push(p);
+    // 火焰核心亮点
+    for(let i=0;i<130;i++){
+      const p = new P(cx,cy,"•","spark");
+      p.vx = (Math.random()-0.5)*1.5;
+      p.vy = Math.random()*-2 - 1;
+      p.size = 3;
+      arr.push(p);
     }
 
-    for(let i=0;i<200;i++){
-      const p = new Particle(centerX, centerY, '•','ash');
-      p.vx = (Math.random()-0.5)*2;
-      p.vy = Math.random()*-0.5 - 0.5;
-      p.size = 2+Math.random()*2;
-      p.color = 'gray';
-      particles.push(p);
+    // 灰烬下落
+    for(let i=0;i<180;i++){
+      const a = new P(cx,cy,"•","ash");
+      arr.push(a);
     }
 
-    animate(particles);
+    animate(arr);
   }
 
-  function animate(particles){
+  function animate(arr){
     ctx.clearRect(0,0,canvas.width,canvas.height);
-    particles.forEach(p=>{p.draw(); p.update();});
-    particles = particles.filter(p=>p.alpha>0 && (p.size>2 || p.type!=='text'));
-    if(particles.length>0) requestAnimationFrame(()=>animate(particles));
-    else canvas.style.display='none';
+    arr.forEach(p=>{ p.draw(); p.update(); });
+    arr = arr.filter(p => p.alpha>0 && p.size>1);
+
+    if(arr.length>0) requestAnimationFrame(()=>animate(arr));
+    else canvas.style.display="none";
   }
 
-  window.addEventListener('load',()=>{ setTimeout(explodeText,500); });
+  window.addEventListener("load",()=>{ setTimeout(burn,500); });
 })();
 </script>
+`}}
+{{ $fire | safeHTML }}
 
 
 <script>
