@@ -1,0 +1,43 @@
+{{ define "main" }}
+<div class="broadcast-container">
+  <h1>Broadcast</h1>
+  <div id="broadcasts">加载中…</div>
+
+  <div class="broadcast-input-area">
+    <input id="broadcast-input" type="text" placeholder="输入广播内容">
+    <button id="broadcast-send">发送</button>
+  </div>
+</div>
+
+<script type="module" src="/js/broadcast.js"></script>
+
+<style>
+.broadcast-container {
+  max-width: 600px;
+  margin: auto;
+  padding: 2rem 1rem;
+}
+
+.broadcast-input-area {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+#broadcast-input {
+  flex: 1;
+  padding: 0.5rem;
+  border-radius: 6px;
+  border: 1px solid #444;
+}
+
+#broadcast-send {
+  padding: 0.5rem 1rem;
+  background: #111;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+</style>
+{{ end }}
