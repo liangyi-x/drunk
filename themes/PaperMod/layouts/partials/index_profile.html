@@ -1,6 +1,6 @@
 <div class="profile">
-    {{- with site.Params.profileMode }}
-    <div class="profile_inner">
+  {{- with site.Params.profileMode }}
+  <div class="profile_inner">
         {{- if .imageUrl -}}
         {{- $img := "" }}
         {{- if not (urls.Parse .imageUrl).IsAbs }}
@@ -53,6 +53,64 @@
             {{- end }}
         </div>
         {{- end }}
+
+
+  <!-- === 广播模块开始 === -->
+  {{ if .IsHome }}
+  <div id="broadcast-wrapper" style="margin-top:1rem;">
+    <div id="broadcasts" style="max-height:200px; overflow-y:auto; background:rgba(0,0,0,0.6); color:white; padding:0.5rem 1rem; border-radius:8px; font-size:0.95rem;"></div>
+    <div style="margin-top:0.5rem; display:flex; gap:0.3rem;">
+      <input type="text" id="broadcast-input" placeholder="输入广播信息" style="flex:1; padding:0.3rem; border-radius:4px; border:none;">
+      <button id="broadcast-send" style="padding:0.3rem 0.5rem; border:none; border-radius:4px; background:#222; color:#fff; cursor:pointer;">发送</button>
+    </div>
+  </div>
+
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-app.js";
+  import { getFirestore, collection, addDoc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCcerqGJVSsMwLs7eoRjATE8X7bplWsD54",
+    authDomain: "drunk-broadcast.firebaseapp.com",
+    projectId: "drunk-broadcast",
+    storageBucket: "drunk-broadcast.firebasestorage.app",
+    messagingSenderId: "998143016108",
+    appId: "1:998143016108:web:87c3a60b853aaf75f27309",
+    measurementId: "G-49Z7SPGJJY"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  async function sendBroadcast(message) {
+    if(!message.trim()) return;
+    try {
+      await addDoc(collection(db, "broadcasts"), { message, timestamp: new Date() });
+      document.getElementById('broadcast-input').value = '';
+    } catch(e) { console.error("发送失败:", e); }
+  }
+
+  document.getElementById("broadcast-send").addEventListener("click", () => sendBroadcast(document.getElementById("broadcast-input").value));
+  document.getElementById("broadcast-input").addEventListener("keydown", (e) => { if(e.key==="Enter") sendBroadcast(e.target.value); });
+
+  const broadcastContainer = document.getElementById("broadcasts");
+  const q = query(collection(db, "broadcasts"), orderBy("timestamp","desc"));
+
+  onSnapshot(q, (snapshot) => {
+    broadcastContainer.innerHTML = "";
+    snapshot.forEach(doc => {
+      const div = document.createElement("div");
+      div.textContent = doc.data().message;
+      div.style.marginBottom = "0.3rem";
+      broadcastContainer.appendChild(div);
+    });
+  });
+  </script>
+  {{ end }}
+  <!-- === 广播模块结束 === -->
+
+</div>
+
     </div>
     {{- end}}
 </div>
