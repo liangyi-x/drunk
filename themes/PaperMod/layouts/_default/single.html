@@ -1,67 +1,73 @@
-{{ define "main" }}
-<style>
-.broadcast-container {
-  max-width: 720px;
-  margin: 2rem auto;
-  padding: 0 1rem;
-}
-.broadcast-title {
-  text-align: center;
-  font-size: 2rem;
-  font-weight: 500;
-  margin-bottom: 1rem;
-  color: #222;
-}
-.broadcast-list {
-  list-style: none;
-  padding-left: 0;
-}
-.broadcast-item {
-  margin-bottom: 1.5rem;
-  padding: 0.8rem 1rem;
-  border-left: 3px solid #ff6b6b;
-  background: #fff9f8;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-}
-.broadcast-item .date {
-  font-size: 0.85rem;
-  color: #999;
-  margin-bottom: 0.2rem;
-}
-.broadcast-item .content {
-  font-size: 1.05rem;
-  line-height: 1.6;
-  color: #333;
-  white-space: pre-wrap;
-}
-</style>
+{{- define "main" }}
 
-<div class="broadcast-container">
-  <div class="broadcast-title">broadcast</div>
-  <ul class="broadcast-list" id="broadcast-list">
-    <!-- 广播内容由 JS 动态渲染 -->
-  </ul>
-</div>
+<article class="post-single">
+  <header class="post-header">
+    {{ partial "breadcrumbs.html" . }}
+    <h1 class="post-title entry-hint-parent">
+      {{ .Title }}
+      {{- if .Draft }}
+      <span class="entry-hint" title="Draft">
+        <svg xmlns="http://www.w3.org/2000/svg" height="35" viewBox="0 -960 960 960" fill="currentColor">
+          <path d="M160-410v-60h300v60H160Zm0-165v-60h470v60H160Zm0-165v-60h470v60H160Zm360 580v-123l221-220q9-9 20-13t22-4q12 0 23 4.5t20 13.5l37 37q9 9 13 20t4 22q0 11-4.5 22.5T862.09-380L643-160H520Zm300-263-37-37 37 37ZM580-220h38l121-122-18-19-19-18-122 121v38Zm141-141-19-18 37 37-18-19Z" />
+        </svg>
+      </span>
+      {{- end }}
+    </h1>
+    {{- if .Description }}
+    <div class="post-description">
+      {{ .Description }}
+    </div>
+    {{- end }}
+    {{- if not (.Param "hideMeta") }}
+    <div class="post-meta">
+      {{ partial "post_meta.html" . }}
+      {{ partial "translation_list.html" . }}
+      {{ partial "edit_post.html" . }}
+      {{ partial "post_canonical.html" . }}
+    </div>
+    {{- end }}
+  </header>
 
-<script>
-async function loadBroadcast() {
-  const res = await fetch("/broadcast/broadcast.json");
-  if(!res.ok) return;
-  const data = await res.json();
-  const ul = document.getElementById("broadcast-list");
-  ul.innerHTML = "";
-  data.forEach(item => {
-    const li = document.createElement("li");
-    li.className = "broadcast-item";
-    li.innerHTML = `
-      <div class="date">${item.date}</div>
-      <div class="content">${item.content}</div>
-    `;
-    ul.appendChild(li);
-  });
-}
+  {{- $isHidden := (.Param "cover.hiddenInSingle") | default (.Param "cover.hidden") | default false }}
+  {{- partial "cover.html" (dict "cxt" . "IsSingle" true "isHidden" $isHidden) }}
 
-document.addEventListener("DOMContentLoaded", loadBroadcast);
-</script>
-{{ end }}
+  {{- if (.Param "ShowToc") }}
+    {{ partial "toc.html" . }}
+  {{- end }}
+
+  {{- if .Content }}
+  <div class="post-content">
+    {{- if not (.Param "disableAnchoredHeadings") }}
+      {{ partial "anchored_headings.html" .Content }}
+    {{- else }}
+      {{ .Content }}
+    {{- end }}
+  </div>
+  {{- end }}
+
+  <footer class="post-footer">
+    {{- $tags := .Language.Params.Taxonomies.tag | default "tags" }}
+    <ul class="post-tags">
+      {{- range ($.GetTerms $tags) }}
+      <li><a href="{{ .Permalink }}">{{ .LinkTitle }}</a></li>
+      {{- end }}
+    </ul>
+    {{- if (.Param "ShowPostNavLinks") }}
+      {{ partial "post_nav_links.html" . }}
+    {{- end }}
+    {{- if (and site.Params.ShowShareButtons (ne .Params.disableShare true)) }}
+      {{ partial "share_icons.html" . }}
+    {{- end }}
+  </footer>
+
+  {{- /* ------------------------- */ -}}
+  {{- /* 评论区：调用 partial comments.html */ -}}
+  {{- /* 全局开启：config.yaml params.comments: true */ -}}
+  {{- /* 单篇关闭：front matter comments: false */ -}}
+  {{- if or (.Page.Params.comments) (.Site.Params.comments) }}
+    {{ partial "comments.html" . }}
+  {{- end }}
+
+</article>
+
+{{- end }}
