@@ -137,6 +137,7 @@
 {{ $isTag := eq .Kind "term" }}
 
 {{ if $isHome }}
+
 <div class="home-title">Article</div>
 <div class="posts-grid">
   {{ range first 3 (where .Site.RegularPages "Type" "posts") }}
@@ -151,6 +152,7 @@
 </div>
 
 {{ else if $isPosts }}
+
 <div class="all-posts-list">
   <div class="home-title">All Posts</div>
   {{ $paginator := .Paginate (where .Site.RegularPages "Type" "posts") }}
@@ -170,6 +172,7 @@
 </div>
 
 {{ else if $isTag }}
+
 <div class="all-posts-list">
   <div class="home-title">#{{ .Title }}</div>
   {{ $paginator := .Paginate .Pages }}
@@ -192,10 +195,10 @@
 {{ .Content }}
 {{ end }}
 
-<!-- 全站 Footer -->
+<!-- Footer -->
 <div class="global-footer">LOST & FOUND 像水消失在水中</div>
 
-<!-- 弹窗订阅 -->
+<!-- ✦ 弹窗订阅 ✦ -->
 <div style="text-align:center;">
   <div class="subscribe-button">Get updates from my site</div>
 </div>
@@ -206,35 +209,46 @@
   </div>
 </div>
 
-<!-- ==== It'll pass Fire Burn Effect (Homepage Only) ==== -->
+<script>
+document.querySelector('.subscribe-button').addEventListener('click',function(){
+  document.querySelector('.subscribe-overlay').style.display='flex';
+});
+document.querySelector('.subscribe-overlay .close-btn').addEventListener('click',function(){
+  document.querySelector('.subscribe-overlay').style.display='none';
+});
+document.querySelector('.subscribe-overlay').addEventListener('click',function(e){
+  if(e.target===this){this.style.display='none';}
+});
+</script>
+
+<!-- ✦ Fire Burn Effect (Homepage Only) ✦ -->
 {{ if .IsHome }}
-{{ $fire := `
-<div id="fire-pass" style="
-  position:fixed;
-  top:50%; left:50%;
-  transform:translate(-50%,-50%);
-  font-weight:bold;
-  color:white;
-  text-align:center;
-  pointer-events:none;
-  z-index:1000;
-  white-space:nowrap;">
-It'll pass
-</div>
-
-<canvas id="fire-canvas" style="
-  position:fixed;
-  inset:0;
-  width:100%; height:100%;
-  pointer-events:none;
-  z-index:999;">
-</canvas>
-
 <script>
 (function(){
-  const txt = document.getElementById("fire-pass");
-  const canvas = document.getElementById("fire-canvas");
-  if(!txt || !canvas) return;
+  const txt = document.createElement("div");
+  txt.id="fire-pass";
+  txt.style.position="fixed";
+  txt.style.top="50%";
+  txt.style.left="50%";
+  txt.style.transform="translate(-50%,-50%)";
+  txt.style.fontWeight="bold";
+  txt.style.color="white";
+  txt.style.zIndex="1000";
+  txt.style.pointerEvents="none";
+  txt.style.whiteSpace="nowrap";
+  txt.innerText="It'll pass";
+  document.body.appendChild(txt);
+
+  const canvas = document.createElement("canvas");
+  canvas.id="fire-canvas";
+  canvas.style.position="fixed";
+  canvas.style.inset="0";
+  canvas.style.width="100%";
+  canvas.style.height="100%";
+  canvas.style.pointerEvents="none";
+  canvas.style.zIndex="999";
+  document.body.appendChild(canvas);
+
   const ctx = canvas.getContext("2d");
 
   function resize(){
@@ -243,12 +257,13 @@ It'll pass
     const fs = Math.min(canvas.width, canvas.height) * 0.22;
     txt.style.fontSize = fs + "px";
   }
-  window.addEventListener("resize", resize);
   resize();
+  window.addEventListener("resize", resize);
 
   class P {
     constructor(x,y,char,type){
-      this.x=x; this.y=y; this.char=char; this.type=type||"text";
+      this.x=x; this.y=y; this.char=char;
+      this.type=type||"text";
       this.vx=(Math.random()-0.5)*2;
       this.vy=Math.random()*-1 - 0.5;
       this.alpha=1;
@@ -259,7 +274,7 @@ It'll pass
       this.angle=0;
       if(type==="ash"){
         this.vy = Math.random()*2 + 1;
-        this.vx *= 0.3;
+        this.vx *=0.3;
         this.size = 2 + Math.random()*2;
       }
     }
@@ -290,21 +305,36 @@ It'll pass
   }
 
   function burn(){
-    const text=txt.textContent;
+    const chars = txt.innerText.split("");
+    const rect = txt.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+
     txt.style.display="none";
 
+    const ps=[];
+    for(let i=0;i<chars.length;i++){
+      ps.push(new P(cx + (i - chars.length / 2) * 30, cy, chars[i], "text"));
+      for(let j=0;j<3;j++){
+        ps.push(new P(cx, cy, ".", "ash"));
+      }
+    }
 
-<script>
-// 弹窗订阅逻辑
-document.querySelector('.subscribe-button').addEventListener('click',function(){
-  document.querySelector('.subscribe-overlay').style.display='flex';
-});
-document.querySelector('.subscribe-overlay .close-btn').addEventListener('click',function(){
-  document.querySelector('.subscribe-overlay').style.display='none';
-});
-document.querySelector('.subscribe-overlay').addEventListener('click',function(e){
-  if(e.target===this){this.style.display='none';}
-});
+    function loop(){
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      ps.forEach(p=>{
+        p.update();
+        p.draw();
+      });
+      requestAnimationFrame(loop);
+    }
+    loop();
+  }
+
+  setTimeout(burn, 1500);
+})();
 </script>
+{{ end }}
 
 {{ end }}
+
