@@ -1,3 +1,6 @@
+{{ define "main" }}
+
+<!-- === Profile 模块开始 === -->
 <div class="profile">
   {{- with site.Params.profileMode }}
   <div class="profile_inner">
@@ -32,7 +35,7 @@
         {{- end }}
         <h1>{{ .title | default site.Title | markdownify }}</h1>
         <span>{{ .subtitle | markdownify }}</span>
-        {{- partial "social_icons.html" -}}
+        {{- partial "social_icons.html" . -}}
 
         {{- with .buttons }}
         <div class="buttons">
@@ -53,10 +56,13 @@
             {{- end }}
         </div>
         {{- end }}
+  </div>
+  {{- end}}
+</div>
+<!-- === Profile 模块结束 === -->
 
-
-  <!-- === 广播模块开始 === -->
- {{ if .IsHome }}
+<!-- === 广播模块开始 === -->
+{{ if .IsHome }}
 <div id="broadcast-wrapper" style="position:fixed; bottom:1rem; right:1rem; width:300px; z-index:9999;">
   <div id="broadcasts" style="max-height:200px; overflow-y:auto; background:rgba(0,0,0,0.6); color:white; padding:0.5rem 1rem; border-radius:8px; font-size:0.95rem;">
     加载中…
@@ -101,9 +107,7 @@
   });
 
   inputEl.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      sendBtn.click();
-    }
+    if (e.key === "Enter") sendBtn.click();
   });
 
   const q = query(broadcastRef, orderBy("timestamp", "desc"));
@@ -122,4 +126,17 @@
   });
 </script>
 {{ end }}
+<!-- === 广播模块结束 === -->
 
+<!-- 主页正文内容开始 -->
+<div class="home-content">
+  {{ range .Pages }}
+    <article class="post">
+      <h2><a href="{{ .Permalink }}">{{ .Title }}</a></h2>
+      {{ .Summary }}
+    </article>
+  {{ end }}
+</div>
+<!-- 主页正文内容结束 -->
+
+{{ end }}
