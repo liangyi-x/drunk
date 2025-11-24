@@ -63,68 +63,53 @@
 
 <!-- === 广播模块开始 === -->
 {{ if .IsHome }}
-<div id="broadcast-wrapper" style="position:fixed; bottom:1rem; right:1rem; width:300px; z-index:9999;">
-  <div id="broadcasts" style="max-height:200px; overflow-y:auto; background:rgba(0,0,0,0.6); color:white; padding:0.5rem 1rem; border-radius:8px; font-size:0.95rem;">
+<!-- === 广播模块开始（豆瓣风格） === -->
+<div id="broadcast-wrapper" style="
+    position:fixed;
+    bottom:1rem;
+    right:1rem;
+    width:320px;
+    max-height:350px;
+    z-index:9999;
+    font-family:Arial,sans-serif;
+">
+  <div id="broadcasts" style="
+      max-height:280px;
+      overflow-y:auto;
+      background:rgba(0,0,0,0.65);
+      color:#fff;
+      padding:0.6rem 1rem;
+      border-radius:10px;
+      font-size:0.95rem;
+      line-height:1.4rem;
+      box-shadow:0 0 15px rgba(0,0,0,0.5);
+      scroll-behavior:smooth;
+  ">
     加载中…
   </div>
   <div style="margin-top:0.5rem; display:flex; gap:0.3rem;">
-    <input type="text" id="broadcast-input" placeholder="输入广播信息" style="flex:1; padding:0.3rem; border-radius:4px; border:none;">
-    <button id="broadcast-send" style="padding:0.3rem 0.5rem; border:none; border-radius:4px; background:#222; color:#fff; cursor:pointer;">发送</button>
+    <input type="text" id="broadcast-input" placeholder="输入广播信息" style="
+        flex:1;
+        padding:0.35rem 0.5rem;
+        border-radius:6px;
+        border:none;
+        font-size:0.9rem;
+        outline:none;
+    ">
+    <button id="broadcast-send" style="
+        padding:0.35rem 0.7rem;
+        border:none;
+        border-radius:6px;
+        background:#444;
+        color:#fff;
+        cursor:pointer;
+        font-size:0.9rem;
+    ">发送</button>
   </div>
 </div>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-app.js";
-  import { getFirestore, collection, addDoc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-firestore.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyCcerqGJVSsMwLs7eoRjATE8X7bplWsD54",
-    authDomain: "drunk-broadcast.firebaseapp.com",
-    projectId: "drunk-broadcast",
-    storageBucket: "drunk-broadcast.firebasestorage.app",
-    messagingSenderId: "998143016108",
-    appId: "1:998143016108:web:87c3a60b853aaf75f27309",
-    measurementId: "G-49Z7SPGJJY"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-  const broadcastRef = collection(db, "broadcasts");
-
-  const inputEl = document.getElementById("broadcast-input");
-  const sendBtn = document.getElementById("broadcast-send");
-  const listEl = document.getElementById("broadcasts");
-
-  sendBtn.addEventListener("click", async () => {
-    const text = inputEl.value.trim();
-    if (!text) return;
-    try {
-      await addDoc(broadcastRef, { message: text, timestamp: new Date() });
-      inputEl.value = "";
-    } catch (e) {
-      console.error("发送广播失败:", e);
-    }
-  });
-
-  inputEl.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") sendBtn.click();
-  });
-
-  const q = query(broadcastRef, orderBy("timestamp", "desc"));
-  onSnapshot(q, (snapshot) => {
-    listEl.innerHTML = "";
-    snapshot.forEach(doc => {
-      const data = doc.data();
-      const div = document.createElement("div");
-      div.textContent = data.message;
-      div.style.marginBottom = "0.3rem";
-      listEl.appendChild(div);
-    });
-  }, (error) => {
-    console.error("监听广播失败:", error);
-    listEl.textContent = "加载失败";
-  });
-</script>
+<!-- 引入 Firebase 脚本 -->
+<script type="module" src="/js/broadcast.js"></script>
 {{ end }}
 <!-- === 广播模块结束 === -->
 
