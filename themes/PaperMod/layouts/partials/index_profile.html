@@ -126,6 +126,21 @@ onSnapshot(q, snapshot => {
 {{ $broadcast | safeHTML }}
 {{ end }}
 
+    <script>
+document.addEventListener("DOMContentLoaded", () => {
+  const lf = document.getElementById("lostfound");
+  if (!lf) return;
+
+  lf.addEventListener("click", () => {
+    lf.classList.add("dissolve");
+
+    // 延迟跳转到广播页面（你自己创建 /broadcast/）
+    setTimeout(() => {
+      window.location.href = "/drunk/broadcast/";
+    }, 800); // 与 CSS 动画同步
+  });
+});
+</script>
 
   </div>
   {{- end }}
