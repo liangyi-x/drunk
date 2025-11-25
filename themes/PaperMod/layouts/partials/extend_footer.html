@@ -1,3 +1,19 @@
-{{- /* Footer custom content area start */ -}}
-{{- /*     Insert any custom code web-analytics, resources, etc. here */ -}}
-{{- /* Footer custom content area end */ -}}
+<!-- extend_footer.html -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const lf = document.getElementById("lostfound");
+  if (!lf) {
+    console.warn("lostfound 元素不存在");
+    return;
+  }
+
+  lf.addEventListener("click", (e) => {
+    e.preventDefault();
+    lf.classList.add("dissolve");
+
+    setTimeout(() => {
+      window.location.href = lf.getAttribute("href");
+    }, 800);
+  });
+});
+</script>
