@@ -1,139 +1,365 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>咒语显灵 · 不可能之海</title>
+  <title>LOST & FOUND</title>
+
   <style>
     body {
-      margin: 0;
-      padding: 0;
-      font-family: serif;
-      background: #f7f7f7;
+      margin: 0; padding: 0;
+      background: #1f1f1f;
+      color: #ddd;
+      font-family: sans-serif;
+      overflow-x: hidden;
+      transition: all 3s ease-out;
     }
 
-    /* 主体容器 */
-    .container {
-      padding: 40px;
-      max-width: 720px;
-      margin: 0 auto;
-      text-align: center;
-    }
-
-    h1 {
-      font-weight: normal;
-      font-size: 32px;
-      margin-bottom: 30px;
-    }
-
-    /* 可点击咒语 */
-    .spell {
-      cursor: pointer;
-      display: inline-block;
-      font-size: 22px;
-      position: relative;
-      padding: 8px 16px;
-      border-radius: 6px;
-      transition: 0.3s;
-    }
-
-    .spell:hover {
-      background: #e3e3e3;
-    }
-
-    /* 海浪效果容器 */
-    .wave-container {
+    /* 雾气 / 雨滴 canvas */
+    #fog-canvas {
       position: fixed;
-      left: 0;
-      bottom: -120px;
-      width: 100%;
-      height: 200px;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
       pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+    }
+
+    .page-title {
+      text-align: center;
+      color: #fff;
+      font-size: 2.2rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .broadcast-input-wrapper {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    #broadcast-input {
+      flex: 1;
+      padding: 0.5rem;
+      border: none;
+      border-radius: 6px;
+      background: rgba(255,255,255,0.08);
+      color: #eee;
+    }
+
+    #broadcast-send {
+      padding: 0.5rem 0.9rem;
+      border: none;
+      border-radius: 6px;
+      background: rgba(80,80,80,0.6);
+      color: #fff;
+      cursor: pointer;
+    }
+    #broadcast-send:hover {
+      background: rgba(100,100,100,0.8);
+    }
+
+    .broadcast-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+
+    .broadcast-card {
+      background: rgba(255,255,255,0.05);
+      padding: 1rem;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .broadcast-card:hover {
+      transform: translateY(-4px);
+      backdrop-filter: blur(8px);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+    }
+
+    /* dissolve 动画 */
+    @keyframes cardFade {
+      0% { transform: rotate(0deg); opacity: 1; }
+      100% { transform: rotate(6deg); opacity: 0; }
+    }
+    .broadcast-card.dissolve {
+      animation: cardFade 0.8s forwards;
+    }
+
+    .broadcast-message {
+      font-size: 1rem;
+      margin-bottom: 0.4rem;
+    }
+    .broadcast-time {
+      font-size: 0.85rem;
+      color: #aaa;
+      text-align: right;
+    }
+
+    #lostfound {
+      text-align: center;
+      margin: 2rem 0;
+      font-style: italic;
+      color: rgba(200,200,200,0.7);
+      cursor: pointer;
+    }
+
+    @media (max-width: 600px) {
+      .page-title { font-size: 1.8rem; }
+    }
+
+    /* 海浪 & 符文效果 */
+    #spell-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.35);
+      backdrop-filter: blur(4px);
       opacity: 0;
-      transition: opacity 1.2s ease;
+      pointer-events: none;
+      transition: opacity 0.4s ease-out;
+      z-index: 999;
+    }
+
+    #wave-container {
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 260px; height: 260px;
+      transform: translate(-50%, -50%);
+      overflow: hidden;
+      border-radius: 50%;
+      opacity: 0;
+      transition: opacity 0.4s ease-out;
     }
 
     .wave {
       position: absolute;
-      left: 50%;
-      width: 1600px;
-      height: 200px;
-      background: rgba(80, 160, 255, 0.35);
-      border-radius: 50%;
-      transform: translateX(-50%);
-      animation: waveMove 4s ease-in-out infinite;
+      width: 200%; height: 200%;
+      top: -50%; left: -50%;
+      background: rgba(70,140,255,0.35);
+      border-radius: 45%;
+      animation: rotateWave 6s infinite linear;
     }
-
     .wave:nth-child(2) {
-      background: rgba(80, 160, 255, 0.2);
-      animation-delay: 1.2s;
+      background: rgba(120,170,255,0.45);
+      animation-duration: 8s;
     }
 
-    @keyframes waveMove {
-      0% { transform: translate(-50%, 0) scale(1); }
-      50% { transform: translate(-50%, -25px) scale(1.03); }
-      100% { transform: translate(-50%, 0) scale(1); }
+    @keyframes rotateWave {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
     }
 
-    /* 显灵文字 */
-    .spell-text {
-      position: fixed;
-      bottom: 260px;
-      width: 100%;
-      text-align: center;
-      font-size: 22px;
+    #spell-text {
+      position: absolute;
+      top: calc(50% + 150px);
+      left: 50%;
+      transform: translate(-50%, 0);
+      color: #e7f5ff;
+      font-size: 1.6rem;
+      letter-spacing: 2px;
       opacity: 0;
-      transition: opacity 1.2s ease;
+      transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+      text-shadow: 0 0 15px rgba(150,200,255,0.8);
+    }
+
+    /* 符文元素 */
+    #spell-fog, #spell-circle, #spell-rune {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      opacity: 0;
       pointer-events: none;
+      transition: all 1s ease-out;
     }
 
-    /* 返回主页按钮 */
-    .back {
-      margin-top: 40px;
-      font-size: 18px;
-      display: inline-block;
-      padding: 6px 12px;
-      border-radius: 4px;
-      color: #333;
-      text-decoration: none;
-      border: 1px solid #aaa;
+    #spell-rune {
+      width: 40px; height: 40px;
+      background: radial-gradient(circle, #7fffd4, #00ffff);
+      border-radius: 50%;
+      box-shadow: 0 0 15px #0ff;
+      animation: floatRune 3s infinite alternate;
     }
 
-    .back:hover { background: #ececec; }
+    @keyframes floatRune {
+      0% { transform: translate(-50%, -50%) translateY(0) scale(1); }
+      50% { transform: translate(-50%, -50%) translateY(-20px) scale(1.1); }
+      100% { transform: translate(-50%, -50%) translateY(0) scale(1); }
+    }
+
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>广播 · 不可能之海</h1>
-
-    <div class="spell" onclick="castSpell()">不可能之海</div>
-
-    <br><br>
-    <a href="../index.html" class="back">← 回到主页</a>
+    <h1 class="page-title">LOST & FOUND</h1>
+    <div class="broadcast-input-wrapper">
+      <input type="text" id="broadcast-input" placeholder="it hasn't pass..."/>
+      <button id="broadcast-send">Send</button>
+    </div>
+    <div class="broadcast-list" id="broadcasts"></div>
+    <div id="lostfound">点击触发魔法</div>
   </div>
 
-  <!-- 海浪层 -->
-  <div class="wave-container" id="waves">
-    <div class="wave"></div>
-    <div class="wave"></div>
+  <!-- 海浪 & 符文结构 -->
+  <div id="spell-overlay">
+    <div id="spell-fog"></div>
+    <div id="spell-circle"></div>
+    <div id="spell-rune"></div>
+    <div id="wave-container">
+      <div class="wave"></div>
+      <div class="wave"></div>
+    </div>
+    <div id="spell-text">不可能之海正在为你翻涌</div>
   </div>
 
-  <!-- 显灵文字 -->
-  <div class="spell-text" id="spellText">海答应了你。</div>
+  <!-- Firebase -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-firestore.js";
 
+    const firebaseConfig = {
+      apiKey: "AIzaSyCcerqGJVSsMwLs7eoRjATE8X7bplWsD54",
+      authDomain: "drunk-broadcast.firebaseapp.com",
+      projectId: "drunk-broadcast",
+      storageBucket: "drunk-broadcast.firebasestorage.app",
+      messagingSenderId: "998143016108",
+      appId: "1:998143016108:web:87c3a60b853aaf75f27309"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const ref = collection(db, "broadcasts");
+
+    const inputEl = document.getElementById("broadcast-input");
+    const sendBtn = document.getElementById("broadcast-send");
+    const listEl = document.getElementById("broadcasts");
+
+    sendBtn.onclick = async () => {
+      const v = inputEl.value.trim();
+      if (!v) return;
+      await addDoc(ref, { message: v, timestamp: new Date() });
+      inputEl.value = "";
+    };
+
+    inputEl.addEventListener("keydown", e => {
+      if (e.key === "Enter") sendBtn.click();
+    });
+
+    const q = query(ref, orderBy("timestamp", "desc"));
+    onSnapshot(q, snap => {
+      listEl.innerHTML = "";
+      snap.forEach(doc => {
+        const data = doc.data();
+        const d = document.createElement("div");
+        d.className = "broadcast-card";
+        d.innerHTML = `
+          <div class="broadcast-message">${data.message}</div>
+          <div class="broadcast-time">${data.timestamp.toDate().toLocaleString()}</div>
+        `;
+        d.onclick = () => d.classList.add("dissolve");
+        listEl.appendChild(d);
+      });
+    });
+  </script>
+
+  <!-- 魔法触发 -->
   <script>
-    function castSpell() {
-      const waves = document.getElementById("waves");
-      const text = document.getElementById("spellText");
+    const spellOverlay = document.getElementById("spell-overlay");
+    const spellFog = document.getElementById("spell-fog");
+    const spellCircle = document.getElementById("spell-circle");
+    const spellRune = document.getElementById("spell-rune");
+    const waveContainer = document.getElementById("wave-container");
+    const spellText = document.getElementById("spell-text");
 
-      waves.style.opacity = 1;
-      text.style.opacity = 1;
+    document.getElementById("lostfound").onclick = () => {
+      spellOverlay.style.opacity = "1";
 
+      setTimeout(() => { spellFog.style.opacity = "0.5"; }, 50);
+      setTimeout(() => { spellCircle.style.opacity = "1"; spellCircle.style.transform = "translate(-50%, -50%) scale(1)"; }, 150);
+      setTimeout(() => { spellRune.style.opacity = "1"; spellRune.style.transform = "translate(-50%, -50%) scale(1)"; }, 350);
+      setTimeout(() => { waveContainer.style.opacity = "1"; }, 500);
+      setTimeout(() => { spellText.style.opacity = "1"; spellText.style.transform = "translate(-50%, -10px)"; }, 600);
+
+      // 拖慢时间效果
+      document.body.style.filter = "blur(2px) brightness(0.8)";
+
+      // 自动淡出
       setTimeout(() => {
-        waves.style.opacity = 0;
-        text.style.opacity = 0;
-      }, 2800);
+        spellRune.style.opacity = "0";
+        spellCircle.style.opacity = "0";
+        spellFog.style.opacity = "0";
+        waveContainer.style.opacity = "0";
+        spellText.style.opacity = "0";
+        spellOverlay.style.opacity = "0";
+        document.body.style.filter = "none";
+      }, 3200);
+
+      // 4秒后跳回主页
+      setTimeout(() => { window.location.href = "/"; }, 4000);
+    };
+    {"variant":"standard","title":"符文粒子漂浮效果","id":"48493"}
+<script>
+  
+  // 创建符文粒子容器
+  const runeContainer = document.createElement("div");
+  runeContainer.style.position = "fixed";
+  runeContainer.style.top = "0";
+  runeContainer.style.left = "0";
+  runeContainer.style.width = "100%";
+  runeContainer.style.height = "100%";
+  runeContainer.style.pointerEvents = "none";
+  runeContainer.style.zIndex = "1000";
+  document.body.appendChild(runeContainer);
+
+  function spawnRunes(count = 10) {
+    for (let i = 0; i < count; i++) {
+      const rune = document.createElement("div");
+      const size = 10 + Math.random() * 20;
+      rune.style.width = `${size}px`;
+      rune.style.height = `${size}px`;
+      rune.style.background = "radial-gradient(circle, #7fffd4, #00ffff)";
+      rune.style.borderRadius = "50%";
+      rune.style.position = "absolute";
+      rune.style.top = `${Math.random() * 100}%`;
+      rune.style.left = `${Math.random() * 100}%`;
+      rune.style.opacity = "0";
+      rune.style.boxShadow = "0 0 10px #0ff";
+      rune.style.transition = "all 3s ease-out";
+      runeContainer.appendChild(rune);
+
+      // 延迟淡入
+      setTimeout(() => { rune.style.opacity = "1"; }, Math.random() * 300);
+
+      // 随机漂浮动画
+      const dx = (Math.random() - 0.5) * 100;
+      const dy = (Math.random() - 0.5) * 100;
+      rune.animate([
+        { transform: `translate(0px, 0px) rotate(0deg)` },
+        { transform: `translate(${dx}px, ${dy}px) rotate(${360 * Math.random()}deg)` }
+      ], {
+        duration: 4000 + Math.random() * 3000,
+        iterations: Infinity,
+        direction: "alternate",
+        easing: "ease-in-out"
+      });
+
+      // 自动消失
+      setTimeout(() => { rune.remove(); }, 5000);
     }
+  }
+
+  // 点击魔法时生成符文粒子
+  document.getElementById("lostfound").addEventListener("click", () => {
+    spawnRunes(15); // 每次生成 15 个符文粒子
+  });
   </script>
 </body>
 </html>
