@@ -357,6 +357,39 @@ It'll pass
 {{ $fire | safeHTML }}
 {{ end }}
 
+<!-- LOST & FOUND clickable animation -->
+<div class="global-footer" id="lostfound" style="cursor:pointer; text-align:center; margin-top:2rem;">
+  LOST & FOUND 像水消失在水中
+</div>
+
+<style>
+  .dissolve {
+    animation: dissolveAnim 0.8s forwards;
+  }
+  @keyframes dissolveAnim {
+    0% {opacity:1; transform:scale(1);}
+    100% {opacity:0; transform:scale(0.3) rotate(10deg);}
+  }
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const lf = document.getElementById("lostfound");
+  if (!lf) return;
+
+  lf.addEventListener("click", () => {
+    lf.classList.add("dissolve");
+
+    // 使用 Hugo 路径，确保不 404
+    const url = "{{ "/broadcast--index/" | relURL }}";
+
+    setTimeout(() => {
+      window.location.href = url;
+    }, 800);
+  });
+});
+</script>
+
 
 {{ end }}
 
