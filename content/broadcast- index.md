@@ -1,6 +1,118 @@
----
-title: "Broadcast"
-layout: "broadcast"
----
+{"id":"87421","variant":"standard","title":"优化版广播页面模板"}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Drunk Broadcast</title>
+<style>
+  body { margin:0; font-family: "Helvetica Neue", Arial, sans-serif; background:#111; color:#fff; }
+  main { max-width: 900px; margin: 0 auto; padding: 2rem; }
+  h1 { text-align:center; font-style:italic; color:rgba(255,255,255,0.6); font-size:2rem; margin-bottom:2rem; }
 
-<div id="broadcast-app"></div>
+  /* 广播列表 */
+  #broadcasts { 
+    max-height:400px; overflow-y:auto; background:rgba(0,0,0,0.6); 
+    padding:1rem; border-radius:8px; margin-bottom:1rem; 
+  }
+  #broadcasts div { margin-bottom:0.5rem; font-size:1rem; }
+
+  /* 输入 */
+  #broadcast-input { width:70%; padding:0.5rem; border-radius:4px; border:none; }
+  #broadcast-send { padding:0.5rem 1rem; border:none; border-radius:4px; background:#222; color:#fff; cursor:pointer; }
+
+  /* LOST & FOUND 水墨效果 */
+  #lostfound { text-align:center; font-style:italic; color:rgba(255,255,255,0.6); cursor:pointer; font-size:1.6rem; margin-top:3rem; }
+  canvas#smoke { position:fixed; inset:0; pointer-events:none; z-index:0; }
+
+  /* 溶解动画 */
+  @keyframes dissolve { 0%{opacity:1; filter:blur(0);} 100%{opacity:0; filter:blur(12px);} }
+  .dissolve { animation:dissolve 1.2s ease forwards; }
+</style>
+</head>
+<body>
+<canvas id="smoke"></canvas>
+<main>
+  <h1>LOST & FOUND 像水消失在水中</h1>
+  
+  <div id="broadcasts">加载中…</div>
+  <div style="display:flex; gap:0.5rem; margin-bottom:2rem;">
+    <input type="text" id="broadcast-input" placeholder="输入广播信息">
+    <button id="broadcast-send">发送</button>
+  </div>
+
+  <div id="lostfound">LOST & FOUND 像水消失在水中</div>
+</main>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-app.js";
+import { getFirestore, collection, addDoc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-firestore.js";
+
+// Firebase 初始化
+const firebaseConfig = {
+  apiKey: "AIzaSyCcerqGJVSsMwLs7eoRjATE8X7bplWsD54",
+  authDomain: "drunk-broadcast.firebaseapp.com",
+  projectId: "drunk-broadcast",
+  storageBucket: "drunk-broadcast.firebasestorage.app",
+  messagingSenderId: "998143016108",
+  appId: "1:998143016108:web:87c3a60b853aaf75f27309"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// 广播功能
+const inputEl = document.getElementById("broadcast-input");
+const sendBtn = document.getElementById("broadcast-send");
+const listEl = document.getElementById("broadcasts");
+const broadcastRef = collection(db, "broadcasts");
+const q = query(broadcastRef, orderBy("timestamp","desc"));
+
+sendBtn.addEventListener("click", async ()=> {
+  const text = inputEl.value.trim();
+  if(!text) return;
+  try { 
+    await addDoc(broadcastRef, { message: text, timestamp: new Date() }); 
+    inputEl.value = "";
+  } catch(e){ console.error(e); }
+});
+inputEl.addEventListener("keydown", e => { if(e.key==="Enter") sendBtn.click(); });
+onSnapshot(q, snapshot => {
+  listEl.innerHTML="";
+  snapshot.forEach(doc => {
+    const div = document.createElement("div");
+    div.textContent = doc.data().message;
+    listEl.appendChild(div);
+  });
+});
+
+// LOST & FOUND 点击溶解跳转
+const lostfound = document.getElementById("lostfound");
+lostfound.addEventListener("click", () => {
+  lostfound.classList.add("dissolve");
+  setTimeout(() => { window.location.href = "/drunk/"; }, 1200);
+});
+
+// 简单烟雾动画
+(function smokeEffect(){
+  const canvas = document.getElementById("smoke");
+  if(!canvas) return;
+  const ctx = canvas.getContext("2d");
+  let particles=[];
+  function resize(){ canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
+  window.addEventListener("resize",resize);
+  resize();
+
+  class P { constructor(){ this.x=Math.random()*canvas.width; this.y=canvas.height+Math.random()*50; this.alpha=Math.random()*0.3+0.1; this.size=Math.random()*3+1; this.vy=-(Math.random()*0.3+0.1);} update(){ this.y+=this.vy; if(this.y<0) this.y=canvas.height; } draw(){ ctx.fillStyle="rgba(200,200,200,"+this.alpha+")"; ctx.beginPath(); ctx.arc(this.x,this.y,this.size,0,Math.PI*2); ctx.fill();} }
+
+  for(let i=0;i<80;i++) particles.push(new P());
+
+  function animate(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    particles.forEach(p=>{ p.update(); p.draw(); });
+    requestAnimationFrame(animate);
+  }
+  animate();
+})();
+</script>
+</body>
+</html>
