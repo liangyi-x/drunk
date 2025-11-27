@@ -1,134 +1,180 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>LOST & FOUND</title>
-  <style>
-    body { margin:0; padding:0; background:#1f1f1f; color:#ddd; font-family:sans-serif; overflow:hidden; transition: filter 1.2s ease-in-out; }
-    .container { position:relative; z-index:1; max-width:800px; margin:0 auto; padding:2rem 1rem; opacity:0; transition:opacity 1.5s ease-in-out; }
-    .page-title { text-align:center; color:#fff; font-size:2.2rem; margin-bottom:1.5rem; }
-    .broadcast-input-wrapper { display:flex; gap:0.5rem; margin-bottom:1.5rem; }
-    #broadcast-input { flex:1; padding:0.5rem; border:none; border-radius:6px; background:rgba(255,255,255,0.08); color:#eee; }
-    #broadcast-send { padding:0.5rem 0.9rem; border:none; border-radius:6px; background:rgba(80,80,80,0.6); color:#fff; cursor:pointer; }
-    #broadcast-send:hover { background: rgba(100,100,100,0.8); }
-    .broadcast-list { display:flex; flex-direction:column; gap:0.8rem; }
-    .broadcast-card { background: rgba(255,255,255,0.05); padding:1rem; border-radius:8px; transition: all 0.3s ease; cursor:pointer; }
-    .broadcast-card:hover { transform: translateY(-4px); backdrop-filter: blur(8px); box-shadow:0 4px 16px rgba(0,0,0,0.5);}
-    .broadcast-card.dissolve { animation: cardFade 0.8s forwards; }
-    @keyframes cardFade { 0%{transform:rotate(0deg);opacity:1;}100%{transform:rotate(6deg);opacity:0;} }
-    .broadcast-message { font-size:1rem; margin-bottom:0.4rem; }
-    .broadcast-time { font-size:0.85rem; color:#aaa; text-align:right; }
-    #lostfound { text-align:center; margin:2rem 0; font-style:italic; color:rgba(200,200,200,0.7); cursor:pointer; transition:0.3s; }
-    #lostfound:hover { color:#7fffd4; }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Broadcast</title>
 
-    #spell-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.35); pointer-events:none; opacity:0; transition:opacity 1.2s ease-in-out; z-index:999; }
+<style>
+  body { margin:0; padding:0; background:#000; color:#fff; font-family:monospace; overflow:hidden;}
 
-    #vinyl-container { position:absolute; top:50%; left:50%; transform:translate(-50%, -50%) scale(0.8); width:200px; height:200px; opacity:0; }
-    .vinyl-ring { position:absolute; border-radius:50%; top:50%; left:50%; transform:translate(-50%, -50%); }
-    #outer-ring { width:200px; height:200px; background:#001f3f; }
-    #middle-ring { width:160px; height:160px; background:#000; }
-    #inner-ring { width:60px; height:60px; background:#fff; }
-    #vinyl-text { text-align:center; color:#ffe0b2; font-size:1rem; margin-top:8px; opacity:0; transition:opacity 0.5s ease-in-out; }
+  #lostfound {
+    position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%);
+    font-size: 24px; cursor:pointer;
+  }
 
-    #people-text { position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); color:#330000; font-size:1.6rem; font-weight:bold; text-shadow:0 0 12px #440000; opacity:0; transition: opacity 0.8s ease-in-out; }
+  #spell-overlay {
+    position:fixed; inset:0; background:#000; opacity:0; transition:1s;
+    pointer-events:none;
+  }
 
-    #wave { position:absolute; bottom:0; left:0; width:100%; height:80px; background:#001f3f; border-top-left-radius:50% 20px; border-top-right-radius:50% 20px; transform:translateY(100%); opacity:0; }
-  </style>
+  /* 三层黑胶 */
+  #vinyl-container {
+    position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+    width:220px; height:220px; opacity:0;
+  }
+  .ring {
+    position:absolute; inset:0; border-radius:50%; border:3px solid #fff2;
+    animation: spin 5s linear infinite;
+  }
+  .ring.mid {
+    inset:20px; animation-duration:7s;
+  }
+  .ring.inner {
+    inset:40px; animation-duration:9s;
+  }
+  @keyframes spin {
+    from {transform: rotate(0deg);}
+    to   {transform: rotate(360deg);}
+  }
+
+  #vinyl-text {
+    position:absolute; top: calc(50% + 150px); left:50%; transform:translateX(-50%);
+    font-size:20px; opacity:0; transition:1s;
+  }
+
+  #people-text {
+    position:absolute; top:45%; left:50%; transform:translate(-50%, -50%);
+    font-size:28px; letter-spacing:1px;
+    opacity:0; transition:1.2s;
+  }
+
+  /* 海浪 */
+  #wave {
+    position:absolute; bottom:0; width:100%; height:180px;
+    opacity:0; background:url("../wave.svg") repeat-x bottom;
+    background-size:contain;
+    transition:1s;
+  }
+
+  /* 广播区域 */
+  #broadcast {
+    position:absolute; bottom:20px; left:50%; transform:translateX(-50%);
+    width:90%; max-width:480px;
+  }
+
+  #list {
+    margin-top:10px; font-size:14px; line-height:1.6;
+    max-height:200px; overflow:auto;
+  }
+
+  input {
+    width:100%; padding:8px; margin-top:5px;
+    background:#111; border:1px solid #333; color:#fff;
+  }
+
+  button {
+    width:100%; padding:8px; margin-top:5px;
+    background:#333; border:0; color:#fff; cursor:pointer;
+  }
+  button:hover { background:#444; }
+</style>
+
 </head>
 <body>
-  <div class="container" id="main-container">
-    <h1 class="page-title">LOST & FOUND</h1>
-    <div class="broadcast-input-wrapper">
-      <input type="text" id="broadcast-input" placeholder="it hasn't passed…"/>
-      <button id="broadcast-send">See you Sunday？</button>
-    </div>
-    <div class="broadcast-list" id="broadcasts"></div>
-    <div id="lostfound">在不可能之海里</div>
-  </div>
 
-  <div id="spell-overlay">
-    <div id="vinyl-container">
-      <div class="vinyl-ring" id="outer-ring"></div>
-      <div class="vinyl-ring" id="middle-ring"></div>
-      <div class="vinyl-ring" id="inner-ring"></div>
-      <div id="vinyl-text">Tomorrow is another day</div>
-    </div>
-    <div id="people-text">People make mistakes.</div>
-    <div id="wave"></div>
-  </div>
+<div id="lostfound">点击触发魔法</div>
 
-  <script>
-    window.addEventListener("load", ()=> {
-      document.getElementById("main-container").style.opacity = "1";
-    });
+<div id="spell-overlay"></div>
 
-    document.getElementById("lostfound").onclick = () => {
-      const spellOverlay = document.getElementById("spell-overlay");
-      const vinylContainer = document.getElementById("vinyl-container");
-      const vinylText = document.getElementById("vinyl-text");
-      const peopleText = document.getElementById("people-text");
-      const wave = document.getElementById("wave");
+<div id="vinyl-container">
+  <div class="ring"></div>
+  <div class="ring mid"></div>
+  <div class="ring inner"></div>
+</div>
 
-      spellOverlay.style.opacity = "1";
-      vinylContainer.style.opacity = "1";
-      wave.style.opacity = "1";
-      wave.style.transform = "translateY(0)";
+<div id="vinyl-text">Tomorrow is waiting for you.</div>
+<div id="people-text">People always meet again.</div>
 
-      const duration = 3600;
-      let start = null;
-      let wavePhase = 0;
+<div id="wave"></div>
 
-      function animateFrame(t) {
-        if (!start) start = t;
-        const progress = Math.min((t - start) / duration, 1);
-        const rotation = 360 * progress;
-        const scale = 0.8 + 0.2 * progress;
-        vinylContainer.style.transform = `translate(-50%, -50%) scale(${scale}) rotate(${rotation}deg)`;
-        // 海浪同步轻微波动
-        wave.style.transform = `translateY(${Math.sin(wavePhase) * 6}px)`;
-        wavePhase += 0.06;
+<!-- 广播 -->
+<div id="broadcast">
+  <input id="msgInput" placeholder="写点什么…">
+  <button onclick="postMsg()">发广播</button>
+  <div id="list"></div>
+</div>
 
-        if (progress < 1) {
-          requestAnimationFrame(animateFrame);
-        }
-      }
-      requestAnimationFrame(animateFrame);
+<script>
+/* ============ 魔法动画 ============ */
 
-      vinylText.style.opacity = "1";
+const lostfound = document.getElementById("lostfound");
+const spellOverlay = document.getElementById("spell-overlay");
+const vinylContainer = document.getElementById("vinyl-container");
+const vinylText = document.getElementById("vinyl-text");
+const peopleText = document.getElementById("people-text");
+const wave = document.getElementById("wave");
 
+lostfound.onclick = () => {
+  lostfound.style.opacity="0";
+
+  spellOverlay.style.opacity="1";
+  vinylContainer.style.opacity="1";
+  vinylText.style.opacity="1";
+  wave.style.opacity="1";
+
+  /* 显示 Tomorrow */
+  setTimeout(()=>{
+    vinylText.style.opacity="0";
+
+    /* 黑胶淡出 */
+    vinylContainer.style.transition="1s";
+    wave.style.transition="1s";
+    vinylContainer.style.opacity="0";
+    wave.style.opacity="0";
+
+    /* people 显示 */
+    setTimeout(()=>{
+      peopleText.style.opacity="1";
+
+      /* people 淡出并跳主页 */
       setTimeout(()=>{
-        // 淡出黑胶和海浪
-        const fadeDur = 800;
-        let fadeStart = performance.now();
-        function fadeFrame(t2) {
-          const prog = Math.min((t2 - fadeStart) / fadeDur, 1);
-          const rot = 360 + 360 * prog;
-          const sc = 1 - 0.3 * prog;
-          const op = 1 - prog;
-          vinylContainer.style.transform = `translate(-50%, -50%) scale(${sc}) rotate(${rot}deg)`;
-          vinylContainer.style.opacity = op;
-          wave.style.opacity = op;
-          if (prog < 1) {
-            requestAnimationFrame(fadeFrame);
-          }
-        }
-        requestAnimationFrame(fadeFrame);
-        vinylText.style.opacity = "0";
-
+        peopleText.style.opacity="0";
+        spellOverlay.style.opacity="0";
         setTimeout(()=>{
-          peopleText.style.opacity = "1";
-          setTimeout(()=>{
-            spellOverlay.style.opacity = "0";
-            peopleText.style.opacity = "0";
-          }, 1800);
+          window.location.href = "https://liangyi-x.github.io/drunk/";
+        },900);
 
-          setTimeout(()=>{ window.location.href = window.location.href; }, 2400);
+      },1800);
 
-        }, fadeDur);
+    },1000);
 
-      }, duration);
-    };
-  </script>
+  },1800);
+};
+
+
+/* ============ 广播系统（本地存储） ============ */
+
+function loadMsg(){
+  const arr = JSON.parse(localStorage.getItem("broadcast") || "[]");
+  const list = document.getElementById("list");
+  list.innerHTML = arr.map(t=>`<div>· ${t}</div>`).join("");
+}
+
+function postMsg(){
+  const input = document.getElementById("msgInput");
+  const text = input.value.trim();
+  if(!text) return;
+
+  const arr = JSON.parse(localStorage.getItem("broadcast") || "[]");
+  arr.unshift(text);
+  localStorage.setItem("broadcast", JSON.stringify(arr));
+
+  input.value="";
+  loadMsg();
+}
+
+loadMsg();
+</script>
 </body>
 </html>
