@@ -12,7 +12,7 @@ body { margin:0; padding:0; background:#1f1f1f; color:#ddd; font-family:sans-ser
 #broadcast-input { flex:1; padding:0.5rem; border:none; border-radius:6px; background:rgba(255,255,255,0.08); color:#eee; }
 #broadcast-send { padding:0.5rem 0.9rem; border:none; border-radius:6px; background:rgba(80,80,80,0.6); color:#fff; cursor:pointer; }
 #broadcast-send:hover { background: rgba(100,100,100,0.8); }
-.broadcast-list { display:flex; flex-direction:column; gap:0.8rem; }
+.broadcast-list { display:flex; flex-direction:column; gap:0.8rem; max-height:300px; overflow-y:auto; }
 .broadcast-card { background: rgba(255,255,255,0.05); padding:1rem; border-radius:8px; transition: all 0.3s ease; cursor:pointer; }
 .broadcast-card:hover { transform: translateY(-4px); backdrop-filter: blur(8px); box-shadow:0 4px 16px rgba(0,0,0,0.5);}
 .broadcast-card.dissolve { animation: cardFade 0.8s forwards; }
@@ -29,19 +29,20 @@ body { margin:0; padding:0; background:#1f1f1f; color:#ddd; font-family:sans-ser
 #outer-ring { width:200px; height:200px; background:#001f3f; }
 #middle-ring { width:160px; height:160px; background:#000; }
 #inner-ring { width:60px; height:60px; background:#fff; }
-#vinyl-text { text-align:center; color:#ffe0b2; font-size:1rem; margin-top:8px; opacity:0; transition:opacity 0.5s ease-in-out; }
+#vinyl-text { position:absolute; bottom:-25px; width:100%; text-align:center; color:#ffe0b2; font-size:1rem; opacity:0; transition:opacity 0.5s ease-in-out; }
 
-#people-text { position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); color:#330000; font-size:1.8rem; font-weight:bold; text-shadow:0 0 6px #440000,0 0 12px #220000; opacity:0; transition: opacity 0.5s ease-in-out; animation: floatText 2s ease-in-out infinite alternate; }
+#people-text { position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); font-size:1.8rem; font-weight:bold; opacity:0; text-align:center; background: linear-gradient(90deg,#330000,#550000,#330000); -webkit-background-clip:text; color:transparent; text-shadow:0 0 6px #440000,0 0 12px #220000; animation: floatText 2s ease-in-out infinite alternate, bloodFlow 3s linear infinite;}
 @keyframes floatText { 0%{transform:translate(-50%,-50%);} 50%{transform:translate(-50%,-48%);} 100%{transform:translate(-50%,-50%);} }
+@keyframes bloodFlow { 0%{background-position:0 0;} 100%{background-position:100% 0;} }
 
-#wave { position:absolute; bottom:0; left:0; width:100%; height:80px; background:#001f3f; border-top-left-radius:50% 20px; border-top-right-radius:50% 20px; transform:translateY(100%); opacity:0; }
+#wave { position:absolute; bottom:0; left:0; width:100%; height:80px; background:#001f3f; border-top-left-radius:50% 20px; border-top-right-radius:50% 20px; transform:translateY(100%); opacity:0; transition:opacity 1s;}
 </style>
 </head>
 <body>
 <div class="container" id="main-container">
   <h1 class="page-title">LOST & FOUND</h1>
   <div class="broadcast-input-wrapper">
-    <input type="text" id="broadcast-input" placeholder="it hasn't passed…"/>
+    <input type="text" id="broadcast-input" placeholder="it hasn't pass…"/>
     <button id="broadcast-send">See you Sunday？</button>
   </div>
   <div class="broadcast-list" id="broadcasts"></div>
@@ -60,7 +61,7 @@ body { margin:0; padding:0; background:#1f1f1f; color:#ddd; font-family:sans-ser
 </div>
 
 <script type="module">
-// Firebase 广播功能
+// Firebase 广播功能保持
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-app.js";
 import { getFirestore, collection, addDoc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-firestore.js";
 const firebaseConfig = { apiKey:"AIzaSyCcerqGJVSsMwLs7eoRjATE8X7bplWsD54", authDomain:"drunk-broadcast.firebaseapp.com", projectId:"drunk-broadcast", storageBucket:"drunk-broadcast.firebasestorage.app", messagingSenderId:"998143016108", appId:"1:998143016108:web:87c3a60b853aaf75f27309" };
@@ -70,15 +71,33 @@ const ref = collection(db,"broadcasts");
 const inputEl = document.getElementById("broadcast-input");
 const sendBtn = document.getElementById("broadcast-send");
 const listEl = document.getElementById("broadcasts");
-sendBtn.onclick=async()=>{const v=inputEl.value.trim(); if(!v) return; await addDoc(ref,{message:v,timestamp:new Date()}); inputEl.value="";};
+
+sendBtn.onclick=async()=>{
+  const v=inputEl.value.trim(); 
+  if(!v) return; 
+  await addDoc(ref,{message:v,timestamp:new Date()}); 
+  inputEl.value="";
+};
+
 inputEl.addEventListener("keydown",e=>{if(e.key==="Enter") sendBtn.click();});
+
 const q=query(ref,orderBy("timestamp","desc"));
-onSnapshot(q,snap=>{listEl.innerHTML=""; snap.forEach(doc=>{const data=doc.data(); const d=document.createElement("div"); d.className="broadcast-card"; d.innerHTML=`<div class="broadcast-message">${data.message}</div><div class="broadcast-time">${data.timestamp.toDate().toLocaleString()}</div>`; d.onclick=()=>d.classList.add("dissolve"); listEl.appendChild(d);});});
+onSnapshot(q,snap=>{
+  listEl.innerHTML="";
+  snap.forEach(doc=>{
+    const data=doc.data(); 
+    const d=document.createElement("div"); 
+    d.className="broadcast-card"; 
+    d.innerHTML=`<div class="broadcast-message">${data.message}</div><div class="broadcast-time">${data.timestamp.toDate().toLocaleString()}</div>`; 
+    d.onclick=()=>d.classList.add("dissolve"); 
+    listEl.appendChild(d);
+  });
+});
+
 window.addEventListener("load",()=>{document.getElementById("main-container").style.opacity="1";});
 </script>
 
 <script>
-// 黑胶旋转+海浪+people文字效果
 const lostfound = document.getElementById("lostfound");
 const spellOverlay = document.getElementById("spell-overlay");
 const vinylContainer = document.getElementById("vinyl-container");
@@ -132,11 +151,13 @@ lostfound.onclick = () => {
       // people文字显示
       peopleText.style.opacity="1";
       setTimeout(()=>{
-        spellOverlay.style.opacity="0";
+        // 完整淡出回主页
         peopleText.style.opacity="0";
+        spellOverlay.style.opacity="0";
+        wave.style.opacity="0";
+        vinylContainer.style.opacity="0";
+        setTimeout(()=>{ window.location.href = window.location.href; },800);
       },1800);
-
-      setTimeout(()=>{ window.location.href = window.location.href; },2400);
 
     }, fadeDur);
 
