@@ -198,6 +198,38 @@
 <!-- Footer -->
 <div class="global-footer">LOST & FOUND 像水消失在水中</div>
 
+<!-- LOST & FOUND clickable -->
+<div id="lostfound"
+     style="cursor:pointer; text-align:center; margin-top:2rem;">
+  LOST & FOUND 像水消失在水中
+</div>
+
+<style>
+/* 溶解动画 */
+@keyframes dissolve {
+  0% { opacity: 1; filter: blur(0px); }
+  100% { opacity: 0; filter: blur(12px); }
+}
+
+.dissolve {
+  animation: dissolve 1.2s ease forwards;
+}
+</style>
+
+<script>
+document.getElementById("lostfound").addEventListener("click", function () {
+  const el = this;
+  el.classList.add("dissolve");
+
+  // 动画结束后跳转
+  setTimeout(() => {
+    window.location.href = "/drunk/broadcast--index/";
+  }, 1200);
+});
+</script>
+
+
+
 <!-- ✦ 弹窗订阅 ✦ -->
 <div style="text-align:center;">
   <div class="subscribe-button">Get updates from my site</div>
@@ -356,39 +388,6 @@ It'll pass
 `}}
 {{ $fire | safeHTML }}
 {{ end }}
-
-<!-- LOST & FOUND clickable animation -->
-<div class="global-footer" id="lostfound" style="cursor:pointer; text-align:center; margin-top:2rem;">
-  LOST & FOUND 像水消失在水中
-</div>
-
-<style>
-  .dissolve {
-    animation: dissolveAnim 0.8s forwards;
-  }
-  @keyframes dissolveAnim {
-    0% {opacity:1; transform:scale(1);}
-    100% {opacity:0; transform:scale(0.3) rotate(10deg);}
-  }
-</style>
-
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  const lf = document.getElementById("lostfound");
-  if (!lf) return;
-
-  lf.addEventListener("click", () => {
-    lf.classList.add("dissolve");
-
-    // 使用 Hugo 路径，确保不 404
-    const url = "{{ "/broadcast--index/" | relURL }}";
-
-    setTimeout(() => {
-      window.location.href = url;
-    }, 800);
-  });
-});
-</script>
 
 
 {{ end }}
