@@ -5,48 +5,33 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LOST & FOUND</title>
 <style>
-body {
-  margin:0; padding:0;
-  background:#1f1f1f;
-  color:#ddd;
-  font-family:sans-serif;
-  overflow-x:hidden;
-  transition: all 3s ease-out;
-}
+body { margin:0; padding:0; background:#1f1f1f; color:#ddd; font-family:sans-serif; overflow-x:hidden; }
 .container { position:relative; z-index:1; max-width:800px; margin:0 auto; padding:2rem 1rem; }
 .page-title { text-align:center; color:#fff; font-size:2.2rem; margin-bottom:1.5rem; }
-
-.broadcast-input-wrapper {
-  display:flex; gap:0.5rem; margin-bottom:1.5rem;
-}
+.broadcast-input-wrapper { display:flex; gap:0.5rem; margin-bottom:1.5rem; }
 #broadcast-input { flex:1; padding:0.5rem; border:none; border-radius:6px; background:rgba(255,255,255,0.08); color:#eee; }
 #broadcast-send { padding:0.5rem 0.9rem; border:none; border-radius:6px; background:rgba(80,80,80,0.6); color:#fff; cursor:pointer; }
 #broadcast-send:hover { background: rgba(100,100,100,0.8); }
-
 .broadcast-list { display:flex; flex-direction:column; gap:0.8rem; }
 .broadcast-card { background: rgba(255,255,255,0.05); padding:1rem; border-radius:8px; transition: all 0.3s ease; cursor:pointer; }
 .broadcast-card:hover { transform: translateY(-4px); backdrop-filter: blur(8px); box-shadow:0 4px 16px rgba(0,0,0,0.5);}
 .broadcast-card.dissolve { animation: cardFade 0.8s forwards; }
 @keyframes cardFade { 0%{transform:rotate(0deg);opacity:1;}100%{transform:rotate(6deg);opacity:0;} }
-
 .broadcast-message { font-size:1rem; margin-bottom:0.4rem; }
 .broadcast-time { font-size:0.85rem; color:#aaa; text-align:right; }
-
 #lostfound { text-align:center; margin:2rem 0; font-style:italic; color:rgba(200,200,200,0.7); cursor:pointer; }
-
 #spell-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.35); pointer-events:none; opacity:0; transition:opacity 0.4s ease-out; z-index:999; }
-#float-text { position:absolute; top:50%; left:50%; transform:translate(-50%,0); color:#7fffd4; font-size:1.6rem; text-shadow:0 0 15px #0ff,0 0 25px #0ff; opacity:0; transition:opacity 0.8s ease-out, transform 0.8s ease-out; }
-#spell-text { position:absolute; top:calc(50% + 80px); left:50%; transform:translate(-50%,0); color:#e7f5ff; font-size:1.8rem; text-shadow:0 0 20px #aaf; opacity:0; transition:opacity 0.8s ease-out, transform 0.8s ease-out; }
-
+#record-container { position:absolute; top:50%; left:50%; width:260px; height:260px; transform:translate(-50%,-50%); border-radius:50%; background:radial-gradient(circle, #222 60%, #000 100%); box-shadow:0 0 20px #0ff; opacity:0; }
+#record-label { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); color:#7fffd4; font-size:1.4rem; text-align:center; text-shadow:0 0 10px #0ff; opacity:0; }
+#spell-text { position:absolute; top:calc(50% + 150px); left:50%; transform:translate(-50%,0); color:#e7f5ff; font-size:1.8rem; text-shadow:0 0 20px #aaf; opacity:0; transition:opacity 0.8s ease-out, transform 0.8s ease-out; }
 #spell-rune { width:10px; height:10px; position:absolute; border-radius:50%; pointer-events:none; box-shadow:0 0 10px #0ff; opacity:0; }
 </style>
 </head>
 <body>
-
 <div class="container">
   <h1 class="page-title">LOST & FOUND</h1>
   <div class="broadcast-input-wrapper">
-    <input type="text" id="broadcast-input" placeholder="it hasn't pass..."/>
+    <input type="text" id="broadcast-input" placeholder="it hasn't pass……"/>
     <button id="broadcast-send">See you Sunday？</button>
   </div>
   <div class="broadcast-list" id="broadcasts"></div>
@@ -54,110 +39,73 @@ body {
 </div>
 
 <div id="spell-overlay">
-  <div id="float-text">Tomorrow is another day</div>
+  <div id="record-container"></div>
+  <div id="record-label">Tomorrow is another day</div>
 </div>
 
-<!-- Firebase 广播脚本 -->
 <script type="module">
+// Firebase 广播功能
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-app.js";
 import { getFirestore, collection, addDoc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyCcerqGJVSsMwLs7eoRjATE8X7bplWsD54",
-  authDomain: "drunk-broadcast.firebaseapp.com",
-  projectId: "drunk-broadcast",
-  storageBucket: "drunk-broadcast.firebasestorage.app",
-  messagingSenderId: "998143016108",
-  appId: "1:998143016108:web:87c3a60b853aaf75f27309"
-};
-
+const firebaseConfig = { apiKey:"AIzaSyCcerqGJVSsMwLs7eoRjATE8X7bplWsD54", authDomain:"drunk-broadcast.firebaseapp.com", projectId:"drunk-broadcast", storageBucket:"drunk-broadcast.firebasestorage.app", messagingSenderId:"998143016108", appId:"1:998143016108:web:87c3a60b853aaf75f27309" };
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-const ref = collection(db, "broadcasts");
-
+const ref = collection(db,"broadcasts");
 const inputEl = document.getElementById("broadcast-input");
 const sendBtn = document.getElementById("broadcast-send");
 const listEl = document.getElementById("broadcasts");
-
-sendBtn.onclick = async () => {
-  const v = inputEl.value.trim();
-  if(!v) return;
-  await addDoc(ref, { message:v, timestamp:new Date() });
-  inputEl.value="";
-};
-inputEl.addEventListener("keydown", e=>{if(e.key==="Enter") sendBtn.click();});
-
-const q = query(ref, orderBy("timestamp","desc"));
-onSnapshot(q,snap=>{
-  listEl.innerHTML="";
-  snap.forEach(doc=>{
-    const data = doc.data();
-    const d = document.createElement("div");
-    d.className="broadcast-card";
-    d.innerHTML=`<div class="broadcast-message">${data.message}</div>
-                 <div class="broadcast-time">${data.timestamp.toDate().toLocaleString()}</div>`;
-    d.onclick=()=>d.classList.add("dissolve");
-    listEl.appendChild(d);
-  });
-});
+sendBtn.onclick=async()=>{const v=inputEl.value.trim(); if(!v) return; await addDoc(ref,{message:v,timestamp:new Date()}); inputEl.value="";};
+inputEl.addEventListener("keydown",e=>{if(e.key==="Enter") sendBtn.click();});
+const q=query(ref,orderBy("timestamp","desc"));
+onSnapshot(q,snap=>{listEl.innerHTML=""; snap.forEach(doc=>{const data=doc.data(); const d=document.createElement("div"); d.className="broadcast-card"; d.innerHTML=`<div class="broadcast-message">${data.message}</div><div class="broadcast-time">${data.timestamp.toDate().toLocaleString()}</div>`; d.onclick=()=>d.classList.add("dissolve"); listEl.appendChild(d);});});
 </script>
 
-<!-- 魔法荧光动画 -->
 <script>
+// 魔法粒子和留声机效果
 const spellOverlay = document.getElementById("spell-overlay");
-const floatText = document.getElementById("float-text");
+const record = document.getElementById("record-container");
+const label = document.getElementById("record-label");
 
 function spawnRunes(count=25){
   for(let i=0;i<count;i++){
     const rune = document.createElement("div");
-    const size = 6+Math.random()*12;
-    rune.style.width = rune.style.height = size+"px";
-    rune.style.borderRadius = "50%";
-    rune.style.position = "absolute";
-    rune.style.top = Math.random()*100+"%";
-    rune.style.left = Math.random()*100+"%";
-    rune.style.opacity = "0";
-    rune.style.background = `radial-gradient(circle, hsl(${Math.random()*360},100%,75%), hsl(${Math.random()*360},80%,50%))`;
-    rune.style.boxShadow = `0 0 ${5+Math.random()*10}px #0ff`;
+    const size=6+Math.random()*12;
+    rune.style.width=rune.style.height=size+"px";
+    rune.style.borderRadius="50%";
+    rune.style.position="absolute";
+    rune.style.top=Math.random()*100+"%";
+    rune.style.left=Math.random()*100+"%";
+    rune.style.opacity="0";
+    rune.style.background=`radial-gradient(circle, hsl(${Math.random()*360},100%,75%), hsl(${Math.random()*360},80%,50%))`;
+    rune.style.boxShadow=`0 0 ${5+Math.random()*10}px #0ff`;
     document.body.appendChild(rune);
-
     setTimeout(()=>{rune.style.opacity="1";},Math.random()*300);
 
     const colorAnim = setInterval(()=>{
-      rune.style.background = `radial-gradient(circle, hsl(${Math.random()*360},100%,75%), hsl(${Math.random()*360},80%,50%))`;
-      rune.style.boxShadow = `0 0 ${5+Math.random()*10}px #0ff`;
+      rune.style.background=`radial-gradient(circle, hsl(${Math.random()*360},100%,75%), hsl(${Math.random()*360},80%,50%))`;
+      rune.style.boxShadow=`0 0 ${5+Math.random()*10}px #0ff`;
     },400+Math.random()*600);
 
-    const amplitudeX = (Math.random()-0.5)*80;
-    const amplitudeY = (Math.random()-0.5)*80;
-    const rotate = (Math.random()-0.5)*20;
-    rune.animate([
-      {transform:`translate(0,0) rotate(0deg)`},
-      {transform:`translate(${amplitudeX}px, ${amplitudeY}px) rotate(${rotate}deg)`},
-      {transform:`translate(0,0) rotate(0deg)`}
-    ],{duration:4000+Math.random()*4000, iterations:Infinity, easing:'ease-in-out'});
-
+    const amplitudeX=(Math.random()-0.5)*80;
+    const amplitudeY=(Math.random()-0.5)*80;
+    const rotate=(Math.random()-0.5)*20;
+    rune.animate([{transform:`translate(0,0) rotate(0deg)`},{transform:`translate(${amplitudeX}px,${amplitudeY}px) rotate(${rotate}deg)`},{transform:`translate(0,0) rotate(0deg)`}],{duration:4000+Math.random()*4000,iterations:Infinity,easing:'ease-in-out'});
     rune.animate([{transform:'translateY(0px)'},{transform:'translateY(-5px)'},{transform:'translateY(0px)'},{transform:'translateY(5px)'},{transform:'translateY(0px)'}],{duration:2500+Math.random()*1000,iterations:Infinity,easing:'ease-in-out'});
 
-    setTimeout(()=>{
-      rune.remove();
-      clearInterval(colorAnim);
-    },8000);
+    setTimeout(()=>{rune.remove(); clearInterval(colorAnim);},8000);
   }
 }
 
 document.getElementById("lostfound").onclick=()=>{
   spellOverlay.style.opacity="1";
-  floatText.style.opacity="1";
-  floatText.style.transform="translate(-50%,-20px)";
-  floatText.animate([{transform:'translate(-50%,-20px)'},{transform:'translate(-50%,-25px)'},{transform:'translate(-50%,-20px)'},{transform:'translate(-50%,-15px)'},{transform:'translate(-50%,-20px)'}],{duration:2200,iterations:Infinity,easing:'ease-in-out'});
-
+  record.style.opacity="1";
+  label.style.opacity="1";
   spawnRunes(25);
   document.body.style.filter="blur(1.5px) brightness(0.85)";
 
   setTimeout(()=>{
-    floatText.style.opacity="0";
-    const spellText = document.createElement("div");
+    label.style.opacity="0";
+    const spellText=document.createElement("div");
     spellText.id="spell-text";
     spellText.textContent="People make mistakes.";
     spellOverlay.appendChild(spellText);
