@@ -1,0 +1,167 @@
+{{ define "main" }}
+
+<style>
+/* 页面基础样式 */
+body {
+  background-color: #d6d6d6;
+  color: #fff;
+  font-family: sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+/* LOST & FOUND 标题 */
+#lostfound-title {
+  text-align: center;
+  font-size: 3rem;
+  color: #fff;
+  font-weight: normal;
+  margin: 3rem 0 2rem 0;
+}
+
+/* 广播列表容器 */
+#broadcast-wrapper {
+  max-width: 600px;
+  margin: 0 auto;
+  background: rgba(255,255,255,0.05);
+  padding: 1rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  color: #222;
+  font-size: 1rem;
+}
+
+/* 单条广播 */
+.broadcast-item {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+/* 输入框和发送按钮 */
+#broadcast-input {
+  width: calc(100% - 70px);
+  padding: 0.4rem;
+  border-radius: 4px;
+  border: none;
+  margin-right: 0.5rem;
+}
+#broadcast-send {
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+  border: none;
+  background: #222;
+  color: #fff;
+  cursor: pointer;
+}
+
+/* 雾雨效果 */
+#mist {
+  position: fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  pointer-events:none;
+  z-index:0;
+}
+</style>
+
+<h1 id="lostfound-title">LOST & FOUND</h1>
+
+<div id="broadcast-wrapper">
+  <div id="broadcasts">加载中…</div>
+  <div style="margin-top:0.5rem; display:flex; gap:0.3rem;">
+    <input type="text" id="broadcast-input" placeholder="输入广播信息">
+    <button id="broadcast-send">发送</button>
+  </div>
+</div>
+
+<canvas id="mist"></canvas>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-app.js";
+import { getFirestore, collection, addDoc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-firestore.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCcerqGJVSsMwLs7eoRjATE8X7bplWsD54",
+  authDomain: "drunk-broadcast.firebaseapp.com",
+  projectId: "drunk-broadcast",
+  storageBucket: "drunk-broadcast.firebasestorage.app",
+  messagingSenderId: "998143016108",
+  appId: "1:998143016108:web:87c3a60b853aaf75f27309"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+// 匿名登录
+signInAnonymously(auth).catch(console.error);
+
+const broadcastRef = collection(db, "broadcasts");
+const inputEl = document.getElementById("broadcast-input");
+const sendBtn = document.getElementById("broadcast-send");
+const listEl = document.getElementById("broadcasts");
+
+// 发送广播
+sendBtn.addEventListener("click", async ()=>{
+  const text = inputEl.value.trim();
+  if(!text) return;
+  try{
+    await addDoc(broadcastRef,{message:text,timestamp:new Date()});
+    inputEl.value="";
+  } catch(e){ console.error("发送广播失败:",e); }
+});
+inputEl.addEventListener("keydown",e=>{if(e.key==="Enter") sendBtn.click();});
+
+// 监听广播
+const q = query(broadcastRef, orderBy("timestamp","desc"));
+onSnapshot(q, snapshot=>{
+  listEl.innerHTML = "";
+  snapshot.forEach(doc=>{
+    const div = document.createElement("div");
+    div.className = "broadcast-item";
+    div.textContent = doc.data().message;
+    listEl.appendChild(div);
+  });
+}, error=>{ console.error("监听失败", error); listEl.textContent="加载失败"; });
+
+// 雾雨动画
+const canvas = document.getElementById("mist");
+const ctx = canvas.getContext("2d");
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+class MistParticle {
+  constructor() {
+    this.reset();
+  }
+  reset() {
+    this.x = Math.random()*canvas.width;
+    this.y = Math.random()*canvas.height;
+    this.radius = 1 + Math.random()*3;
+    this.alpha = 0.05 + Math.random()*0.05;
+    this.vx = (Math.random()-0.5)*0.3;
+    this.vy = (Math.random()-0.5)*0.3;
+  }
+  update() {
+    this.x += this.vx; this.y += this.vy;
+    if(this.x <0 || this.x>canvas.width || this.y<0 || this.y>canvas.height) this.reset();
+  }
+  draw() {
+    ctx.beginPath();
+    ctx.arc(this.x,this.y,this.radius,0,Math.PI*2);
+    ctx.fillStyle = `rgba(200,200,200,${this.alpha})`;
+    ctx.fill();
+  }
+}
+
+const particles = Array.from({length: 200}, ()=>new MistParticle());
+function animate(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  particles.forEach(p=>{ p.update(); p.draw(); });
+  requestAnimationFrame(animate);
+}
+animate();
+
+</script>
+
+{{ end }}
