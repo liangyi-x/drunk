@@ -20,25 +20,17 @@ body { margin:0; padding:0; background:#1f1f1f; color:#ddd; font-family:sans-ser
 .broadcast-message { font-size:1rem; margin-bottom:0.4rem; }
 .broadcast-time { font-size:0.85rem; color:#aaa; text-align:right; }
 #lostfound { text-align:center; margin:2rem 0; font-style:italic; color:rgba(200,200,200,0.7); cursor:pointer; transition:0.3s; }
-#lostfound:hover { color:#FFA500; }
+#lostfound:hover { color:#7fffd4; }
 
 #spell-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.35); pointer-events:none; opacity:0; transition:opacity 1.2s ease-in-out; z-index:999; }
 
-#fox-container { position:absolute; bottom:20%; width:80px; height:50px; opacity:0; display:flex; flex-direction:column; align-items:center; justify-content:center; transition: opacity 0.5s ease-in-out; }
-
-#fox-svg { width:80px; height:50px; }
-#fox-text { position:absolute; top:-25px; left:50%; transform:translateX(-50%); color:#ffe0b2; font-size:1rem; font-weight:bold; text-shadow:0 0 6px #FFA500; opacity:0; transition: opacity 0.5s ease-in-out;}
-@keyframes foxWalk { 0% { transform: translateX(-100px); } 100% { transform: translateX(100vw); } }
-
-@keyframes legMove {
-  0%,100%{ transform: translateY(0px); }
-  25%{ transform: translateY(-3px); }
-  50%{ transform: translateY(0px); }
-  75%{ transform: translateY(3px); }
-}
-#fox-leg { width:100%; height:5px; background:#FF8C42; position:absolute; bottom:5px; border-radius:2px; animation:legMove 0.5s infinite alternate;}
+#vinyl-container { position:absolute; top:50%; left:50%; transform:translate(-50%, -50%) scale(0.8); width:200px; height:200px; opacity:0; }
+#vinyl { width:100%; height:100%; border-radius:50%; background: conic-gradient(#001f3f 0% 70%, #000 70% 90%, #fff 90% 100%); }
+#vinyl-text { text-align:center; color:#ffe0b2; font-size:1rem; margin-top:8px; opacity:0; transition:opacity 0.5s ease-in-out; }
 
 #people-text { position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); color:#8B0000; font-size:1.4rem; font-weight:bold; text-shadow:0 0 10px #4B0000; opacity:0; transition: opacity 0.8s ease-in-out;}
+
+#wave { position:absolute; bottom:0; left:0; width:100%; height:80px; background: #001f3f; border-top-left-radius:50% 20px; border-top-right-radius:50% 20px; transform:translateY(100%); opacity:0; transition:opacity 1s ease-in-out, transform 1s ease-in-out;}
 </style>
 </head>
 <body>
@@ -53,18 +45,12 @@ body { margin:0; padding:0; background:#1f1f1f; color:#ddd; font-family:sans-ser
 </div>
 
 <div id="spell-overlay">
-  <div id="fox-container">
-    <svg id="fox-svg" viewBox="0 0 80 50">
-      <ellipse cx="30" cy="35" rx="20" ry="10" fill="#FF8C42"/>
-      <circle cx="50" cy="25" r="12" fill="#FF8C42"/>
-      <polygon points="45,10 50,25 40,20" fill="#FF8C42"/>
-      <polygon points="60,10 55,25 65,20" fill="#FF8C42"/>
-      <path d="M65 35 Q75 25 70 40" fill="#FF8C42"/>
-    </svg>
-    <div id="fox-text">Tomorrow is another day</div>
-    <div id="fox-leg"></div>
+  <div id="vinyl-container">
+    <div id="vinyl"></div>
+    <div id="vinyl-text">Tomorrow is another day</div>
   </div>
   <div id="people-text">People make mistakes.</div>
+  <div id="wave"></div>
 </div>
 
 <script type="module">
@@ -86,40 +72,49 @@ window.addEventListener("load",()=>{document.getElementById("main-container").st
 </script>
 
 <script>
-// 横走狐狸 + 暗红文字逻辑
-const spellOverlay = document.getElementById("spell-overlay");
-const foxContainer = document.getElementById("fox-container");
-const foxText = document.getElementById("fox-text");
+// 黑胶旋转+海浪动画逻辑
 const lostfound = document.getElementById("lostfound");
+const spellOverlay = document.getElementById("spell-overlay");
+const vinylContainer = document.getElementById("vinyl-container");
+const vinylText = document.getElementById("vinyl-text");
 const peopleText = document.getElementById("people-text");
+const wave = document.getElementById("wave");
 
 lostfound.onclick = () => {
   spellOverlay.style.opacity = "1";
-  foxContainer.style.opacity = "1";
-  foxText.style.opacity = "1";
+  vinylContainer.style.opacity = "1";
+  vinylText.style.opacity = "1";
+  wave.style.opacity = "1";
+  wave.style.transform="translateY(0)";
 
-  // 横向行走动画
-  foxContainer.style.animation = "foxWalk 4s linear forwards";
+  // 黑胶旋转淡入
+  vinylContainer.animate([
+    { transform:"translate(-50%, -50%) scale(0.8) rotate(0deg)", opacity:0 },
+    { transform:"translate(-50%, -50%) scale(1) rotate(360deg)", opacity:1 }
+  ], { duration: 4000, easing:"ease-in-out", fill:"forwards" });
 
-  // 显示文字在狐狸上
-  foxText.textContent = "Tomorrow is another day";
-
-  // 狐狸走完后消失
+  // 消失后显示 people 文字
   setTimeout(()=>{
-    foxContainer.style.opacity = "0";
-    foxText.style.opacity = "0";
+    // 黑胶旋转淡出
+    vinylContainer.animate([
+      { transform:"translate(-50%, -50%) scale(1) rotate(360deg)", opacity:1 },
+      { transform:"translate(-50%, -50%) scale(0.7) rotate(720deg)", opacity:0 }
+    ], { duration: 1000, easing:"ease-in-out", fill:"forwards" });
+    vinylText.style.opacity="0";
+    wave.style.opacity="0";
+    wave.style.transform="translateY(100%)";
 
-    // 显示吸血鬼暗红文字
-    peopleText.style.opacity = "1";
-
-    // 暂停2秒后淡出并回主页
     setTimeout(()=>{
-      spellOverlay.style.opacity = "0";
-      peopleText.style.opacity = "0";
-      document.body.style.filter="none";
-    },2000);
+      peopleText.style.opacity="1";
 
-    setTimeout(()=>{window.location.href="https://liangyi-x.github.io/drunk/";},2800);
+      setTimeout(()=>{
+        spellOverlay.style.opacity="0";
+        peopleText.style.opacity="0";
+      },2000);
+
+      setTimeout(()=>{window.location.href="https://liangyi-x.github.io/drunk/";},2800);
+
+    },1000);
 
   },4000);
 };
