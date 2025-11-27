@@ -1,0 +1,59 @@
+{{ define "main" }}
+
+<h1 style="text-align:center; color:white;">LOST & FOUND</h1>
+
+<div class="broadcast-list" style="max-width:800px; margin:2rem auto;">
+
+  {{/* Firebase 广播容器 */}}
+  <div id="broadcasts" style="background:#ccc; padding:1rem; border-radius:8px; max-height:400px; overflow-y:auto;">
+    加载中…
+  </div>
+
+  <div style="margin-top:1rem; display:flex; gap:0.5rem;">
+    <input id="broadcast-input" placeholder="输入广播信息" style="flex:1; padding:0.3rem; border-radius:4px; border:none;">
+    <button id="broadcast-send" style="padding:0.3rem 0.5rem; border:none; border-radius:4px; background:#444; color:#fff; cursor:pointer;">发送</button>
+  </div>
+
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-app.js";
+import { getFirestore, collection, addDoc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "...",
+  authDomain: "...",
+  projectId: "...",
+  storageBucket: "...",
+  messagingSenderId: "...",
+  appId: "..."
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const broadcastRef = collection(db, "broadcasts");
+
+const inputEl = document.getElementById("broadcast-input");
+const sendBtn = document.getElementById("broadcast-send");
+const listEl = document.getElementById("broadcasts");
+
+sendBtn.addEventListener("click", async () => {
+  const text = inputEl.value.trim();
+  if (!text) return;
+  await addDoc(broadcastRef, { message: text, timestamp: new Date() });
+  inputEl.value = "";
+});
+
+const q = query(broadcastRef, orderBy("timestamp", "desc"));
+onSnapshot(q, snapshot => {
+  listEl.innerHTML = "";
+  snapshot.forEach(doc => {
+    const div = document.createElement("div");
+    div.textContent = doc.data().message;
+    div.style.borderBottom = "1px solid #bbb";
+    div.style.padding = "0.3rem 0";
+    listEl.appendChild(div);
+  });
+});
+</script>
+
+{{ end }}
