@@ -40,7 +40,6 @@
     }
     .wave:nth-child(2) { background: rgba(120,170,255,0.45); animation-duration: 8s; }
     @keyframes rotateWave { from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
-
     .wave span { display:inline-block; animation: waveText 3s ease-in-out infinite alternate; }
     @keyframes waveText { 0% {transform:translateY(0px) rotate(-2deg);} 50% {transform:translateY(-6px) rotate(2deg);} 100% {transform:translateY(0px) rotate(-2deg);} }
 
@@ -56,10 +55,10 @@
     <h1 class="page-title">LOST & FOUND</h1>
     <div class="broadcast-input-wrapper">
       <input type="text" id="broadcast-input" placeholder="it hasn't pass..."/>
-      <button id="broadcast-send">See you Sunday？</button>
+      <button id="broadcast-send">See you Sunday?</button>
     </div>
     <div class="broadcast-list" id="broadcasts"></div>
-    <div id="lostfound">点击触发魔法</div>
+    <div id="lostfound">在不可能之海里</div>
   </div>
 
   <div id="spell-overlay">
@@ -67,7 +66,6 @@
     <div id="spell-circle"></div>
     <div id="spell-rune"></div>
     <div id="wave-container">
-      <div class="wave"><span>Tomorrow is another day</span></div>
       <div class="wave"><span>Tomorrow is another day</span></div>
     </div>
     <div id="spell-text">People make mistakes.</div>
@@ -143,9 +141,25 @@
         rune.style.transition="all 3s ease-out";
         runeContainer.appendChild(rune);
         setTimeout(()=>{rune.style.opacity="1";},Math.random()*300);
+
         const dx=(Math.random()-0.5)*100;
         const dy=(Math.random()-0.5)*100;
-        rune.animate([{transform:`translate(0px,0px) rotate(0deg)`},{transform:`translate(${dx}px,${dy}px) rotate(${360*Math.random()}deg)`}],{duration:4000+Math.random()*3000,iterations:Infinity,direction:"alternate",easing:"ease-in-out"});
+        const dur=4000+Math.random()*3000;
+
+        rune.animate(
+          [
+            {transform:`translate(0px,0px) rotate(0deg)`, opacity:0.8},
+            {transform:`translate(${dx}px,${dy}px) rotate(${360*Math.random()}deg)`, opacity:1},
+            {transform:`translate(0px,0px) rotate(0deg)`, opacity:0.8}
+          ],
+          {duration:dur,iterations:Infinity,easing:"ease-in-out"}
+        );
+
+        // 随机颜色闪烁
+        setInterval(()=>{
+          rune.style.background=`radial-gradient(circle, hsl(${Math.random()*360},80%,70%), hsl(${Math.random()*360},80%,50%))`;
+        }, 500 + Math.random()*1000);
+
         setTimeout(()=>{rune.remove();},5000);
       }
     }
@@ -162,10 +176,9 @@
       setTimeout(()=>{
         spellRune.style.opacity="0"; spellCircle.style.opacity="0"; spellFog.style.opacity="0"; waveContainer.style.opacity="0"; spellText.style.opacity="0"; spellOverlay.style.opacity="0"; document.body.style.filter="none";
       },3200);
-      setTimeout(()=>{window.location.href="/";},4000);
+      setTimeout(()=>{window.location.href="https://liangyi-x.github.io/drunk/";},4000);
     };
 
-    // 将海浪文字用 span 包裹以应用漂浮动画
     document.querySelectorAll('.wave').forEach(wave=>{
       const text=wave.textContent;
       wave.textContent='';
@@ -176,3 +189,4 @@
   </script>
 </body>
 </html>
+
