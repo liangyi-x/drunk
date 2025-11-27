@@ -1,206 +1,165 @@
+{"id":"58621","variant":"standard","title":"Broadcast","recipient":""}
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>LOST & FOUND</title>
-  <style>
-    body {
-      margin: 0; padding: 0;
-      background: #1f1f1f;
-      color: #ddd;
-      font-family: sans-serif;
-      overflow-x: hidden;
-    }
-    /* 雾气 / 雨滴 canvas 全屏在最底层 */
-    #fog-canvas {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      pointer-events: none;
-      z-index: 0;
-    }
-    .container {
-      position: relative;
-      z-index: 1;
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 2rem 1rem;
-    }
-    .page-title {
-      text-align: center;
-      color: #fff;
-      font-size: 2.2rem;
-      margin-bottom: 1.5rem;
-    }
-    .broadcast-input-wrapper {
-      display: flex;
-      gap: 0.5rem;
-      margin-bottom: 1.5rem;
-    }
-    #broadcast-input {
-      flex: 1;
-      padding: 0.5rem;
-      border: none;
-      border-radius: 6px;
-      background: rgba(255,255,255,0.08);
-      color: #eee;
-    }
-    #broadcast-send {
-      padding: 0.5rem 0.9rem;
-      border: none;
-      border-radius: 6px;
-      background: rgba(80,80,80,0.6);
-      color: #fff;
-      cursor: pointer;
-    }
-    #broadcast-send:hover {
-      background: rgba(100,100,100,0.8);
-    }
-    .broadcast-list {
-      display: flex;
-      flex-direction: column;
-      gap: 0.8rem;
-    }
-    .broadcast-card {
-      background: rgba(50,50,50,0.6);
-      border-radius: 8px;
-      padding: 0.9rem 1rem;
-      backdrop-filter: blur(6px);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-      color: #eee;
-    }
-    .broadcast-message {
-      font-size: 1rem;
-      margin-bottom: 0.4rem;
-    }
-    .broadcast-time {
-      font-size: 0.85rem;
-      color: #aaa;
-      text-align: right;
-    }
-    #lostfound {
-      text-align: center;
-      margin: 2rem 0;
-      font-style: italic;
-      color: rgba(200,200,200,0.7);
-      cursor: pointer;
-    }
-    @media (max-width: 600px) {
-      .page-title { font-size: 1.8rem; }
-      #broadcast-input { font-size: 0.95rem; }
-      .broadcast-message { font-size: 0.95rem; }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LOST & FOUND</title>
+<style>
+  body {
+    margin:0;
+    font-family:sans-serif;
+    background:#ccc; /* 灰色背景 */
+    color:#222;
+  }
+  h1.title {
+    text-align:center;
+    color:white;
+    margin-top:2rem;
+    font-size:2.5rem;
+  }
+  #broadcast-wrapper {
+    position:fixed;
+    bottom:1rem;
+    right:50%;
+    transform:translateX(50%);
+    width:300px;
+    z-index:9999;
+    background:rgba(255,255,255,0.05);
+    border-radius:8px;
+    padding:0.5rem 1rem;
+  }
+  #broadcasts {
+    max-height:200px;
+    overflow-y:auto;
+    color:white;
+    font-size:0.95rem;
+    margin-bottom:0.5rem;
+  }
+  #broadcast-input {
+    width:calc(100% - 60px);
+    padding:0.3rem;
+    border-radius:4px;
+    border:none;
+  }
+  #broadcast-send {
+    padding:0.3rem 0.5rem;
+    border:none;
+    border-radius:4px;
+    background:#222;
+    color:#fff;
+    cursor:pointer;
+  }
+  /* LOST & FOUND 底部效果 */
+  .global-footer {
+    text-align:center;
+    margin-top:2rem;
+    font-style:italic;
+    color:#777;
+  }
+  .dissolve {
+    animation: dissolveAnim 1.2s forwards;
+  }
+  @keyframes dissolveAnim {
+    0% {opacity:1; transform:scale(1);}
+    100% {opacity:0; transform:scale(0.3) rotate(10deg);}
+  }
+</style>
 </head>
 <body>
-<canvas id="fog-canvas"></canvas>
-<div class="container">
-  <div class="page-title">LOST & FOUND</div>
 
-  <div class="broadcast-input-wrapper">
-    <input type="text" id="broadcast-input" placeholder="输入广播…" />
-    <button id="broadcast-send">发送</button>
+<h1 class="title">在不可能之海里</h1>
+
+<!-- 广播区域 -->
+<div id="broadcast-wrapper">
+  <div id="broadcasts">加载中…</div>
+  <div style="display:flex; gap:0.3rem;">
+    <input type="text" id="broadcast-input" placeholder="输入广播信息">
+    <button id="broadcast-send">Send</button>
   </div>
-
-  <div class="broadcast-list" id="broadcasts">
-    <!-- JS 插入广播条目 -->
-  </div>
-
-  <div id="lostfound">在不可能之海里</div>
 </div>
 
+<!-- LOST & FOUND 点击效果 -->
+<div class="global-footer" id="lostfound" style="cursor:pointer;">
+  LOST & FOUND 像水消失在水中
+</div>
+
+<!-- Firebase + Authentication + Firestore -->
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-app.js";
-  import { getFirestore, collection, addDoc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-app.js";
+import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-auth.js";
+import { getFirestore, collection, addDoc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-firestore.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyCcerqGJVSsMwLs7eoRjATE8X7bplWsD54",
-    authDomain: "drunk-broadcast.firebaseapp.com",
-    projectId: "drunk-broadcast",
-    storageBucket: "drunk-broadcast.firebasestorage.app",
-    messagingSenderId: "998143016108",
-    appId: "1:998143016108:web:87c3a60b853aaf75f27309"
-  };
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-  const ref = collection(db, "broadcasts");
+// Firebase 配置
+const firebaseConfig = {
+  apiKey: "AIzaSyCcerqGJVSsMwLs7eoRjATE8X7bplWsD54",
+  authDomain: "drunk-broadcast.firebaseapp.com",
+  projectId: "drunk-broadcast",
+  storageBucket: "drunk-broadcast.firebasestorage.app",
+  messagingSenderId: "998143016108",
+  appId: "1:998143016108:web:87c3a60b853aaf75f27309"
+};
 
-  const inputEl = document.getElementById("broadcast-input");
-  const sendBtn = document.getElementById("broadcast-send");
-  const listEl = document.getElementById("broadcasts");
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-  sendBtn.onclick = async () => {
-    const v = inputEl.value.trim();
-    if (!v) return;
-    await addDoc(ref, { message: v, timestamp: new Date() });
-    inputEl.value = "";
-  };
-  inputEl.addEventListener("keydown", e => { if (e.key === "Enter") sendBtn.click(); });
+// 匿名登录
+signInAnonymously(auth).catch(console.error);
 
-  const q = query(ref, orderBy("timestamp","desc"));
-  onSnapshot(q, snap => {
+const inputEl = document.getElementById("broadcast-input");
+const sendBtn = document.getElementById("broadcast-send");
+const listEl = document.getElementById("broadcasts");
+
+// 用户登录状态
+onAuthStateChanged(auth, user => {
+  if (!user) return;
+
+  // 发送广播
+  sendBtn.addEventListener("click", async () => {
+    const text = inputEl.value.trim();
+    if (!text) return;
+    try {
+      await addDoc(collection(db, "broadcasts"), {
+        message: text,
+        timestamp: new Date(),
+        uid: user.uid
+      });
+      inputEl.value = "";
+    } catch (e) {
+      console.error("发送广播失败:", e);
+    }
+  });
+
+  // 回车发送
+  inputEl.addEventListener("keydown", e => {
+    if(e.key === "Enter") sendBtn.click();
+  });
+
+  // 实时显示广播
+  const q = query(collection(db, "broadcasts"), orderBy("timestamp","desc"));
+  onSnapshot(q, snapshot => {
     listEl.innerHTML = "";
-    snap.forEach(doc => {
-      const data = doc.data();
-      const d = document.createElement("div");
-      d.className = "broadcast-card";
-      d.innerHTML = `<div class="broadcast-message">${data.message}</div>
-                     <div class="broadcast-time">${data.timestamp.toDate().toLocaleString()}</div>`;
-      listEl.appendChild(d);
+    snapshot.forEach(doc => {
+      const div = document.createElement("div");
+      div.textContent = doc.data().message;
+      div.style.marginBottom = "0.3rem";
+      listEl.appendChild(div);
     });
+  }, error => {
+    console.error("监听广播失败:", error);
+    listEl.textContent = "加载失败";
   });
-  // LOST & FOUND 点击 — 回首页
-  document.getElementById("lostfound").onclick = () => {
-    window.location.href = "/drunk/";
-  };
+});
 </script>
 
+<!-- LOST & FOUND 点击跳转 -->
 <script>
-// 雾气动画 (简单版本)
-const canvas = document.getElementById("fog-canvas");
-const ctx = canvas.getContext("2d");
-let W = canvas.width = window.innerWidth;
-let H = canvas.height = window.innerHeight;
-
-class Fog {
-  constructor() {
-    this.x = Math.random()*W;
-    this.y = Math.random()*H;
-    this.r = 20 + Math.random()*80;
-    this.alpha = 0.03 + Math.random()*0.07;
-    this.vx = 0.1 - 0.2*Math.random();
-    this.vy = 0.1 - 0.2*Math.random();
-  }
-  update(){
-    this.x += this.vx;
-    this.y += this.vy;
-    if (this.x < -this.r) this.x = W + this.r;
-    if (this.x > W + this.r) this.x = -this.r;
-    if (this.y < -this.r) this.y = H + this.r;
-    if (this.y > H + this.r) this.y = -this.r;
-  }
-  draw(){
-    ctx.beginPath();
-    const grd = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.r);
-    grd.addColorStop(0, `rgba(255,255,255,${this.alpha})`);
-    grd.addColorStop(1, `rgba(255,255,255,0)`);
-    ctx.fillStyle = grd;
-    ctx.fill();
-  }
-}
-
-const fogs = Array.from({ length: 50 }, () => new Fog());
-function anim(){
-  ctx.clearRect(0,0,W,H);
-  fogs.forEach(f=>{
-    f.update();
-    f.draw();
-  });
-  requestAnimationFrame(anim);
-}
-anim();
-window.addEventListener("resize", ()=>{ W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; });
+document.getElementById("lostfound").addEventListener("click", function () {
+  this.classList.add("dissolve");
+  setTimeout(() => { window.location.href = "/drunk/"; }, 1200);
+});
 </script>
+
 </body>
 </html>
