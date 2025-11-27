@@ -1,192 +1,178 @@
+{"variant":"standard","title":"LOST & FOUND 广播+魔法动画整合版","id":"48503"}
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>LOST & FOUND</title>
-  <style>
-    body {
-      margin: 0; padding: 0;
-      background: #1f1f1f;
-      color: #ddd;
-      font-family: sans-serif;
-      overflow-x: hidden;
-      transition: all 3s ease-out;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LOST & FOUND</title>
+<style>
+body {
+  margin:0; padding:0;
+  background:#1f1f1f;
+  color:#ddd;
+  font-family:sans-serif;
+  overflow-x:hidden;
+  transition: all 3s ease-out;
+}
+.container { position:relative; z-index:1; max-width:800px; margin:0 auto; padding:2rem 1rem; }
+.page-title { text-align:center; color:#fff; font-size:2.2rem; margin-bottom:1.5rem; }
 
-    .container { position: relative; z-index: 1; max-width: 800px; margin: 0 auto; padding: 2rem 1rem; }
-    .page-title { text-align: center; color: #fff; font-size: 2.2rem; margin-bottom: 1.5rem; }
-    .broadcast-input-wrapper { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
-    #broadcast-input { flex: 1; padding: 0.5rem; border: none; border-radius: 6px; background: rgba(255,255,255,0.08); color: #eee; }
-    #broadcast-send { padding: 0.5rem 0.9rem; border: none; border-radius: 6px; background: rgba(80,80,80,0.6); color: #fff; cursor: pointer; }
-    #broadcast-send:hover { background: rgba(100,100,100,0.8); }
-    .broadcast-list { display: flex; flex-direction: column; gap: 0.8rem; }
-    .broadcast-card { background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 8px; transition: all 0.3s ease; cursor: pointer; }
-    .broadcast-card:hover { transform: translateY(-4px); backdrop-filter: blur(8px); box-shadow: 0 4px 16px rgba(0,0,0,0.5); }
-    @keyframes cardFade { 0% { transform: rotate(0deg); opacity: 1; } 100% { transform: rotate(6deg); opacity: 0; } }
-    .broadcast-card.dissolve { animation: cardFade 0.8s forwards; }
-    .broadcast-message { font-size: 1rem; margin-bottom: 0.4rem; }
-    .broadcast-time { font-size: 0.85rem; color: #aaa; text-align: right; }
-    #lostfound { text-align: center; margin: 2rem 0; font-style: italic; color: rgba(200,200,200,0.7); cursor: pointer; }
-    @media (max-width:600px){.page-title{font-size:1.8rem}}
+.broadcast-input-wrapper {
+  display:flex; gap:0.5rem; margin-bottom:1.5rem;
+}
+#broadcast-input { flex:1; padding:0.5rem; border:none; border-radius:6px; background:rgba(255,255,255,0.08); color:#eee; }
+#broadcast-send { padding:0.5rem 0.9rem; border:none; border-radius:6px; background:rgba(80,80,80,0.6); color:#fff; cursor:pointer; }
+#broadcast-send:hover { background: rgba(100,100,100,0.8); }
 
-    /* 魔法效果 */
-    #spell-overlay { position: fixed; inset:0; background: rgba(0,0,0,0.35); backdrop-filter: blur(4px); opacity:0; pointer-events:none; transition: opacity 0.4s ease-out; z-index:999; }
-    #wave-container { position: absolute; top:50%; left:50%; width:260px; height:260px; transform: translate(-50%, -50%); overflow:hidden; border-radius:50%; opacity:0; transition: opacity 0.4s ease-out; }
-    .wave {
-      position:absolute; width:200%; height:200%; top:-50%; left:-50%;
-      background: rgba(70,140,255,0.35); border-radius:45%; animation: rotateWave 6s infinite linear;
-      display:flex; justify-content:center; align-items:center; font-size:1.2rem; color:#fff; text-shadow:0 0 10px #aaf;
-    }
-    .wave:nth-child(2) { background: rgba(120,170,255,0.45); animation-duration: 8s; }
-    @keyframes rotateWave { from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
-    .wave span { display:inline-block; animation: waveText 3s ease-in-out infinite alternate; }
-    @keyframes waveText { 0% {transform:translateY(0px) rotate(-2deg);} 50% {transform:translateY(-6px) rotate(2deg);} 100% {transform:translateY(0px) rotate(-2deg);} }
+.broadcast-list { display:flex; flex-direction:column; gap:0.8rem; }
+.broadcast-card { background: rgba(255,255,255,0.05); padding:1rem; border-radius:8px; transition: all 0.3s ease; cursor:pointer; }
+.broadcast-card:hover { transform: translateY(-4px); backdrop-filter: blur(8px); box-shadow:0 4px 16px rgba(0,0,0,0.5);}
+.broadcast-card.dissolve { animation: cardFade 0.8s forwards; }
+@keyframes cardFade { 0%{transform:rotate(0deg);opacity:1;}100%{transform:rotate(6deg);opacity:0;} }
 
-    #spell-text { position:absolute; top:calc(50% + 150px); left:50%; transform:translate(-50%,0); color:#e7f5ff; font-size:1.6rem; letter-spacing:2px; opacity:0; transition: opacity 0.6s ease-out, transform 0.6s ease-out; text-shadow:0 0 15px rgba(150,200,255,0.8); }
+.broadcast-message { font-size:1rem; margin-bottom:0.4rem; }
+.broadcast-time { font-size:0.85rem; color:#aaa; text-align:right; }
 
-    #spell-fog,#spell-circle,#spell-rune { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%) scale(0); opacity:0; pointer-events:none; transition: all 1s ease-out; }
-    #spell-rune { width:40px; height:40px; background: radial-gradient(circle,#7fffd4,#00ffff); border-radius:50%; box-shadow:0 0 15px #0ff; animation: floatRune 3s infinite alternate; }
-    @keyframes floatRune {0% {transform:translate(-50%,-50%) translateY(0) scale(1);} 50% {transform:translate(-50%,-50%) translateY(-20px) scale(1.1);} 100% {transform:translate(-50%,-50%) translateY(0) scale(1);}}
-  </style>
+#lostfound { text-align:center; margin:2rem 0; font-style:italic; color:rgba(200,200,200,0.7); cursor:pointer; }
+
+#spell-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.35); pointer-events:none; opacity:0; transition:opacity 0.4s ease-out; z-index:999; }
+#float-text { position:absolute; top:50%; left:50%; transform:translate(-50%,0); color:#7fffd4; font-size:1.6rem; text-shadow:0 0 15px #0ff,0 0 25px #0ff; opacity:0; transition:opacity 0.8s ease-out, transform 0.8s ease-out; }
+#spell-text { position:absolute; top:calc(50% + 80px); left:50%; transform:translate(-50%,0); color:#e7f5ff; font-size:1.8rem; text-shadow:0 0 20px #aaf; opacity:0; transition:opacity 0.8s ease-out, transform 0.8s ease-out; }
+
+#spell-rune { width:10px; height:10px; position:absolute; border-radius:50%; pointer-events:none; box-shadow:0 0 10px #0ff; opacity:0; }
+</style>
 </head>
 <body>
-  <div class="container">
-    <h1 class="page-title">LOST & FOUND</h1>
-    <div class="broadcast-input-wrapper">
-      <input type="text" id="broadcast-input" placeholder="it hasn't pass..."/>
-      <button id="broadcast-send">See you Sunday?</button>
-    </div>
-    <div class="broadcast-list" id="broadcasts"></div>
-    <div id="lostfound">在不可能之海里</div>
+
+<div class="container">
+  <h1 class="page-title">LOST & FOUND</h1>
+  <div class="broadcast-input-wrapper">
+    <input type="text" id="broadcast-input" placeholder="输入消息..."/>
+    <button id="broadcast-send">发送</button>
   </div>
+  <div class="broadcast-list" id="broadcasts"></div>
+  <div id="lostfound">点击触发魔法</div>
+</div>
 
-  <div id="spell-overlay">
-    <div id="spell-fog"></div>
-    <div id="spell-circle"></div>
-    <div id="spell-rune"></div>
-    <div id="wave-container">
-      <div class="wave"><span>Tomorrow is another day</span></div>
-    </div>
-    <div id="spell-text">People make mistakes.</div>
-  </div>
+<div id="spell-overlay">
+  <div id="float-text">Tomorrow is another day</div>
+</div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-firestore.js";
+<!-- Firebase 广播脚本 -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-app.js";
+import { getFirestore, collection, addDoc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-firestore.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyCcerqGJVSsMwLs7eoRjATE8X7bplWsD54",
-      authDomain: "drunk-broadcast.firebaseapp.com",
-      projectId: "drunk-broadcast",
-      storageBucket: "drunk-broadcast.firebasestorage.app",
-      messagingSenderId: "998143016108",
-      appId: "1:998143016108:web:87c3a60b853aaf75f27309"
-    };
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const ref = collection(db, "broadcasts");
-    const inputEl = document.getElementById("broadcast-input");
-    const sendBtn = document.getElementById("broadcast-send");
-    const listEl = document.getElementById("broadcasts");
+const firebaseConfig = {
+  apiKey: "AIzaSyCcerqGJVSsMwLs7eoRjATE8X7bplWsD54",
+  authDomain: "drunk-broadcast.firebaseapp.com",
+  projectId: "drunk-broadcast",
+  storageBucket: "drunk-broadcast.firebasestorage.app",
+  messagingSenderId: "998143016108",
+  appId: "1:998143016108:web:87c3a60b853aaf75f27309"
+};
 
-    sendBtn.onclick = async () => {
-      const v = inputEl.value.trim();
-      if(!v) return;
-      await addDoc(ref,{message:v,timestamp:new Date()});
-      inputEl.value="";
-    };
-    inputEl.addEventListener("keydown", e => { if(e.key==="Enter") sendBtn.click(); });
-    const q = query(ref, orderBy("timestamp","desc"));
-    onSnapshot(q,snap=>{
-      listEl.innerHTML="";
-      snap.forEach(doc=>{
-        const data=doc.data();
-        const d=document.createElement("div");
-        d.className="broadcast-card";
-        d.innerHTML=`<div class="broadcast-message">${data.message}</div><div class="broadcast-time">${data.timestamp.toDate().toLocaleString()}</div>`;
-        d.onclick=()=>d.classList.add("dissolve");
-        listEl.appendChild(d);
-      });
-    });
-  </script>
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const ref = collection(db, "broadcasts");
 
-  <script>
-    const spellOverlay=document.getElementById("spell-overlay");
-    const spellFog=document.getElementById("spell-fog");
-    const spellCircle=document.getElementById("spell-circle");
-    const spellRune=document.getElementById("spell-rune");
-    const waveContainer=document.getElementById("wave-container");
-    const spellText=document.getElementById("spell-text");
+const inputEl = document.getElementById("broadcast-input");
+const sendBtn = document.getElementById("broadcast-send");
+const listEl = document.getElementById("broadcasts");
 
-    const runeContainer=document.createElement("div");
-    runeContainer.style.position="fixed";
-    runeContainer.style.top="0"; runeContainer.style.left="0";
-    runeContainer.style.width="100%"; runeContainer.style.height="100%";
-    runeContainer.style.pointerEvents="none"; runeContainer.style.zIndex="1000";
-    document.body.appendChild(runeContainer);
+sendBtn.onclick = async () => {
+  const v = inputEl.value.trim();
+  if(!v) return;
+  await addDoc(ref, { message:v, timestamp:new Date() });
+  inputEl.value="";
+};
+inputEl.addEventListener("keydown", e=>{if(e.key==="Enter") sendBtn.click();});
 
-    function spawnRunes(count=15){
-      for(let i=0;i<count;i++){
-        const rune=document.createElement("div");
-        const size=10+Math.random()*20;
-        rune.style.width=rune.style.height=size+"px";
-        rune.style.background="radial-gradient(circle, #7fffd4,#00ffff)";
-        rune.style.borderRadius="50%";
-        rune.style.position="absolute";
-        rune.style.top=`${Math.random()*100}%`;
-        rune.style.left=`${Math.random()*100}%`;
-        rune.style.opacity="0";
-        rune.style.boxShadow="0 0 10px #0ff";
-        rune.style.transition="all 3s ease-out";
-        runeContainer.appendChild(rune);
-        setTimeout(()=>{rune.style.opacity="1";},Math.random()*300);
+const q = query(ref, orderBy("timestamp","desc"));
+onSnapshot(q,snap=>{
+  listEl.innerHTML="";
+  snap.forEach(doc=>{
+    const data = doc.data();
+    const d = document.createElement("div");
+    d.className="broadcast-card";
+    d.innerHTML=`<div class="broadcast-message">${data.message}</div>
+                 <div class="broadcast-time">${data.timestamp.toDate().toLocaleString()}</div>`;
+    d.onclick=()=>d.classList.add("dissolve");
+    listEl.appendChild(d);
+  });
+});
+</script>
 
-        const dx=(Math.random()-0.5)*100;
-        const dy=(Math.random()-0.5)*100;
-        const dur=4000+Math.random()*3000;
+<!-- 魔法荧光动画 -->
+<script>
+const spellOverlay = document.getElementById("spell-overlay");
+const floatText = document.getElementById("float-text");
 
-        rune.animate(
-          [
-            {transform:`translate(0px,0px) rotate(0deg)`, opacity:0.8},
-            {transform:`translate(${dx}px,${dy}px) rotate(${360*Math.random()}deg)`, opacity:1},
-            {transform:`translate(0px,0px) rotate(0deg)`, opacity:0.8}
-          ],
-          {duration:dur,iterations:Infinity,easing:"ease-in-out"}
-        );
+function spawnRunes(count=25){
+  for(let i=0;i<count;i++){
+    const rune = document.createElement("div");
+    const size = 6+Math.random()*12;
+    rune.style.width = rune.style.height = size+"px";
+    rune.style.borderRadius = "50%";
+    rune.style.position = "absolute";
+    rune.style.top = Math.random()*100+"%";
+    rune.style.left = Math.random()*100+"%";
+    rune.style.opacity = "0";
+    rune.style.background = `radial-gradient(circle, hsl(${Math.random()*360},100%,75%), hsl(${Math.random()*360},80%,50%))`;
+    rune.style.boxShadow = `0 0 ${5+Math.random()*10}px #0ff`;
+    document.body.appendChild(rune);
 
-        // 随机颜色闪烁
-        setInterval(()=>{
-          rune.style.background=`radial-gradient(circle, hsl(${Math.random()*360},80%,70%), hsl(${Math.random()*360},80%,50%))`;
-        }, 500 + Math.random()*1000);
+    setTimeout(()=>{rune.style.opacity="1";},Math.random()*300);
 
-        setTimeout(()=>{rune.remove();},5000);
-      }
-    }
+    const colorAnim = setInterval(()=>{
+      rune.style.background = `radial-gradient(circle, hsl(${Math.random()*360},100%,75%), hsl(${Math.random()*360},80%,50%))`;
+      rune.style.boxShadow = `0 0 ${5+Math.random()*10}px #0ff`;
+    },400+Math.random()*600);
 
-    document.getElementById("lostfound").onclick=()=>{
-      spellOverlay.style.opacity="1";
-      setTimeout(()=>{spellFog.style.opacity="0.5";},50);
-      setTimeout(()=>{spellCircle.style.opacity="1"; spellCircle.style.transform="translate(-50%,-50%) scale(1)";},150);
-      setTimeout(()=>{spellRune.style.opacity="1"; spellRune.style.transform="translate(-50%,-50%) scale(1)";},350);
-      setTimeout(()=>{waveContainer.style.opacity="1";},500);
-      setTimeout(()=>{spellText.style.opacity="1"; spellText.style.transform="translate(-50%,-10px)";},600);
-      document.body.style.filter="blur(2px) brightness(0.8)";
-      spawnRunes(15);
-      setTimeout(()=>{
-        spellRune.style.opacity="0"; spellCircle.style.opacity="0"; spellFog.style.opacity="0"; waveContainer.style.opacity="0"; spellText.style.opacity="0"; spellOverlay.style.opacity="0"; document.body.style.filter="none";
-      },3200);
-      setTimeout(()=>{window.location.href="https://liangyi-x.github.io/drunk/";},4000);
-    };
+    const amplitudeX = (Math.random()-0.5)*80;
+    const amplitudeY = (Math.random()-0.5)*80;
+    const rotate = (Math.random()-0.5)*20;
+    rune.animate([
+      {transform:`translate(0,0) rotate(0deg)`},
+      {transform:`translate(${amplitudeX}px, ${amplitudeY}px) rotate(${rotate}deg)`},
+      {transform:`translate(0,0) rotate(0deg)`}
+    ],{duration:4000+Math.random()*4000, iterations:Infinity, easing:'ease-in-out'});
 
-    document.querySelectorAll('.wave').forEach(wave=>{
-      const text=wave.textContent;
-      wave.textContent='';
-      const span=document.createElement('span');
-      span.textContent=text;
-      wave.appendChild(span);
-    });
-  </script>
+    rune.animate([{transform:'translateY(0px)'},{transform:'translateY(-5px)'},{transform:'translateY(0px)'},{transform:'translateY(5px)'},{transform:'translateY(0px)'}],{duration:2500+Math.random()*1000,iterations:Infinity,easing:'ease-in-out'});
+
+    setTimeout(()=>{
+      rune.remove();
+      clearInterval(colorAnim);
+    },8000);
+  }
+}
+
+document.getElementById("lostfound").onclick=()=>{
+  spellOverlay.style.opacity="1";
+  floatText.style.opacity="1";
+  floatText.style.transform="translate(-50%,-20px)";
+  floatText.animate([{transform:'translate(-50%,-20px)'},{transform:'translate(-50%,-25px)'},{transform:'translate(-50%,-20px)'},{transform:'translate(-50%,-15px)'},{transform:'translate(-50%,-20px)'}],{duration:2200,iterations:Infinity,easing:'ease-in-out'});
+
+  spawnRunes(25);
+  document.body.style.filter="blur(1.5px) brightness(0.85)";
+
+  setTimeout(()=>{
+    floatText.style.opacity="0";
+    const spellText = document.createElement("div");
+    spellText.id="spell-text";
+    spellText.textContent="People make mistakes.";
+    spellOverlay.appendChild(spellText);
+    spellText.style.opacity="1";
+    spellText.style.transform="translate(-50%,-10px)";
+  },1600);
+
+  setTimeout(()=>{
+    spellOverlay.style.opacity="0";
+    document.body.style.filter="none";
+  },3700);
+
+  setTimeout(()=>{window.location.href="https://liangyi-x.github.io/drunk/";},4000);
+};
+</script>
 </body>
 </html>
-
