@@ -1,284 +1,139 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>LOST & FOUND</title>
-
+  <title>咒语显灵 · 不可能之海</title>
   <style>
     body {
-      margin: 0; padding: 0;
-      background: #1f1f1f;
-      color: #ddd;
-      font-family: sans-serif;
-      overflow-x: hidden;
+      margin: 0;
+      padding: 0;
+      font-family: serif;
+      background: #f7f7f7;
     }
 
-    /* 雾气 / 雨滴 canvas */
-    #fog-canvas {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      pointer-events: none;
-      z-index: 0;
-    }
-
+    /* 主体容器 */
     .container {
-      position: relative;
-      z-index: 1;
-      max-width: 800px;
+      padding: 40px;
+      max-width: 720px;
       margin: 0 auto;
-      padding: 2rem 1rem;
-    }
-
-    .page-title {
       text-align: center;
-      color: #fff;
-      font-size: 2.2rem;
-      margin-bottom: 1.5rem;
     }
 
-    .broadcast-input-wrapper {
-      display: flex;
-      gap: 0.5rem;
-      margin-bottom: 1.5rem;
+    h1 {
+      font-weight: normal;
+      font-size: 32px;
+      margin-bottom: 30px;
     }
 
-    #broadcast-input {
-      flex: 1;
-      padding: 0.5rem;
-      border: none;
+    /* 可点击咒语 */
+    .spell {
+      cursor: pointer;
+      display: inline-block;
+      font-size: 22px;
+      position: relative;
+      padding: 8px 16px;
       border-radius: 6px;
-      background: rgba(255,255,255,0.08);
-      color: #eee;
+      transition: 0.3s;
     }
 
-    #broadcast-send {
-      padding: 0.5rem 0.9rem;
-      border: none;
-      border-radius: 6px;
-      background: rgba(80,80,80,0.6);
-      color: #fff;
-      cursor: pointer;
-    }
-    #broadcast-send:hover {
-      background: rgba(100,100,100,0.8);
+    .spell:hover {
+      background: #e3e3e3;
     }
 
-    .broadcast-list {
-      display: flex;
-      flex-direction: column;
-      gap: 0.8rem;
-    }
-
-    .broadcast-card {
-      background: rgba(255,255,255,0.05);
-      padding: 1rem;
-      border-radius: 8px;
-      transition: all 0.3s ease;
-      cursor: pointer;
-    }
-
-    .broadcast-card:hover {
-      transform: translateY(-4px);
-      backdrop-filter: blur(8px);
-      box-shadow: 0 4px 16px rgba(0,0,0,0.5);
-    }
-
-    /* dissolve 动画 */
-    @keyframes cardFade {
-      0% { transform: rotate(0deg); opacity: 1; }
-      100% { transform: rotate(6deg); opacity: 0; }
-    }
-    .broadcast-card.dissolve {
-      animation: cardFade 0.8s forwards;
-    }
-
-    .broadcast-message {
-      font-size: 1rem;
-      margin-bottom: 0.4rem;
-    }
-    .broadcast-time {
-      font-size: 0.85rem;
-      color: #aaa;
-      text-align: right;
-    }
-
-    #lostfound {
-      text-align: center;
-      margin: 2rem 0;
-      font-style: italic;
-      color: rgba(200,200,200,0.7);
-      cursor: pointer;
-    }
-
-    @media (max-width: 600px) {
-      .page-title { font-size: 1.8rem; }
-    }
-
-    /* 咒语特效层 */
-    #spell-overlay {
+    /* 海浪效果容器 */
+    .wave-container {
       position: fixed;
-      top: 0; left: 0;
-      width: 100vw; height: 100vh;
-      backdrop-filter: blur(3px);
-      background: rgba(255,255,255,0.03);
+      left: 0;
+      bottom: -120px;
+      width: 100%;
+      height: 200px;
       pointer-events: none;
       opacity: 0;
-      transition: opacity 0.4s ease-out;
-      z-index: 999;
+      transition: opacity 1.2s ease;
     }
 
-    #spell-circle {
+    .wave {
       position: absolute;
-      top: 50%; left: 50%;
-      width: 180px; height: 180px;
-      transform: translate(-50%, -50%) scale(0.3);
+      left: 50%;
+      width: 1600px;
+      height: 200px;
+      background: rgba(80, 160, 255, 0.35);
       border-radius: 50%;
-      border: 2px solid rgba(180,220,255,0.4);
-      opacity: 0;
-      transition: opacity 0.4s ease-out, transform 0.6s ease-out;
-      box-shadow:
-        0 0 15px rgba(120,180,255,0.4),
-        inset 0 0 15px rgba(120,180,255,0.4);
+      transform: translateX(-50%);
+      animation: waveMove 4s ease-in-out infinite;
     }
 
-    #spell-rune {
-      position: absolute;
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%) scale(0.6);
-      font-size: 2.2rem;
-      font-weight: 300;
-      color: rgba(255,255,255,0.85);
-      opacity: 0;
-      transition: opacity 0.4s ease-out, transform 0.6s ease-out;
-      text-shadow: 0 0 15px rgba(160,200,255,0.5);
-      letter-spacing: 4px;
+    .wave:nth-child(2) {
+      background: rgba(80, 160, 255, 0.2);
+      animation-delay: 1.2s;
     }
 
-    #spell-fog {
-      position: absolute;
-      width: 200%; height: 200%;
-      top: -50%; left: -50%;
-      background: radial-gradient(circle, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.05) 40%, rgba(255,255,255,0) 70%);
-      opacity: 0;
-      transition: opacity 1.2s ease-out;
+    @keyframes waveMove {
+      0% { transform: translate(-50%, 0) scale(1); }
+      50% { transform: translate(-50%, -25px) scale(1.03); }
+      100% { transform: translate(-50%, 0) scale(1); }
     }
 
+    /* 显灵文字 */
+    .spell-text {
+      position: fixed;
+      bottom: 260px;
+      width: 100%;
+      text-align: center;
+      font-size: 22px;
+      opacity: 0;
+      transition: opacity 1.2s ease;
+      pointer-events: none;
+    }
+
+    /* 返回主页按钮 */
+    .back {
+      margin-top: 40px;
+      font-size: 18px;
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 4px;
+      color: #333;
+      text-decoration: none;
+      border: 1px solid #aaa;
+    }
+
+    .back:hover { background: #ececec; }
   </style>
 </head>
-
 <body>
-<canvas id="fog-canvas"></canvas>
+  <div class="container">
+    <h1>广播 · 不可能之海</h1>
 
-<!-- 内容 -->
-<div class="container">
-  <div class="page-title">LOST & FOUND</div>
+    <div class="spell" onclick="castSpell()">不可能之海</div>
 
-  <div class="broadcast-input-wrapper">
-    <input type="text" id="broadcast-input" placeholder="It hasn't passed…" />
-    <button id="broadcast-send">Send</button>
+    <br><br>
+    <a href="../index.html" class="back">← 回到主页</a>
   </div>
 
-  <div class="broadcast-list" id="broadcasts"></div>
+  <!-- 海浪层 -->
+  <div class="wave-container" id="waves">
+    <div class="wave"></div>
+    <div class="wave"></div>
+  </div>
 
-  <div id="lostfound">在不可能之海里</div>
-</div>
+  <!-- 显灵文字 -->
+  <div class="spell-text" id="spellText">海答应了你。</div>
 
-<!-- 咒语特效 -->
-<div id="spell-overlay">
-  <div id="spell-fog"></div>
-  <div id="spell-circle"></div>
-  <div id="spell-rune">海答应了你</div>
-</div>
+  <script>
+    function castSpell() {
+      const waves = document.getElementById("waves");
+      const text = document.getElementById("spellText");
 
-<!-- Firebase -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-app.js";
-  import { getFirestore, collection, addDoc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-firestore.js";
+      waves.style.opacity = 1;
+      text.style.opacity = 1;
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyCcerqGJVSsMwLs7eoRjATE8X7bplWsD54",
-    authDomain: "drunk-broadcast.firebaseapp.com",
-    projectId: "drunk-broadcast",
-    storageBucket: "drunk-broadcast.firebasestorage.app",
-    messagingSenderId: "998143016108",
-    appId: "1:998143016108:web:87c3a60b853aaf75f27309"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-  const ref = collection(db, "broadcasts");
-
-  const inputEl = document.getElementById("broadcast-input");
-  const sendBtn = document.getElementById("broadcast-send");
-  const listEl = document.getElementById("broadcasts");
-
-  sendBtn.onclick = async () => {
-    const v = inputEl.value.trim();
-    if (!v) return;
-    await addDoc(ref, { message: v, timestamp: new Date() });
-    inputEl.value = "";
-  };
-
-  inputEl.addEventListener("keydown", e => {
-    if (e.key === "Enter") sendBtn.click();
-  });
-
-  const q = query(ref, orderBy("timestamp", "desc"));
-  onSnapshot(q, snap => {
-    listEl.innerHTML = "";
-    snap.forEach(doc => {
-      const data = doc.data();
-      const d = document.createElement("div");
-      d.className = "broadcast-card";
-      d.innerHTML = `
-        <div class="broadcast-message">${data.message}</div>
-        <div class="broadcast-time">${data.timestamp.toDate().toLocaleString()}</div>
-      `;
-      d.onclick = () => d.classList.add("dissolve");
-      listEl.appendChild(d);
-    });
-  });
-</script>
-
-<!-- 咒语触发 -->
-<script>
-  const spellOverlay = document.getElementById("spell-overlay");
-  const spellFog = document.getElementById("spell-fog");
-  const spellCircle = document.getElementById("spell-circle");
-  const spellRune = document.getElementById("spell-rune");
-
-  document.getElementById("lostfound").onclick = () => {
-
-    spellOverlay.style.opacity = "1";
-
-    setTimeout(() => { spellFog.style.opacity = "1"; }, 50);
-
-    setTimeout(() => {
-      spellCircle.style.opacity = "1";
-      spellCircle.style.transform = "translate(-50%, -50%) scale(1)";
-    }, 150);
-
-    setTimeout(() => {
-      spellRune.style.opacity = "1";
-      spellRune.style.transform = "translate(-50%, -50%) scale(1)";
-    }, 350);
-
-    // 自动淡出
-    setTimeout(() => {
-      spellRune.style.opacity = "0";
-      spellCircle.style.opacity = "0";
-      spellFog.style.opacity = "0";
-      spellOverlay.style.opacity = "0";
-    }, 3000);
-
-    setTimeout(() => {
-      spellCircle.style.transform = "translate(-50%, -50%) scale(0.3)";
-      spellRune.style.transform = "translate(-50%, -50%) scale(0.6)";
-    }, 4000);
-  };
-</script>
-
+      setTimeout(() => {
+        waves.style.opacity = 0;
+        text.style.opacity = 0;
+      }, 2800);
+    }
+  </script>
 </body>
 </html>
