@@ -1,106 +1,206 @@
-{{ define "main" }}
-<style>
-body { background-color:#f5f5f5; color:#222; font-family:sans-serif; }
-.broadcast-container { max-width:800px; margin:3rem auto; padding:0 1rem; }
-.broadcast-title { text-align:center; font-size:2rem; font-weight:bold; color:#222; margin-bottom:2rem; }
-.broadcast-item { background:#fff; border-radius:12px; padding:1.2rem; margin-bottom:1.5rem; box-shadow:0 3px 10px rgba(0,0,0,0.05);}
-.broadcast-item h3 { margin:0 0 0.5rem 0; font-size:1.4rem; }
-.broadcast-item p { margin:0; font-size:1rem; color:#555; }
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LOST & FOUND</title>
+  <style>
+    body {
+      margin: 0; padding: 0;
+      background: #1f1f1f;
+      color: #ddd;
+      font-family: sans-serif;
+      overflow-x: hidden;
+    }
+    /* 雾气 / 雨滴 canvas 全屏在最底层 */
+    #fog-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+    }
+    .page-title {
+      text-align: center;
+      color: #fff;
+      font-size: 2.2rem;
+      margin-bottom: 1.5rem;
+    }
+    .broadcast-input-wrapper {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+    #broadcast-input {
+      flex: 1;
+      padding: 0.5rem;
+      border: none;
+      border-radius: 6px;
+      background: rgba(255,255,255,0.08);
+      color: #eee;
+    }
+    #broadcast-send {
+      padding: 0.5rem 0.9rem;
+      border: none;
+      border-radius: 6px;
+      background: rgba(80,80,80,0.6);
+      color: #fff;
+      cursor: pointer;
+    }
+    #broadcast-send:hover {
+      background: rgba(100,100,100,0.8);
+    }
+    .broadcast-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+    .broadcast-card {
+      background: rgba(50,50,50,0.6);
+      border-radius: 8px;
+      padding: 0.9rem 1rem;
+      backdrop-filter: blur(6px);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+      color: #eee;
+    }
+    .broadcast-message {
+      font-size: 1rem;
+      margin-bottom: 0.4rem;
+    }
+    .broadcast-time {
+      font-size: 0.85rem;
+      color: #aaa;
+      text-align: right;
+    }
+    #lostfound {
+      text-align: center;
+      margin: 2rem 0;
+      font-style: italic;
+      color: rgba(200,200,200,0.7);
+      cursor: pointer;
+    }
+    @media (max-width: 600px) {
+      .page-title { font-size: 1.8rem; }
+      #broadcast-input { font-size: 0.95rem; }
+      .broadcast-message { font-size: 0.95rem; }
+    }
+  </style>
+</head>
+<body>
+<canvas id="fog-canvas"></canvas>
+<div class="container">
+  <div class="page-title">LOST & FOUND</div>
 
-/* LOST & FOUND 点击动画 */
-#lostfound {
-  cursor:pointer; text-align:center; margin:2rem 0; font-style:italic; color:#777; font-size:1.2rem; position:relative; overflow:visible;
-}
-#lostfound.dissolve { animation: inkSpread 1.4s ease-out forwards; }
-@keyframes inkSpread {
-  0% { opacity:1; filter:blur(0px); transform:scale(1); letter-spacing:0; }
-  40% { opacity:0.9; filter:blur(3px); transform:scale(1.05); }
-  70% { opacity:0.45; filter:blur(9px); transform:scale(1.22); }
-  100% { opacity:0; filter:blur(15px); transform:scale(1.35); letter-spacing:4px; }
-}
-/* 简易烟雾效果 */
-#smokeCanvas { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); pointer-events:none; }
-</style>
-
-<div class="broadcast-container">
-  <div id="lostfound">LOST & FOUND 像水消失在水中
-    <canvas id="smokeCanvas" width="260" height="80"></canvas>
+  <div class="broadcast-input-wrapper">
+    <input type="text" id="broadcast-input" placeholder="输入广播…" />
+    <button id="broadcast-send">发送</button>
   </div>
 
-  <div class="broadcast-list" id="broadcastList">
-    <!-- Firebase 数据会渲染在这里 -->
+  <div class="broadcast-list" id="broadcasts">
+    <!-- JS 插入广播条目 -->
   </div>
+
+  <div id="lostfound">在不可能之海里</div>
 </div>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
-import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-app.js";
+  import { getFirestore, collection, addDoc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-firestore.js";
 
-const firebaseConfig = {
+  const firebaseConfig = {
     apiKey: "AIzaSyCcerqGJVSsMwLs7eoRjATE8X7bplWsD54",
     authDomain: "drunk-broadcast.firebaseapp.com",
     projectId: "drunk-broadcast",
     storageBucket: "drunk-broadcast.firebasestorage.app",
     messagingSenderId: "998143016108",
     appId: "1:998143016108:web:87c3a60b853aaf75f27309"
-};
+  };
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const ref = collection(db, "broadcasts");
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const ref = collection(db, "broadcasts");
+  const inputEl = document.getElementById("broadcast-input");
+  const sendBtn = document.getElementById("broadcast-send");
+  const listEl = document.getElementById("broadcasts");
 
-// 渲染广播列表
-async function loadBroadcasts() {
-  const q = query(ref, orderBy("timestamp", "desc"));
-  const snapshot = await getDocs(q);
-  const list = document.getElementById("broadcastList");
-  snapshot.forEach(doc => {
-    const data = doc.data();
-    const div = document.createElement("div");
-    div.className = "broadcast-item";
-    div.innerHTML = `<h3>${data.title}</h3><p>${data.content}</p>`;
-    list.appendChild(div);
+  sendBtn.onclick = async () => {
+    const v = inputEl.value.trim();
+    if (!v) return;
+    await addDoc(ref, { message: v, timestamp: new Date() });
+    inputEl.value = "";
+  };
+  inputEl.addEventListener("keydown", e => { if (e.key === "Enter") sendBtn.click(); });
+
+  const q = query(ref, orderBy("timestamp","desc"));
+  onSnapshot(q, snap => {
+    listEl.innerHTML = "";
+    snap.forEach(doc => {
+      const data = doc.data();
+      const d = document.createElement("div");
+      d.className = "broadcast-card";
+      d.innerHTML = `<div class="broadcast-message">${data.message}</div>
+                     <div class="broadcast-time">${data.timestamp.toDate().toLocaleString()}</div>`;
+      listEl.appendChild(d);
+    });
   });
-}
-loadBroadcasts();
-
-// 点击动画 + 烟雾
-document.getElementById("lostfound").addEventListener("click", function() {
-  const el = this;
-  el.classList.add("dissolve");
-  startSmoke();
-  setTimeout(() => { window.location.href="/broadcast/"; }, 1500);
-});
-
-function startSmoke() {
-  const canvas = document.getElementById("smokeCanvas");
-  const ctx = canvas.getContext("2d");
-  let particles = [];
-  const W = canvas.width;
-  const H = canvas.height;
-  for(let i=0;i<28;i++){
-    particles.push({
-      x: W/2 + (Math.random()-0.5)*20,
-      y: H/2 + (Math.random()-0.5)*10,
-      r: Math.random()*12+6,
-      opacity: 0.25+Math.random()*0.2,
-      driftX: (Math.random()-0.5)*0.6,
-      driftY: (Math.random()-1.2)*0.6,
-      fade: Math.random()*0.005+0.003
-    });
-  }
-  function draw(){
-    ctx.clearRect(0,0,W,H);
-    particles.forEach(p=>{
-      ctx.beginPath();
-      ctx.fillStyle=`rgba(180,180,180,${p.opacity})`;
-      ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill();
-      p.x+=p.driftX; p.y+=p.driftY; p.opacity-=p.fade; p.r*=1.003;
-      if(p.opacity<=0)p.opacity=0;
-    });
-    requestAnimationFrame(draw);
-  }
-  draw();
-}
+  // LOST & FOUND 点击 — 回首页
+  document.getElementById("lostfound").onclick = () => {
+    window.location.href = "/drunk/";
+  };
 </script>
-{{ end }}
+
+<script>
+// 雾气动画 (简单版本)
+const canvas = document.getElementById("fog-canvas");
+const ctx = canvas.getContext("2d");
+let W = canvas.width = window.innerWidth;
+let H = canvas.height = window.innerHeight;
+
+class Fog {
+  constructor() {
+    this.x = Math.random()*W;
+    this.y = Math.random()*H;
+    this.r = 20 + Math.random()*80;
+    this.alpha = 0.03 + Math.random()*0.07;
+    this.vx = 0.1 - 0.2*Math.random();
+    this.vy = 0.1 - 0.2*Math.random();
+  }
+  update(){
+    this.x += this.vx;
+    this.y += this.vy;
+    if (this.x < -this.r) this.x = W + this.r;
+    if (this.x > W + this.r) this.x = -this.r;
+    if (this.y < -this.r) this.y = H + this.r;
+    if (this.y > H + this.r) this.y = -this.r;
+  }
+  draw(){
+    ctx.beginPath();
+    const grd = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.r);
+    grd.addColorStop(0, `rgba(255,255,255,${this.alpha})`);
+    grd.addColorStop(1, `rgba(255,255,255,0)`);
+    ctx.fillStyle = grd;
+    ctx.fill();
+  }
+}
+
+const fogs = Array.from({ length: 50 }, () => new Fog());
+function anim(){
+  ctx.clearRect(0,0,W,H);
+  fogs.forEach(f=>{
+    f.update();
+    f.draw();
+  });
+  requestAnimationFrame(anim);
+}
+anim();
+window.addEventListener("resize", ()=>{ W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; });
+</script>
+</body>
+</html>
