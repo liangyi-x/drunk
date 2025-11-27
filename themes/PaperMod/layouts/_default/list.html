@@ -1,462 +1,147 @@
-{{ define "main" }}
-
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LOST & FOUND</title>
 <style>
-/* 首页卡片 grid */
-.posts-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2.3rem;
-  max-width: 960px;
-  margin: 2.5rem auto 0 auto;
-  padding: 0 1rem;
-}
+body { margin:0; padding:0; background:#1f1f1f; color:#ddd; font-family:sans-serif; overflow:hidden; transition: filter 1.2s ease-in-out;}
+.container { position:relative; z-index:1; max-width:800px; margin:0 auto; padding:2rem 1rem; opacity:0; transition:opacity 1.5s ease-in-out;}
+.page-title { text-align:center; color:#fff; font-size:2.2rem; margin-bottom:1.5rem; }
+.broadcast-input-wrapper { display:flex; gap:0.5rem; margin-bottom:1.5rem; }
+#broadcast-input { flex:1; padding:0.5rem; border:none; border-radius:6px; background:rgba(255,255,255,0.08); color:#eee; }
+#broadcast-send { padding:0.5rem 0.9rem; border:none; border-radius:6px; background:rgba(80,80,80,0.6); color:#fff; cursor:pointer; }
+#broadcast-send:hover { background: rgba(100,100,100,0.8); }
+.broadcast-list { display:flex; flex-direction:column; gap:0.8rem; }
+.broadcast-card { background: rgba(255,255,255,0.05); padding:1rem; border-radius:8px; transition: all 0.3s ease; cursor:pointer; }
+.broadcast-card:hover { transform: translateY(-4px); backdrop-filter: blur(8px); box-shadow:0 4px 16px rgba(0,0,0,0.5);}
+.broadcast-card.dissolve { animation: cardFade 0.8s forwards; }
+@keyframes cardFade { 0%{transform:rotate(0deg);opacity:1;}100%{transform:rotate(6deg);opacity:0;} }
+.broadcast-message { font-size:1rem; margin-bottom:0.4rem; }
+.broadcast-time { font-size:0.85rem; color:#aaa; text-align:right; }
+#lostfound { text-align:center; margin:2rem 0; font-style:italic; color:rgba(200,200,200,0.7); cursor:pointer; transition:0.3s; }
+#lostfound:hover { color:#7fffd4; }
 
-/* 首页标题 */
-.home-title {
-  text-align: center;
-  font-size: 2rem;
-  font-weight: 500;
-  margin-bottom: 1.2rem;
-  color: #222;
-}
+#spell-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.35); pointer-events:none; opacity:0; transition:opacity 1.2s ease-in-out; z-index:999; }
 
-/* 卡片 */
-.post-card {
-  background: #fff;
-  border-radius: 12px;
-  padding: 1.3rem;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.05);
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
-}
-.post-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.10);
-}
-.post-card h3 {
-  margin: 0;
-  font-size: 1.45rem;
-  color: #222;
-  transition: color 0.25s ease;
-}
-.post-card h3:hover { color: #000; }
-.post-excerpt {
-  margin-top: 0.6rem;
-  font-size: 1rem;
-  color: #555;
-  line-height: 1.6;
-}
-.post-card a { color: inherit; text-decoration: none; }
+#vinyl-container { position:absolute; top:50%; left:50%; transform:translate(-50%, -50%) scale(0.8); width:200px; height:200px; opacity:0; }
+.vinyl-ring { position:absolute; border-radius:50%; top:50%; left:50%; transform:translate(-50%, -50%); }
+#outer-ring { width:200px; height:200px; background:#001f3f; }
+#middle-ring { width:160px; height:160px; background:#000; }
+#inner-ring { width:60px; height:60px; background:#fff; }
+#vinyl-text { text-align:center; color:#ffe0b2; font-size:1rem; margin-top:8px; opacity:0; transition:opacity 0.5s ease-in-out; }
 
-/* More 按钮 */
-.more-posts-button {
-  display: inline-block;
-  margin: 1.5rem auto;
-  padding: 0.55rem 1.5rem;
-  background: #222;
-  color: #fff;
-  font-weight: 500;
-  border-radius: 8px;
-  cursor: pointer;
-  text-decoration: none;
-  transition: background 0.25s ease, transform 0.2s ease;
-}
-.more-posts-button:hover {
-  background: #444;
-  transform: translateY(-2px);
-}
+#people-text { position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); color:#330000; font-size:1.8rem; font-weight:bold; text-shadow:0 0 6px #440000,0 0 12px #220000; opacity:0; transition: opacity 0.5s ease-in-out; animation: floatText 2s ease-in-out infinite alternate; }
+@keyframes floatText { 0%{transform:translate(-50%,-50%);} 50%{transform:translate(-50%,-48%);} 100%{transform:translate(-50%,-50%);} }
 
-/* posts 列表页 */
-.all-posts-list { max-width: 700px; margin: 2rem auto; padding: 0 1rem; }
-.all-posts-list ul { list-style: none; padding-left: 0; }
-.all-posts-list li { padding: 0.6rem 0; border-bottom: 1px solid #eee; }
-.all-posts-list a { text-decoration: none; color: #222; font-size: 1.12rem; font-weight: 500; }
-.all-posts-list a:hover { color: #000; }
-.excerpt { font-size: 0.95rem; color: #666; margin-top: 0.2rem; }
-
-/* 分页 */
-.pagination a, .pagination strong { margin: 0 0.35rem; font-size: 0.95rem; text-decoration: none; }
-.pagination a { color: #444; } .pagination a:hover { color: #000; }
-.pagination strong { color: #000; font-weight: bold; }
-
-/* Footer */
-.global-footer { text-align: center; margin: 2.5rem 0 0.5rem 0; font-style: italic; color: #777; }
-
-/* 弹窗订阅 */
-.subscribe-button {
-  display: inline-block;
-  margin: 1rem auto 2rem auto;
-  padding: 0.55rem 1.5rem;
-  background: #222;
-  color: #fff;
-  font-weight: 500;
-  border-radius: 8px;
-  cursor: pointer;
-  text-decoration: none;
-  transition: background 0.25s ease, transform 0.2s ease;
-}
-.subscribe-button:hover { background:#444; transform: translateY(-2px);}
-.subscribe-overlay {
-  display: none;
-  position: fixed;
-  top:0; left:0;
-  width:100%; height:100%;
-  background: rgba(0,0,0,0.6);
-  z-index: 999;
-  justify-content: center;
-  align-items: center;
-}
-.subscribe-popup {
-  background: #fff;
-  padding: 1rem;
-  border-radius: 12px;
-  max-width: 480px;
-  width: 90%;
-  text-align: center;
-  position: relative;
-}
-.subscribe-popup .close-btn {
-  position: absolute;
-  top:0.5rem; right:0.5rem;
-  font-size:1.2rem;
-  font-weight:bold;
-  cursor:pointer;
-}
-.subscribe-popup iframe {
-  width:100%; height:320px; border:none; background:white;
-}
-
-/* 手机端 */
-@media (max-width:480px){
-  .posts-grid { gap:2rem; padding-top:1rem; padding-bottom:1rem;}
-  .post-card{padding:1rem;}
-}
+#wave { position:absolute; bottom:0; left:0; width:100%; height:80px; background:#001f3f; border-top-left-radius:50% 20px; border-top-right-radius:50% 20px; transform:translateY(100%); opacity:0; }
 </style>
-
-{{ $isHome := .IsHome }}
-{{ $isPosts := eq .Type "posts" }}
-{{ $isTag := eq .Kind "term" }}
-
-{{ if $isHome }}
-
-<div class="home-title">Article</div>
-<div class="posts-grid">
-  {{ range first 3 (where .Site.RegularPages "Type" "posts") }}
-    <div class="post-card">
-      <h3><a href="{{ .RelPermalink }}">{{ .Title }}</a></h3>
-      <p class="post-excerpt">{{ .Summary }}</p>
-    </div>
-  {{ end }}
-</div>
-<div style="text-align:center;">
-  <a class="more-posts-button" href="/drunk/posts/">More</a>
-</div>
-
-{{ else if $isPosts }}
-
-<div class="all-posts-list">
-  <div class="home-title">All Posts</div>
-  {{ $paginator := .Paginate (where .Site.RegularPages "Type" "posts") }}
-  <ul>
-    {{ range $paginator.Pages }}
-      <li>
-        <a href="{{ .RelPermalink }}">{{ .Title }}</a>
-        <div class="excerpt">{{ .Summary }}</div>
-      </li>
-    {{ end }}
-  </ul>
-  <div class="pagination" style="text-align:center; margin-top:1.5rem;">
-    {{ if $paginator.HasPrev }}<a href="{{ $paginator.Prev.URL }}">← Prev</a>{{ end }}
-    <strong>{{ $paginator.PageNumber }}</strong>
-    {{ if $paginator.HasNext }}<a href="{{ $paginator.Next.URL }}">Next →</a>{{ end }}
+</head>
+<body>
+<div class="container" id="main-container">
+  <h1 class="page-title">LOST & FOUND</h1>
+  <div class="broadcast-input-wrapper">
+    <input type="text" id="broadcast-input" placeholder="it hasn't passed…"/>
+    <button id="broadcast-send">See you Sunday？</button>
   </div>
+  <div class="broadcast-list" id="broadcasts"></div>
+  <div id="lostfound">在不可能之海里</div>
 </div>
 
-{{ else if $isTag }}
-
-<div class="all-posts-list">
-  <div class="home-title">#{{ .Title }}</div>
-  {{ $paginator := .Paginate .Pages }}
-  <ul>
-    {{ range $paginator.Pages }}
-      <li>
-        <a href="{{ .RelPermalink }}">{{ .Title }}</a>
-        <div class="excerpt">{{ .Summary }}</div>
-      </li>
-    {{ end }}
-  </ul>
-  <div class="pagination" style="text-align:center; margin-top:1.5rem;">
-    {{ if $paginator.HasPrev }}<a href="{{ $paginator.Prev.URL }}">← Prev</a>{{ end }}
-    <strong>{{ $paginator.PageNumber }}</strong>
-    {{ if $paginator.HasNext }}<a href="{{ $paginator.Next.URL }}">Next →</a>{{ end }}
+<div id="spell-overlay">
+  <div id="vinyl-container">
+    <div class="vinyl-ring" id="outer-ring"></div>
+    <div class="vinyl-ring" id="middle-ring"></div>
+    <div class="vinyl-ring" id="inner-ring"></div>
+    <div id="vinyl-text">Tomorrow is another day</div>
   </div>
+  <div id="people-text">People make mistakes.</div>
+  <div id="wave"></div>
 </div>
 
-{{ else }}
-{{ .Content }}
-{{ end }}
-
-
-<!-- LOST & FOUND clickable -->
-<div id="lostfound"
-     style="cursor:pointer; text-align:center; margin-top:2rem; font-style:italic; color:#777; font-size:1rem; position:relative; overflow:visible;">
-  LOST & FOUND 像水消失在水中
-  <canvas id="smokeCanvas" width="260" height="80" 
-          style="position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); pointer-events:none;"></canvas>
-</div>
-
-<style>
-/* 墨散开动画 */
-@keyframes inkSpread {
-  0% {
-    opacity: 1;
-    filter: blur(0px);
-    transform: scale(1);
-    letter-spacing: 0px;
-  }
-  40% {
-    opacity: 0.9;
-    filter: blur(3px);
-    transform: scale(1.05);
-  }
-  70% {
-    opacity: 0.45;
-    filter: blur(9px);
-    transform: scale(1.22);
-  }
-  100% {
-    opacity: 0;
-    filter: blur(15px);
-    transform: scale(1.35);
-    letter-spacing: 4px;
-  }
-}
-
-#lostfound.dissolve {
-  animation: inkSpread 1.4s ease-out forwards;
-}
-</style>
-
-<script>
-// 点击事件
-document.getElementById("lostfound").addEventListener("click", function () {
-  const el = this;
-  el.classList.add("dissolve");
-  startSmoke(); // 开启烟雾流动
-
-  setTimeout(() => {
-    window.location.href = "/drunk/broadcast/";
-  }, 1500);
-});
-
-/* --------------------------------------------------
-   简易烟雾流动（轻量级粒子，像水里的雾气）
--------------------------------------------------- */
-function startSmoke() {
-  const canvas = document.getElementById("smokeCanvas");
-  const ctx = canvas.getContext("2d");
-
-  let particles = [];
-  const W = canvas.width;
-  const H = canvas.height;
-
-  for (let i = 0; i < 28; i++) {
-    particles.push({
-      x: W / 2 + (Math.random() - 0.5) * 20,
-      y: H / 2 + (Math.random() - 0.5) * 10,
-      r: Math.random() * 12 + 6,
-      opacity: 0.25 + Math.random() * 0.2,
-      driftX: (Math.random() - 0.5) * 0.6,
-      driftY: (Math.random() - 1.2) * 0.6, // 往上散
-      fade: Math.random() * 0.005 + 0.003
-    });
-  }
-
-  function draw() {
-    ctx.clearRect(0, 0, W, H);
-
-    particles.forEach(p => {
-      ctx.beginPath();
-      ctx.fillStyle = `rgba(180,180,180,${p.opacity})`;
-      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-      ctx.fill();
-
-      p.x += p.driftX;
-      p.y += p.driftY;
-      p.opacity -= p.fade;
-      p.r *= 1.003;
-
-      // 防止性能浪费：消失后不再渲染
-      if (p.opacity <= 0) p.opacity = 0;
-    });
-
-    requestAnimationFrame(draw);
-  }
-
-  draw();
-}
+<script type="module">
+// Firebase 广播功能
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-app.js";
+import { getFirestore, collection, addDoc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-firestore.js";
+const firebaseConfig = { apiKey:"AIzaSyCcerqGJVSsMwLs7eoRjATE8X7bplWsD54", authDomain:"drunk-broadcast.firebaseapp.com", projectId:"drunk-broadcast", storageBucket:"drunk-broadcast.firebasestorage.app", messagingSenderId:"998143016108", appId:"1:998143016108:web:87c3a60b853aaf75f27309" };
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const ref = collection(db,"broadcasts");
+const inputEl = document.getElementById("broadcast-input");
+const sendBtn = document.getElementById("broadcast-send");
+const listEl = document.getElementById("broadcasts");
+sendBtn.onclick=async()=>{const v=inputEl.value.trim(); if(!v) return; await addDoc(ref,{message:v,timestamp:new Date()}); inputEl.value="";};
+inputEl.addEventListener("keydown",e=>{if(e.key==="Enter") sendBtn.click();});
+const q=query(ref,orderBy("timestamp","desc"));
+onSnapshot(q,snap=>{listEl.innerHTML=""; snap.forEach(doc=>{const data=doc.data(); const d=document.createElement("div"); d.className="broadcast-card"; d.innerHTML=`<div class="broadcast-message">${data.message}</div><div class="broadcast-time">${data.timestamp.toDate().toLocaleString()}</div>`; d.onclick=()=>d.classList.add("dissolve"); listEl.appendChild(d);});});
+window.addEventListener("load",()=>{document.getElementById("main-container").style.opacity="1";});
 </script>
 
-
-
-<!-- ✦ 弹窗订阅 ✦ -->
-<div style="text-align:center;">
-  <div class="subscribe-button">Get updates from my site</div>
-</div>
-<div class="subscribe-overlay">
-  <div class="subscribe-popup">
-    <div class="close-btn">&times;</div>
-    <iframe src="https://364951749.substack.com/embed" scrolling="no"></iframe>
-  </div>
-</div>
-
 <script>
-document.querySelector('.subscribe-button').addEventListener('click',function(){
-  document.querySelector('.subscribe-overlay').style.display='flex';
-});
-document.querySelector('.subscribe-overlay .close-btn').addEventListener('click',function(){
-  document.querySelector('.subscribe-overlay').style.display='none';
-});
-document.querySelector('.subscribe-overlay').addEventListener('click',function(e){
-  if(e.target===this){this.style.display='none';}
-});
+// 黑胶旋转+海浪+people文字效果
+const lostfound = document.getElementById("lostfound");
+const spellOverlay = document.getElementById("spell-overlay");
+const vinylContainer = document.getElementById("vinyl-container");
+const vinylText = document.getElementById("vinyl-text");
+const peopleText = document.getElementById("people-text");
+const wave = document.getElementById("wave");
+
+lostfound.onclick = () => {
+  spellOverlay.style.opacity = "1";
+  vinylContainer.style.opacity = "1";
+  vinylText.style.opacity = "1";
+  wave.style.opacity = "1";
+  wave.style.transform="translateY(0)";
+
+  const duration = 3600;
+  let start = null;
+  let wavePhase = 0;
+
+  function animateFrame(t){
+    if(!start) start = t;
+    const progress = Math.min((t-start)/duration,1);
+    const rotation = 360*progress;
+    const scale = 0.8 + 0.2*progress;
+    vinylContainer.style.transform = `translate(-50%, -50%) scale(${scale}) rotate(${rotation}deg)`;
+    wave.style.transform = `translateY(${Math.sin(wavePhase)*6}px)`;
+    wavePhase += 0.06;
+    if(progress<1) requestAnimationFrame(animateFrame);
+  }
+  requestAnimationFrame(animateFrame);
+
+  vinylText.style.opacity="1";
+
+  setTimeout(()=>{
+    // 黑胶淡出
+    const fadeDur = 800;
+    let fadeStart = performance.now();
+    function fadeFrame(t2){
+      const prog = Math.min((t2-fadeStart)/fadeDur,1);
+      const rot = 360 + 360*prog;
+      const sc = 1 - 0.3*prog;
+      const op = 1 - prog;
+      vinylContainer.style.transform = `translate(-50%, -50%) scale(${sc}) rotate(${rot}deg)`;
+      vinylContainer.style.opacity = op;
+      wave.style.opacity = op;
+      if(prog<1) requestAnimationFrame(fadeFrame);
+    }
+    requestAnimationFrame(fadeFrame);
+    vinylText.style.opacity="0";
+
+    setTimeout(()=>{
+      // people文字显示
+      peopleText.style.opacity="1";
+      setTimeout(()=>{
+        spellOverlay.style.opacity="0";
+        peopleText.style.opacity="0";
+      },1800);
+
+      setTimeout(()=>{ window.location.href = window.location.href; },2400);
+
+    }, fadeDur);
+
+  }, duration);
+};
 </script>
-
-<!-- ==== It'll pass Fire Burn Effect (Homepage Only) ==== -->
-{{ if .IsHome }}
-{{ $fire := `
-<div id="fire-pass" style="
-  position:fixed;
-  top:50%; left:50%;
-  transform:translate(-50%,-50%);
-  font-weight:bold;
-  color:white;
-  text-align:center;
-  pointer-events:none;
-  z-index:1000;
-  white-space:nowrap;">
-It'll pass
-</div>
-
-<canvas id="fire-canvas" style="
-  position:fixed;
-  inset:0;
-  width:100%; height:100%;
-  pointer-events:none;
-  z-index:999;">
-</canvas>
-
-<script>
-(function(){
-  const txt = document.getElementById("fire-pass");
-  const canvas = document.getElementById("fire-canvas");
-  if(!txt || !canvas) return;
-  const ctx = canvas.getContext("2d");
-
-  function resize(){
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    const fs = Math.min(canvas.width, canvas.height) * 0.22;
-    txt.style.fontSize = fs + "px";
-  }
-  window.addEventListener("resize", resize);
-  resize();
-
-  class P {
-    constructor(x,y,char,type="text"){
-      this.x=x; this.y=y; this.char=char; this.type=type;
-      this.vx=(Math.random()-0.5)*2;   // 更集中
-      this.vy=Math.random()*-1 - 0.5;
-      this.alpha=1;
-      this.age=0;
-      this.life=90 + Math.random()*40;
-      this.size=parseFloat(txt.style.fontSize);
-      this.spin = (Math.random()-0.5)*0.02; // 卷曲感
-      this.angle = 0;
-      if(type==="ash"){
-        this.vy = Math.random()*2 + 1; // 灰烬坠落
-        this.vx *= 0.3;
-        this.size = 2 + Math.random()*2;
-      }
-    }
-    update(){
-      this.x += this.vx;
-      this.y += this.vy;
-      this.angle += this.spin;
-      this.size *= 0.985;
-
-      const p = this.age / this.life;
-      if(p < 0.2) this.color = "white";
-      else if(p < 0.4) this.color = "rgb(255,240,180)";
-      else if(p < 0.6) this.color = "rgb(255,180,60)";
-      else if(p < 0.8) this.color = "rgb(255,70,30)";
-      else this.color = "rgb(80,80,80)";
-
-      this.alpha = 1 - p;
-      this.age++;
-    }
-    draw(){
-      ctx.save();
-      ctx.globalAlpha = this.alpha;
-      ctx.translate(this.x, this.y);
-      ctx.rotate(this.angle);
-      ctx.fillStyle = this.color;
-      ctx.font = (this.type==="text" ? this.size : 4) + "px sans-serif";
-      ctx.fillText(this.char, 0, 0);
-      ctx.restore();
-    }
-  }
-
-  function burn(){
-    const text = txt.textContent;
-    txt.style.display="none";
-    const fs = parseFloat(txt.style.fontSize);
-    const cx = canvas.width/2;
-    const cy = canvas.height/2;
-    let arr=[];
-
-    // 文字主粒子
-    for(let i=0;i<text.length;i++){
-      const x = cx - text.length*(fs*0.7)/2 + i*(fs*0.7);
-      const y = cy;
-      for(let k=0;k<10;k++){
-        arr.push(new P(x,y,text[i]));
-      }
-    }
-
-    // 火焰核心亮点
-    for(let i=0;i<130;i++){
-      const p = new P(cx,cy,"•","spark");
-      p.vx = (Math.random()-0.5)*1.5;
-      p.vy = Math.random()*-2 - 1;
-      p.size = 3;
-      arr.push(p);
-    }
-
-    // 灰烬下落
-    for(let i=0;i<180;i++){
-      const a = new P(cx,cy,"•","ash");
-      arr.push(a);
-    }
-
-    animate(arr);
-  }
-
-  function animate(arr){
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    arr.forEach(p=>{ p.draw(); p.update(); });
-    arr = arr.filter(p => p.alpha>0 && p.size>1);
-
-    if(arr.length>0) requestAnimationFrame(()=>animate(arr));
-    else canvas.style.display="none";
-  }
-
-  window.addEventListener("load",()=>{ setTimeout(burn,500); });
-})();
-</script>
-`}}
-{{ $fire | safeHTML }}
-{{ end }}
-
-
-{{ end }}
-
+</body>
+</html>
