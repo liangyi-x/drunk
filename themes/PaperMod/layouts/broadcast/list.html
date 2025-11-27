@@ -1,0 +1,145 @@
+{"variant":"code","title":"broadcast/list.html","id":"90012"}
+{{ define "main" }}
+<style>
+/* 页面整体样式 */
+body { background: #e2e2e2; color: #222; font-family: sans-serif; }
+
+/* LOST & FOUND */
+#lostfound {
+  cursor: pointer;
+  text-align: center;
+  margin: 2rem auto;
+  font-style: normal;
+  color: #555;
+  font-size: 1.2rem;
+  position: relative;
+  overflow: visible;
+}
+#lostfound.dissolve { animation: inkSpread 1.4s ease-out forwards; }
+@keyframes inkSpread {
+  0% { opacity:1; filter: blur(0px); transform: scale(1); letter-spacing:0; }
+  40% { opacity:0.9; filter: blur(3px); transform: scale(1.05); }
+  70% { opacity:0.45; filter: blur(9px); transform: scale(1.22); }
+  100% { opacity:0; filter: blur(15px); transform: scale(1.35); letter-spacing:4px; }
+}
+
+/* 广播列表容器 */
+.broadcast-container {
+  max-width: 680px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+.broadcast-card {
+  background: #fff;
+  padding: 1rem 1.2rem;
+  margin-bottom: 1.5rem;
+  border-radius: 10px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.07);
+  transition: transform 0.2s ease;
+}
+.broadcast-card:hover { transform: translateY(-3px); }
+.broadcast-title { font-weight: 500; font-size: 1.15rem; margin:0; }
+.broadcast-content { margin-top:0.4rem; font-size:0.95rem; color:#444; line-height:1.5; }
+
+/* 雾气 Canvas */
+#smokeCanvas {
+  position: absolute;
+  left: 50%; top: 50%;
+  transform: translate(-50%,-50%);
+  pointer-events:none;
+}
+</style>
+
+<!-- LOST & FOUND 点击动画 -->
+<div id="lostfound">
+  LOST & FOUND
+  <canvas id="smokeCanvas" width="260" height="80"></canvas>
+</div>
+
+<div class="broadcast-container" id="broadcastList">
+  <!-- Firebase 广播动态列表会插入这里 -->
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+
+// ---- Firebase 配置 ----
+const firebaseConfig = {
+    apiKey: "AIzaSyCcerqGJVSsMwLs7eoRjATE8X7bplWsD54",
+    authDomain: "drunk-broadcast.firebaseapp.com",
+    projectId: "drunk-broadcast",
+    storageBucket: "drunk-broadcast.firebasestorage.app",
+    messagingSenderId: "998143016108",
+    appId: "1:998143016108:web:87c3a60b853aaf75f27309"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+// ---- 点击 LOST & FOUND 的墨散 + 雾气动画 ----
+const lostfound = document.getElementById("lostfound");
+lostfound.addEventListener("click", () => {
+  lostfound.classList.add("dissolve");
+  startSmoke();
+  setTimeout(()=>{ window.location.href = "/drunk/broadcast/"; }, 1500);
+});
+
+// ---- 雾气效果 ----
+function startSmoke() {
+  const canvas = document.getElementById("smokeCanvas");
+  const ctx = canvas.getContext("2d");
+  let particles = [];
+  const W = canvas.width, H = canvas.height;
+  for (let i=0;i<28;i++){
+    particles.push({
+      x: W/2 + (Math.random()-0.5)*20,
+      y: H/2 + (Math.random()-0.5)*10,
+      r: Math.random()*12+6,
+      opacity:0.25 + Math.random()*0.2,
+      driftX:(Math.random()-0.5)*0.6,
+      driftY:(Math.random()-1.2)*0.6,
+      fade: Math.random()*0.005+0.003
+    });
+  }
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    particles.forEach(p=>{
+      ctx.beginPath();
+      ctx.fillStyle = `rgba(180,180,180,${p.opacity})`;
+      ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fill();
+      p.x += p.driftX; p.y += p.driftY; p.opacity -= p.fade; p.r *= 1.003;
+      if(p.opacity<=0) p.opacity=0;
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+// ---- 显示广播列表 ----
+const broadcastListEl = document.getElementById("broadcastList");
+async function loadBroadcasts() {
+  try {
+    const q = query(collection(db,"broadcasts"), orderBy("timestamp","desc"));
+    const querySnapshot = await getDocs(q);
+    querySnapshot.forEach(doc=>{
+      const data = doc.data();
+      const div = document.createElement("div");
+      div.className = "broadcast-card";
+      div.innerHTML = `<p class="broadcast-title">${data.author || "匿名"}</p>
+                       <p class="broadcast-content">${data.content}</p>`;
+      broadcastListEl.appendChild(div);
+    });
+  } catch(e){ console.error(e); }
+}
+
+// ---- Firebase Authentication 显示广播 ----
+onAuthStateChanged(auth,user=>{
+  if(user){ loadBroadcasts(); }
+  else { broadcastListEl.innerHTML='<p>请先登录才能查看广播</p>'; }
+});
+</script>
+{{ end }}
+
