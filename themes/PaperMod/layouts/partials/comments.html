@@ -1,6 +1,9 @@
-{{ if or (.Page.Params.comments) (.Site.Params.comments) }}
+{{- /* comments.html */ -}}
+{{- /* ------------------------- */ -}}
+{{- /* 显示 Gitcus 评论区（排除 Broadcast 和 About 页面） */ -}}
+{{- $filename := .File.BaseFileName -}}
+{{- if and (or (.Page.Params.comments) (.Site.Params.comments)) (not (in (slice "broadcast--index" "about") $filename)) -}}
 <div id="comments" style="margin-top: 3rem;">
-
   <script src="https://giscus.app/client.js"
           data-repo="liangyi-x/drunk"
           data-repo-id="R_kgDOQX6njg"
@@ -15,7 +18,6 @@
           crossorigin="anonymous"
           async>
   </script>
-
 </div>
-{{ end }}
+{{- end -}}
 
