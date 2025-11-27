@@ -1,20 +1,20 @@
-{"id":"55874","variant":"standard","title":"LOST & FOUND"}
+{"id":"55877","variant":"standard","title":"广播页面豆瓣风格整合"}
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Broadcast - Drunk</title>
+<title>LOST & FOUND</title>
 <style>
   body {
     margin:0; padding:0;
-    background-color:#1c1c1c;
+    background-color:#2f2f2f;
     font-family:"Noto Sans", sans-serif;
     color:#ddd;
     overflow-x:hidden;
   }
 
-  /* 标题 */
+  /* 页面标题 */
   .page-title {
     text-align: center;
     font-size: 2rem;
@@ -23,64 +23,73 @@
     margin: 2rem 0 1rem 0;
   }
 
-  /* 广播列表卡片化（像豆瓣） */
+  /* 广播列表卡片化 */
   .broadcast-list {
     max-width: 800px;
     margin: 0 auto;
     padding: 0 1rem;
-    display: grid;
-    grid-template-columns: repeat(auto-fill,minmax(250px,1fr));
-    gap: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    z-index:1;
+    position: relative;
   }
   .broadcast-card {
-    background: rgba(255,255,255,0.05);
+    background: #3a3a3a;
     border-radius: 8px;
     padding: 0.8rem 1rem;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.4);
     word-break: break-word;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border-left: 4px solid #888;
     display:flex; flex-direction:column;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
   }
   .broadcast-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 14px rgba(0,0,0,0.5);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
   }
-  .broadcast-message { margin-bottom:0.5rem; }
-  .broadcast-time { font-size:0.85rem; color:#aaa; text-align:right; }
+  .broadcast-message { margin-bottom:0.4rem; font-size:1rem; }
+  .broadcast-time { font-size:0.8rem; color:#aaa; text-align:right; }
 
   /* 输入框 */
   .broadcast-input-wrapper {
     max-width: 800px;
     margin: 1.5rem auto 2rem auto;
     display:flex; gap:0.5rem;
+    position: relative;
+    z-index:1;
   }
   #broadcast-input {
     flex:1;
-    padding:0.4rem 0.6rem;
-    border-radius:4px;
+    padding:0.5rem 0.6rem;
+    border-radius:8px;
     border:none;
     font-size:1rem;
+    background:#4a4a4a;
+    color:#fff;
   }
   #broadcast-send {
-    padding:0.4rem 0.8rem;
+    padding:0.5rem 0.8rem;
     border:none;
-    border-radius:4px;
-    background:#222;
+    border-radius:8px;
+    background:#666;
     color:#fff;
     cursor:pointer;
     font-weight:500;
   }
-  #broadcast-send:hover { background:#444; }
+  #broadcast-send:hover { background:#888; }
 
   /* LOST & FOUND */
   #lostfound {
     text-align:center;
     font-style:italic;
-    font-size:1.3rem;
+    font-size:1.5rem;
     color: rgba(220,220,220,0.7);
     text-shadow:0 0 6px rgba(255,255,255,0.05);
     margin:2rem 0;
     cursor:pointer;
+    z-index:1;
+    position: relative;
   }
 
   /* 溶解动画 */
@@ -95,29 +104,25 @@
     position: fixed;
     inset: 0;
     pointer-events: none;
-    z-index: 0;
+    z-index:0;
   }
-
 </style>
 </head>
 <body>
+<canvas id="smoke-canvas"></canvas>
 
-<h1 class="page-title">广播书</h1>
+<div class="page-title">LOST & FOUND</div>
 
-<!-- Firebase 广播输入 -->
 <div class="broadcast-input-wrapper">
   <input type="text" id="broadcast-input" placeholder="输入广播信息">
   <button id="broadcast-send">发送</button>
 </div>
 
-<!-- 广播列表 -->
 <div class="broadcast-list" id="broadcasts">
-  加载中…
+  <!-- 广播内容通过 Firebase JS 注入 -->
 </div>
 
-<!-- LOST & FOUND -->
-<div id="lostfound">在不可能之海里</div>
-<canvas id="smoke-canvas"></canvas>
+<div id="lostfound">LOST & FOUND 像水消失在水中</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-app.js";
@@ -134,99 +139,69 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const broadcastRef = collection(db, "broadcasts");
-
 const inputEl = document.getElementById("broadcast-input");
 const sendBtn = document.getElementById("broadcast-send");
 const listEl = document.getElementById("broadcasts");
 
+// 发送广播
 sendBtn.addEventListener("click", async ()=>{
-  const text = inputEl.value.trim();
+  const text=inputEl.value.trim();
   if(!text) return;
-  try {
-    await addDoc(broadcastRef, {message:text, timestamp:new Date()});
+  try{
+    await addDoc(broadcastRef,{message:text,timestamp:new Date()});
     inputEl.value="";
-  } catch(e) { console.error("发送广播失败:",e); }
+  }catch(e){console.error("发送失败:",e);}
 });
+inputEl.addEventListener("keydown",e=>{if(e.key==="Enter")sendBtn.click();});
 
-inputEl.addEventListener("keydown", e=>{
-  if(e.key==="Enter") sendBtn.click();
-});
-
-// 按时间倒序
-const q = query(broadcastRef, orderBy("timestamp","desc"));
-onSnapshot(q, snapshot=>{
+// 实时监听
+const q=query(broadcastRef,orderBy("timestamp","desc"));
+onSnapshot(q,snapshot=>{
   listEl.innerHTML="";
   snapshot.forEach(doc=>{
-    const data = doc.data();
-    const div = document.createElement("div");
+    const div=document.createElement("div");
     div.className="broadcast-card";
-    const msgDiv = document.createElement("div");
-    msgDiv.className="broadcast-message";
-    msgDiv.textContent = data.message;
-    const timeDiv = document.createElement("div");
-    timeDiv.className="broadcast-time";
-    const ts = data.timestamp?.toDate ? data.timestamp.toDate() : new Date(data.timestamp);
-    timeDiv.textContent = ts.toLocaleString();
-    div.appendChild(msgDiv);
-    div.appendChild(timeDiv);
+    div.innerHTML=`<div class="broadcast-message">${doc.data().message}</div>
+                   <div class="broadcast-time">${new Date(doc.data().timestamp.toDate()).toLocaleString()}</div>`;
     listEl.appendChild(div);
   });
-}, error=>{
-  console.error("监听广播失败:",error);
-  listEl.textContent="加载失败";
+},error=>{console.error("监听失败:",error); listEl.textContent="加载失败";});
+
+// LOST & FOUND 点击溶解
+document.getElementById("lostfound").addEventListener("click", function () {
+  const el = this;
+  el.classList.add("dissolve");
+  setTimeout(() => { window.location.href = "/drunk/"; }, 1200);
 });
 </script>
 
+<!-- 水墨烟雾 JS -->
 <script>
-  // LOST & FOUND 点击跳转
-  const lf = document.getElementById("lostfound");
-  lf.addEventListener("click", () => {
-    lf.classList.add("dissolve");
-    setTimeout(()=>{ window.location.href="/drunk/"; }, 1200);
+const canvas = document.getElementById("smoke-canvas");
+const ctx = canvas.getContext("2d");
+canvas.width=window.innerWidth;
+canvas.height=window.innerHeight;
+const particles=[];
+for(let i=0;i<80;i++){
+  particles.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height, r:Math.random()*40+20, alpha:Math.random()*0.2+0.05, vx:Math.random()*0.2-0.1, vy:Math.random()*0.2-0.1});
+}
+function animateSmoke(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  particles.forEach(p=>{
+    ctx.beginPath();
+    ctx.fillStyle=`rgba(200,200,200,${p.alpha})`;
+    ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    ctx.fill();
+    p.x+=p.vx; p.y+=p.vy;
+    if(p.x>canvas.width) p.x=0;
+    if(p.x<0) p.x=canvas.width;
+    if(p.y>canvas.height) p.y=0;
+    if(p.y<0) p.y=canvas.height;
   });
-
-  // 烟雾流动效果
-  const canvas = document.getElementById("smoke-canvas");
-  const ctx = canvas.getContext("2d");
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-
-  let particles=[];
-  function Particle(x,y,radius,alpha,dx,dy){
-    this.x=x; this.y=y; this.radius=radius; this.alpha=alpha;
-    this.dx=dx; this.dy=dy;
-  }
-  function initParticles(){
-    particles=[];
-    for(let i=0;i<80;i++){
-      particles.push(new Particle(Math.random()*canvas.width, Math.random()*canvas.height,
-        20+Math.random()*40, 0.02+Math.random()*0.03, (Math.random()-0.5)*0.2, -0.05-Math.random()*0.1));
-    }
-  }
-  function animate(){
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    particles.forEach(p=>{
-      p.x+=p.dx;
-      p.y+=p.dy;
-      if(p.y+p.radius<0) p.y=canvas.height+p.radius;
-      ctx.beginPath();
-      let grad = ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.radius);
-      grad.addColorStop(0,'rgba(200,200,200,'+p.alpha+')');
-      grad.addColorStop(1,'rgba(200,200,200,0)');
-      ctx.fillStyle=grad;
-      ctx.arc(p.x,p.y,p.radius,0,Math.PI*2);
-      ctx.fill();
-    });
-    requestAnimationFrame(animate);
-  }
-  initParticles();
-  animate();
-  window.addEventListener("resize", ()=>{
-    canvas.width=window.innerWidth;
-    canvas.height=window.innerHeight;
-    initParticles();
-  });
+  requestAnimationFrame(animateSmoke);
+}
+animateSmoke();
+window.addEventListener("resize",()=>{canvas.width=window.innerWidth;canvas.height=window.innerHeight;});
 </script>
-
 </body>
 </html>
