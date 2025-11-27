@@ -1,6 +1,177 @@
 {{ define "main" }}
-<div style="max-width:600px;margin:2rem auto;padding:1rem;background:#eee;border-radius:8px;">
-  <h2>{{ .Title }}</h2>
-  <div>{{ .Content }}</div>
+<style>
+/* 页面整体背景灰色 + 雾雨效果 */
+body {
+  background: #ddd;
+  margin: 0;
+  font-family: sans-serif;
+}
+#broadcast-wrapper {
+  position: fixed;
+  bottom: 1rem;
+  right: 50%;
+  transform: translateX(50%);
+  width: 320px;
+  z-index: 9999;
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 8px;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  overflow: hidden;
+}
+#broadcasts {
+  max-height: 250px;
+  overflow-y: auto;
+  padding: 0.5rem 1rem;
+  color: #222;
+  font-size: 0.95rem;
+}
+#broadcast-input-wrapper {
+  display: flex;
+  border-top: 1px solid #ccc;
+}
+#broadcast-input {
+  flex: 1;
+  padding: 0.4rem 0.5rem;
+  border: none;
+  outline: none;
+  font-size: 0.95rem;
+}
+#broadcast-send {
+  padding: 0.4rem 0.8rem;
+  background: #555;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+#broadcast-send:hover { background: #333; }
+
+/* LOST & FOUND 标题 */
+.broadcast-title {
+  text-align: center;
+  font-size: 2rem;
+  font-weight: bold;
+  color: #fff;
+  margin-top: 3rem;
+  text-shadow: 0 0 8px rgba(0,0,0,0.4);
+  position: relative;
+}
+
+/* 雾雨效果 */
+#fog-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+}
+</style>
+
+<!-- LOST & FOUND -->
+<div class="broadcast-title">LOST & FOUND</div>
+
+<!-- 雾雨 Canvas -->
+<canvas id="fog-canvas"></canvas>
+
+<!-- 广播区 -->
+<div id="broadcast-wrapper">
+  <div id="broadcasts">加载中…</div>
+  <div id="broadcast-input-wrapper">
+    <input type="text" id="broadcast-input" placeholder="输入广播信息">
+    <button id="broadcast-send">发送</button>
+  </div>
 </div>
+
+<script type="module">
+// Firebase 初始化
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-app.js";
+import { getFirestore, collection, addDoc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-firestore.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCcerqGJVSsMwLs7eoRjATE8X7bplWsD54",
+  authDomain: "drunk-broadcast.firebaseapp.com",
+  projectId: "drunk-broadcast",
+  storageBucket: "drunk-broadcast.firebasestorage.app",
+  messagingSenderId: "998143016108",
+  appId: "1:998143016108:web:87c3a60b853aaf75f27309"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+// 匿名登录
+signInAnonymously(auth).catch(console.error);
+
+const broadcastRef = collection(db, "broadcasts");
+const q = query(broadcastRef, orderBy("timestamp", "desc"));
+
+const listEl = document.getElementById("broadcasts");
+const inputEl = document.getElementById("broadcast-input");
+const sendBtn = document.getElementById("broadcast-send");
+
+// 监听广播
+onSnapshot(q, snapshot => {
+  listEl.innerHTML = "";
+  snapshot.forEach(doc => {
+    const div = document.createElement("div");
+    div.textContent = doc.data().message;
+    div.style.padding = "0.2rem 0";
+    div.style.borderBottom = "1px solid #eee";
+    listEl.appendChild(div);
+  });
+}, error => {
+  listEl.textContent = "加载失败";
+  console.error(error);
+});
+
+// 发送广播
+sendBtn.addEventListener("click", async () => {
+  const text = inputEl.value.trim();
+  if(!text) return;
+  try {
+    await addDoc(broadcastRef, {
+      message: text,
+      timestamp: new Date()
+    });
+    inputEl.value = "";
+  } catch(e) { console.error("发送失败:", e); }
+});
+inputEl.addEventListener("keydown", e => { if(e.key==="Enter") sendBtn.click(); });
+
+// 雾雨效果
+const canvas = document.getElementById("fog-canvas");
+const ctx = canvas.getContext("2d");
+let width, height;
+function resize() { width = canvas.width = window.innerWidth; height = canvas.height = window.innerHeight; }
+window.addEventListener("resize", resize);
+resize();
+
+const fogParticles = [];
+for(let i=0;i<120;i++){
+  fogParticles.push({
+    x: Math.random()*width,
+    y: Math.random()*height,
+    r: 10 + Math.random()*40,
+    a: 0.05 + Math.random()*0.05,
+    dx: -0.2 + Math.random()*0.4,
+    dy: 0.1 + Math.random()*0.2
+  });
+}
+
+function drawFog(){
+  ctx.clearRect(0,0,width,height);
+  fogParticles.forEach(p=>{
+    ctx.beginPath();
+    ctx.fillStyle = `rgba(200,200,200,${p.a})`;
+    ctx.arc(p.x,p.y,p.r,0,2*Math.PI);
+    ctx.fill();
+    p.x += p.dx;
+    p.y += p.dy;
+    if(p.x<-50) p.x = width+50;
+    if(p.x>width+50) p.x = -50;
+    if(p.y>height+50) p.y = -50;
+  });
+  requestAnimationFrame(drawFog);
+}
+drawFog();
+</script>
 {{ end }}
