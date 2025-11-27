@@ -1,4 +1,4 @@
-{"id":"55871","variant":"standard","title":"LOST & FOUND"}
+{"id":"55874","variant":"standard","title":"LOST & FOUND"}
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -7,77 +7,87 @@
 <title>Broadcast - Drunk</title>
 <style>
   body {
-    margin: 0;
-    padding: 0;
-    background-color: #1c1c1c;
-    font-family: "Noto Sans", sans-serif;
-    color: #ddd;
-    overflow-x: hidden;
+    margin:0; padding:0;
+    background-color:#1c1c1c;
+    font-family:"Noto Sans", sans-serif;
+    color:#ddd;
+    overflow-x:hidden;
   }
 
-  /* 广播容器 */
-  #broadcast-wrapper {
-    position: fixed;
-    bottom: 1rem;
-    right: 50%;
-    transform: translateX(50%);
-    width: 320px;
-    z-index: 9999;
-  }
-
-  #broadcasts {
-    max-height: 250px;
-    overflow-y: auto;
-    background: rgba(20,20,20,0.5);
-    backdrop-filter: blur(4px);
-    color: #eee;
-    padding: 0.8rem 1rem;
-    border-radius: 12px;
-    font-size: 0.95rem;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.3);
-  }
-
-  #broadcast-input {
-    width: calc(100% - 70px);
-    padding: 0.4rem 0.6rem;
-    border-radius: 6px;
-    border: none;
-    outline: none;
-    font-size: 0.9rem;
-    margin-right: 0.3rem;
-  }
-
-  #broadcast-send {
-    padding: 0.4rem 0.6rem;
-    border: none;
-    border-radius: 6px;
-    background-color: #ff9f1c;
-    color: #fff;
-    cursor: pointer;
-    font-size: 0.9rem;
-    transition: background 0.2s ease;
-  }
-
-  #broadcast-send:hover { background-color: #e68a00; }
-
-  /* LOST & FOUND 居中 + 水墨效果 */
-  #lostfound {
+  /* 标题 */
+  .page-title {
     text-align: center;
-    font-style: italic;
-    font-size: 1.3rem;
+    font-size: 2rem;
+    font-weight: 600;
+    color: #fff;
+    margin: 2rem 0 1rem 0;
+  }
+
+  /* 广播列表卡片化（像豆瓣） */
+  .broadcast-list {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 1rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill,minmax(250px,1fr));
+    gap: 1rem;
+  }
+  .broadcast-card {
+    background: rgba(255,255,255,0.05);
+    border-radius: 8px;
+    padding: 0.8rem 1rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    word-break: break-word;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    display:flex; flex-direction:column;
+  }
+  .broadcast-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(0,0,0,0.5);
+  }
+  .broadcast-message { margin-bottom:0.5rem; }
+  .broadcast-time { font-size:0.85rem; color:#aaa; text-align:right; }
+
+  /* 输入框 */
+  .broadcast-input-wrapper {
+    max-width: 800px;
+    margin: 1.5rem auto 2rem auto;
+    display:flex; gap:0.5rem;
+  }
+  #broadcast-input {
+    flex:1;
+    padding:0.4rem 0.6rem;
+    border-radius:4px;
+    border:none;
+    font-size:1rem;
+  }
+  #broadcast-send {
+    padding:0.4rem 0.8rem;
+    border:none;
+    border-radius:4px;
+    background:#222;
+    color:#fff;
+    cursor:pointer;
+    font-weight:500;
+  }
+  #broadcast-send:hover { background:#444; }
+
+  /* LOST & FOUND */
+  #lostfound {
+    text-align:center;
+    font-style:italic;
+    font-size:1.3rem;
     color: rgba(220,220,220,0.7);
-    text-shadow: 0 0 6px rgba(255,255,255,0.05);
-    margin-top: 2.5rem;
-    position: relative;
-    cursor: pointer;
+    text-shadow:0 0 6px rgba(255,255,255,0.05);
+    margin:2rem 0;
+    cursor:pointer;
   }
 
   /* 溶解动画 */
   @keyframes dissolve {
-    0% { opacity: 1; filter: blur(0px); transform: scale(1); }
-    100% { opacity: 0; filter: blur(12px); transform: scale(0.3) rotate(10deg); }
+    0% { opacity:1; filter:blur(0px); transform: scale(1); }
+    100% { opacity:0; filter:blur(12px); transform: scale(0.3) rotate(10deg); }
   }
-
   .dissolve { animation: dissolve 1.2s ease forwards; }
 
   /* 水墨烟雾背景 */
@@ -92,13 +102,17 @@
 </head>
 <body>
 
-<!-- 广播模块 -->
-<div id="broadcast-wrapper">
-  <div id="broadcasts">加载中…</div>
-  <div style="margin-top:0.5rem; display:flex; gap:0.3rem;">
-    <input type="text" id="broadcast-input" placeholder="输入广播信息">
-    <button id="broadcast-send">发送</button>
-  </div>
+<h1 class="page-title">广播书</h1>
+
+<!-- Firebase 广播输入 -->
+<div class="broadcast-input-wrapper">
+  <input type="text" id="broadcast-input" placeholder="输入广播信息">
+  <button id="broadcast-send">发送</button>
+</div>
+
+<!-- 广播列表 -->
+<div class="broadcast-list" id="broadcasts">
+  加载中…
 </div>
 
 <!-- LOST & FOUND -->
@@ -117,85 +131,101 @@ const firebaseConfig = {
   messagingSenderId: "998143016108",
   appId: "1:998143016108:web:87c3a60b853aaf75f27309"
 };
-
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const broadcastRef = collection(db, "broadcasts");
+
 const inputEl = document.getElementById("broadcast-input");
 const sendBtn = document.getElementById("broadcast-send");
 const listEl = document.getElementById("broadcasts");
 
 sendBtn.addEventListener("click", async ()=>{
-  const text=inputEl.value.trim(); 
+  const text = inputEl.value.trim();
   if(!text) return;
-  try{
-    await addDoc(broadcastRef,{message:text,timestamp:new Date()}); 
+  try {
+    await addDoc(broadcastRef, {message:text, timestamp:new Date()});
     inputEl.value="";
-  }catch(e){ console.error("发送广播失败:",e); }
+  } catch(e) { console.error("发送广播失败:",e); }
 });
 
-inputEl.addEventListener("keydown", e => { if(e.key==="Enter") sendBtn.click(); });
+inputEl.addEventListener("keydown", e=>{
+  if(e.key==="Enter") sendBtn.click();
+});
 
-const q=query(broadcastRef, orderBy("timestamp","desc"));
-onSnapshot(q, snapshot => {
+// 按时间倒序
+const q = query(broadcastRef, orderBy("timestamp","desc"));
+onSnapshot(q, snapshot=>{
   listEl.innerHTML="";
   snapshot.forEach(doc=>{
-    const div=document.createElement("div");
-    div.textContent = doc.data().message;
-    div.style.marginBottom = "0.3rem";
+    const data = doc.data();
+    const div = document.createElement("div");
+    div.className="broadcast-card";
+    const msgDiv = document.createElement("div");
+    msgDiv.className="broadcast-message";
+    msgDiv.textContent = data.message;
+    const timeDiv = document.createElement("div");
+    timeDiv.className="broadcast-time";
+    const ts = data.timestamp?.toDate ? data.timestamp.toDate() : new Date(data.timestamp);
+    timeDiv.textContent = ts.toLocaleString();
+    div.appendChild(msgDiv);
+    div.appendChild(timeDiv);
     listEl.appendChild(div);
   });
-}, error => { console.error("监听广播失败:",error); listEl.textContent="加载失败"; });
-
-// LOST & FOUND 点击跳转
-document.getElementById("lostfound").addEventListener("click", function() {
-  const el = this;
-  el.classList.add("dissolve");
-  setTimeout(()=>{ window.location.href = "/drunk/"; }, 1200);
+}, error=>{
+  console.error("监听广播失败:",error);
+  listEl.textContent="加载失败";
 });
+</script>
 
-// 烟雾流动效果
-const canvas = document.getElementById("smoke-canvas");
-const ctx = canvas.getContext("2d");
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-
-let particles = [];
-function Particle(x,y,radius,alpha,dx,dy){
-  this.x=x; this.y=y; this.radius=radius; this.alpha=alpha;
-  this.dx=dx; this.dy=dy;
-}
-function initParticles(){
-  particles=[];
-  for(let i=0;i<80;i++){
-    particles.push(new Particle(Math.random()*canvas.width, Math.random()*canvas.height,
-      20+Math.random()*40, 0.02+Math.random()*0.03, (Math.random()-0.5)*0.2, -0.05-Math.random()*0.1));
-  }
-}
-function animate(){
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  particles.forEach(p=>{
-    p.x += p.dx;
-    p.y += p.dy;
-    if(p.y + p.radius <0) p.y = canvas.height + p.radius;
-    ctx.beginPath();
-    let grad = ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.radius);
-    grad.addColorStop(0,'rgba(200,200,200,'+p.alpha+')');
-    grad.addColorStop(1,'rgba(200,200,200,0)');
-    ctx.fillStyle = grad;
-    ctx.arc(p.x,p.y,p.radius,0,Math.PI*2);
-    ctx.fill();
+<script>
+  // LOST & FOUND 点击跳转
+  const lf = document.getElementById("lostfound");
+  lf.addEventListener("click", () => {
+    lf.classList.add("dissolve");
+    setTimeout(()=>{ window.location.href="/drunk/"; }, 1200);
   });
-  requestAnimationFrame(animate);
-}
-initParticles();
-animate();
 
-window.addEventListener("resize", ()=>{
-  canvas.width=window.innerWidth;
-  canvas.height=window.innerHeight;
+  // 烟雾流动效果
+  const canvas = document.getElementById("smoke-canvas");
+  const ctx = canvas.getContext("2d");
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  let particles=[];
+  function Particle(x,y,radius,alpha,dx,dy){
+    this.x=x; this.y=y; this.radius=radius; this.alpha=alpha;
+    this.dx=dx; this.dy=dy;
+  }
+  function initParticles(){
+    particles=[];
+    for(let i=0;i<80;i++){
+      particles.push(new Particle(Math.random()*canvas.width, Math.random()*canvas.height,
+        20+Math.random()*40, 0.02+Math.random()*0.03, (Math.random()-0.5)*0.2, -0.05-Math.random()*0.1));
+    }
+  }
+  function animate(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    particles.forEach(p=>{
+      p.x+=p.dx;
+      p.y+=p.dy;
+      if(p.y+p.radius<0) p.y=canvas.height+p.radius;
+      ctx.beginPath();
+      let grad = ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.radius);
+      grad.addColorStop(0,'rgba(200,200,200,'+p.alpha+')');
+      grad.addColorStop(1,'rgba(200,200,200,0)');
+      ctx.fillStyle=grad;
+      ctx.arc(p.x,p.y,p.radius,0,Math.PI*2);
+      ctx.fill();
+    });
+    requestAnimationFrame(animate);
+  }
   initParticles();
-});
+  animate();
+  window.addEventListener("resize", ()=>{
+    canvas.width=window.innerWidth;
+    canvas.height=window.innerHeight;
+    initParticles();
+  });
 </script>
 
 </body>
