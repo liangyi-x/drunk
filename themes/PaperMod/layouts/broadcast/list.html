@@ -20,17 +20,18 @@ body { margin:0; padding:0; background:#1f1f1f; color:#ddd; font-family:sans-ser
 .broadcast-message { font-size:1rem; margin-bottom:0.4rem; }
 .broadcast-time { font-size:0.85rem; color:#aaa; text-align:right; }
 #lostfound { text-align:center; margin:2rem 0; font-style:italic; color:rgba(200,200,200,0.7); cursor:pointer; transition:0.3s; }
-#lostfound:hover { color:#7fffd4; }
+#lostfound:hover { color:#FFA500; }
 #spell-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.35); pointer-events:none; opacity:0; transition:opacity 1.2s ease-in-out; z-index:999; }
 
-/* 小狐狸晃动和光晕 */
-#fox-container { position:absolute; top:50%; left:50%; width:200px; height:200px; background:url('https://i.imgur.com/tS3Zs0r.png') no-repeat center/contain; opacity:0; transition: opacity 1.2s ease-in-out; }
-@keyframes foxWiggle { 0% { transform: translate(-50%, -50%) rotate(-2deg); } 25% { transform: translate(-50%, -50%) rotate(2deg); } 50% { transform: translate(-50%, -50%) rotate(-1deg); } 75% { transform: translate(-50%, -50%) rotate(1deg); } 100% { transform: translate(-50%, -50%) rotate(0deg); } }
-@keyframes foxGlow { 0%,100% { box-shadow: 0 0 15px 4px #7fffd4; } 50% { box-shadow: 0 0 25px 8px #0ff; } }
+/* 暗橙色狐狸动画 */
+#fox-container { position:absolute; top:50%; left:50%; width:120px; height:120px; transform:translate(-50%,-50%); opacity:0; filter: drop-shadow(0 0 12px #FF8C42); transition: opacity 1.2s ease-in-out;}
+#fox-container svg { width:100%; height:100%; }
+@keyframes foxWiggle { 0% { transform: translate(-50%, -50%) rotate(-3deg); } 25% { transform: translate(-50%, -50%) rotate(3deg); } 50% { transform: translate(-50%, -50%) rotate(-2deg); } 75% { transform: translate(-50%, -50%) rotate(2deg); } 100% { transform: translate(-50%, -50%) rotate(0deg); } }
+@keyframes foxFloat { 0% { transform: translate(-50%, -50%) translateY(0px); } 50% { transform: translate(-50%, -50%) translateY(-5px); } 100% { transform: translate(-50%, -50%) translateY(0px); } }
+@keyframes textFloat { 0% { transform: translate(-50%, -50%) translateY(0px); } 50% { transform: translate(-50%, -50%) translateY(-6px); } 100% { transform: translate(-50%, -50%) translateY(0px); } }
+@keyframes text-glow { 0%,100% { text-shadow:0 0 8px #FFA500,0 0 12px #FFD580; } 50% { text-shadow:0 0 16px #FFA500,0 0 24px #FFD580; } }
 
-#record-label { position:absolute; top:calc(50% + 130px); left:50%; transform:translate(-50%,-50%); color:#7fffd4; font-size:1.4rem; text-align:center; text-shadow:0 0 10px #0ff; opacity:0; transition:opacity 1.5s ease-in-out; }
-#spell-text { position:absolute; top:calc(50% + 150px); left:50%; transform:translate(-50%,0); color:#e7f5ff; font-size:1.8rem; text-shadow:0 0 20px #aaf; opacity:0; transition:opacity 1.5s ease-in-out, transform 1.5s ease-in-out; }
-#spell-rune { width:10px; height:10px; position:absolute; border-radius:50%; pointer-events:none; box-shadow:0 0 10px #0ff; opacity:0; }
+#fox-text { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); color:#ffe0b2; font-size:1.2rem; font-weight:bold; text-shadow:0 0 12px #FFA500; opacity:0; transition: opacity 1.5s ease-in-out; pointer-events:none;}
 </style>
 </head>
 <body>
@@ -45,8 +46,16 @@ body { margin:0; padding:0; background:#1f1f1f; color:#ddd; font-family:sans-ser
 </div>
 
 <div id="spell-overlay">
-  <div id="fox-container"></div>
-  <div id="record-label">Tomorrow is another day</div>
+  <div id="fox-container">
+    <svg viewBox="0 0 120 120">
+      <ellipse cx="60" cy="70" rx="35" ry="40" fill="#FF8C42"/>
+      <circle cx="60" cy="40" r="25" fill="#FF8C42"/>
+      <polygon points="45,20 55,40 40,35" fill="#FF8C42"/>
+      <polygon points="75,20 65,40 80,35" fill="#FF8C42"/>
+      <path d="M95 80 Q110 60 100 90" fill="#FF8C42"/>
+    </svg>
+    <div id="fox-text">Tomorrow is another day</div>
+  </div>
 </div>
 
 <script type="module">
@@ -64,16 +73,14 @@ sendBtn.onclick=async()=>{const v=inputEl.value.trim(); if(!v) return; await add
 inputEl.addEventListener("keydown",e=>{if(e.key==="Enter") sendBtn.click();});
 const q=query(ref,orderBy("timestamp","desc"));
 onSnapshot(q,snap=>{listEl.innerHTML=""; snap.forEach(doc=>{const data=doc.data(); const d=document.createElement("div"); d.className="broadcast-card"; d.innerHTML=`<div class="broadcast-message">${data.message}</div><div class="broadcast-time">${data.timestamp.toDate().toLocaleString()}</div>`; d.onclick=()=>d.classList.add("dissolve"); listEl.appendChild(d);});});
-
-// 页面加载时慢慢显示
 window.addEventListener("load",()=>{document.getElementById("main-container").style.opacity="1";});
 </script>
 
 <script>
-// 魔法粒子和小狐狸效果
+// 魔法粒子和狐狸动画
 const spellOverlay = document.getElementById("spell-overlay");
 const fox = document.getElementById("fox-container");
-const label = document.getElementById("record-label");
+const foxText = document.getElementById("fox-text");
 
 function spawnRunes(count=25){
   for(let i=0;i<count;i++){
@@ -86,13 +93,13 @@ function spawnRunes(count=25){
     rune.style.left=Math.random()*100+"%";
     rune.style.opacity="0";
     rune.style.background=`radial-gradient(circle, hsl(${Math.random()*360},100%,75%), hsl(${Math.random()*360},80%,50%))`;
-    rune.style.boxShadow=`0 0 ${5+Math.random()*10}px #0ff`;
+    rune.style.boxShadow=`0 0 ${5+Math.random()*10}px #FFA500`;
     document.body.appendChild(rune);
     setTimeout(()=>{rune.style.opacity="1";},Math.random()*300);
 
     const colorAnim = setInterval(()=>{
       rune.style.background=`radial-gradient(circle, hsl(${Math.random()*360},100%,75%), hsl(${Math.random()*360},80%,50%))`;
-      rune.style.boxShadow=`0 0 ${5+Math.random()*10}px #0ff`;
+      rune.style.boxShadow=`0 0 ${5+Math.random()*10}px #FFA500`;
     },400+Math.random()*600);
 
     const amplitudeX=(Math.random()-0.5)*80;
@@ -108,26 +115,33 @@ function spawnRunes(count=25){
 document.getElementById("lostfound").onclick=()=>{
   spellOverlay.style.opacity="1";
   fox.style.opacity="1";
-  fox.style.animation="foxWiggle 3s infinite ease-in-out, foxGlow 2s infinite alternate";
-  label.style.opacity="1";
+  fox.style.animation="foxWiggle 3s infinite ease-in-out, foxFloat 2.5s infinite alternate";
+  foxText.style.animation="textFloat 2.5s infinite alternate, text-glow 2s infinite alternate";
   spawnRunes(25);
   document.body.style.filter="blur(1.5px) brightness(0.85)";
 
-  setTimeout(()=>{
-    label.style.opacity="0";
-    const spellText=document.createElement("div");
-    spellText.id="spell-text";
-    spellText.textContent="People make mistakes.";
-    spellOverlay.appendChild(spellText);
-    requestAnimationFrame(()=>{spellText.style.opacity="1"; spellText.style.transform="translate(-50%,-10px)";});
-  },1600);
+  // 显示 first text
+  foxText.textContent="Tomorrow is another day";
+  foxText.style.opacity="1";
 
+  setTimeout(()=>{
+    // 淡出 first text
+    foxText.style.opacity="0";
+    setTimeout(()=>{
+      // 显示 second text
+      foxText.textContent="People make mistakes.";
+      foxText.style.opacity="1";
+    },1500);
+  },2500);
+
+  // 最后淡出并回主页
   setTimeout(()=>{
     spellOverlay.style.opacity="0";
+    foxText.style.opacity="0";
     document.body.style.filter="none";
-  },4500);
+  },5000);
 
-  setTimeout(()=>{window.location.href="https://liangyi-x.github.io/drunk/";},4800);
+  setTimeout(()=>{window.location.href="https://liangyi-x.github.io/drunk/";},5800);
 };
 </script>
 </body>
