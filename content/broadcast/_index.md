@@ -1,6 +1,7 @@
 ---
 title: "LOST & FOUND"
+date: 2025-11-27
+draft: false
+comments: false
 type: "broadcast"
-comments: false   # 关闭 Giscus 评论
-url: "/broadcast/"  # 确保 URL 正确
 ---
