@@ -60,13 +60,15 @@
     {{- end }}
   </footer>
 
-  {{- /* ------------------------- */ -}}
-  {{- /* 评论区：调用 partial comments.html */ -}}
-  {{- /* 全局开启：config.yaml params.comments: true */ -}}
-  {{- /* 单篇关闭：front matter comments: false */ -}}
-  {{- if or (.Page.Params.comments) (.Site.Params.comments) }}
-    {{ partial "comments.html" . }}
-  {{- end }}
+{{- /* ------------------------- */ -}}
+{{- /* 评论区：调用 partial comments.html */ -}}
+{{- /* 全局开启：config.yaml params.comments: true */ -}}
+{{- /* 单篇关闭：front matter comments: false */ -}}
+{{- $basename := .File.BaseFileName -}}
+{{- if and (or (.Page.Params.comments) (.Site.Params.comments)) (not (or (eq $basename "about") (eq $basename "broadcast--index"))) }}
+{{ partial "comments.html" . }}
+{{- end }}
+
 
 </article>
 
