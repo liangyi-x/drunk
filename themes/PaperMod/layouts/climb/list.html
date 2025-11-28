@@ -15,17 +15,19 @@ body {
   position: relative;
 }
 
-/* 山 - 半屏 */
+/* 山体 - 底部开始，占半屏 */
 .mountain {
-  position: relative;
+  position: absolute;
+  bottom: 0;
   width: 100%;
   height: 50%;
   background: linear-gradient(#3a5f3a, #2c4d2c);
   clip-path: polygon(
-    50% 0%, 55% 5%, 60% 10%, 65% 8%, 70% 12%, 75% 7%, 80% 15%, 
-    85% 10%, 90% 20%, 95% 15%, 100% 40%, 100% 100%, 0% 100%, 0% 40%, 5% 20%, 10% 15%, 15% 10%, 20% 15%, 25% 7%, 30% 12%, 35% 8%, 40% 10%, 45% 5%
+    0% 100%, 0% 40%, 5% 20%, 10% 15%, 15% 10%, 20% 15%, 25% 7%, 30% 12%, 
+    35% 8%, 40% 10%, 45% 5%, 50% 0%, 55% 5%, 60% 10%, 65% 8%, 70% 12%, 
+    75% 7%, 80% 15%, 85% 10%, 90% 20%, 95% 15%, 100% 40%, 100% 100%
   );
-  display: flex;
+  display:flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
@@ -38,18 +40,7 @@ body {
   text-align: center;
   text-shadow: 0 0 12px rgba(0,0,0,0.6);
   margin:0.3rem 0;
-  font-size: clamp(1.5rem, 5vw, 2.5rem);
-}
-
-/* 山底渐变过渡 */
-.mountain::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  height: 15%;
-  background: linear-gradient(to bottom, rgba(58,95,58,0) 0%, #00183a 100%);
-  z-index:1;
+  font-size: clamp(1.5rem,5vw,2.5rem);
 }
 
 /* 海浪容器 */
@@ -57,7 +48,7 @@ body {
   position: absolute;
   bottom:0;
   width:100%;
-  height:25%;
+  height:55%; /* 让波浪可以盖住山底一部分 */
   z-index:5;
   overflow: hidden;
 }
@@ -76,7 +67,9 @@ body {
 
 .wave1 path { fill: rgba(0,24,58,0.8); animation-delay: 0s; }
 .wave2 path { fill: rgba(0,24,58,0.5); animation-delay: 2s; }
+.wave3 path { fill: rgba(0,24,58,0.3); animation-delay: 4s; }
 
+/* 海浪动画 */
 @keyframes waveMove {
   0% { transform: translateX(0) translateY(0); }
   50% { transform: translateX(-25%) translateY(-6px); }
@@ -93,7 +86,7 @@ body {
   font-style: italic;
   cursor: pointer;
   z-index:6;
-  display: flex;
+  display:flex;
   justify-content: center;
   align-items: center;
   gap: 0.3rem;
@@ -104,7 +97,6 @@ body {
 
 .back-text:hover { transform: scale(1.1); }
 
-/* 漂浮动画 */
 @keyframes float {
   0% { transform: translateY(0); }
   50% { transform: translateY(-5px); }
@@ -133,18 +125,18 @@ body {
 }
 .home-btn:hover { transform: scale(1.2); }
 
-/* 响应式适配 - 手机 */
-@media(max-width:600px) {
-  .mountain h1 { font-size: 1.6rem; }
-  .mountain p { font-size: 1rem; }
-  .back-text { font-size: 1rem; }
-  .home-btn { font-size: 28px; }
+/* 响应式适配 */
+@media(max-width:600px){
+  .mountain h1 { font-size:1.6rem; }
+  .mountain p { font-size:1rem; }
+  .back-text { font-size:1rem; }
+  .home-btn { font-size:28px; }
 }
 </style>
 </head>
 <body>
 
-<!-- 山和文字 -->
+<!-- 山 -->
 <div class="mountain">
   <h1>The mountains are calling and I must go.</h1>
   <p>Because it is there!</p>
@@ -158,9 +150,12 @@ body {
   <svg class="wave wave2" viewBox="0 0 120 20" preserveAspectRatio="none">
     <path d="M0 12 C 10 18 20 8 30 12 C 40 18 50 8 60 12 C 70 18 80 8 90 12 C 100 18 110 8 120 12 L120 20 L0 20 Z"></path>
   </svg>
+  <svg class="wave wave3" viewBox="0 0 120 20" preserveAspectRatio="none">
+    <path d="M0 14 C 10 20 20 10 30 14 C 40 20 50 10 60 14 C 70 20 80 10 90 14 C 100 20 110 10 120 14 L120 20 L0 20 Z"></path>
+  </svg>
 </div>
 
-<!-- 底部水母文字 -->
+<!-- 底部漂浮文字 -->
 <div class="back-text" onclick="goBack()">🪼 There and Back</div>
 
 <!-- 右上角退出按钮 -->
@@ -177,3 +172,4 @@ function goBack() {
 
 </body>
 </html>
+
