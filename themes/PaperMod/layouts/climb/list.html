@@ -33,7 +33,7 @@ body {
   align-items: center;
   justify-content: flex-start;
   padding-top: 3rem;
-  z-index:2;
+  z-index:1;
 }
 
 .mountain h1, .mountain p {
@@ -43,44 +43,88 @@ body {
   margin:0.3rem 0;
 }
 
-/* 海浪容器 */
+/* 山底渐变过渡 */
+.mountain::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 20%;
+  background: linear-gradient(to bottom, rgba(58,95,58,0) 0%, #00183a 100%);
+  z-index:1;
+}
+
+/* 海浪容器（最上层显示） */
 .wave-container {
   position: absolute;
   bottom:0;
   width:100%;
-  height:40%;
-  z-index:1;
+  height:35%;
+  z-index:5;
   overflow: hidden;
 }
 
-/* 海浪SVG */
-.wave-container svg {
-  width: 200%;
-  height: 100%;
+/* 多层海浪 */
+.wave {
+  position: absolute;
+  width:200%;
+  height:100%;
+  bottom:0;
+}
+
+.wave path {
   animation: waveMove 6s ease-in-out infinite alternate;
 }
 
+.wave1 path { fill: rgba(0,24,58,0.8); animation-delay: 0s; }
+.wave2 path { fill: rgba(0,24,58,0.5); animation-delay: 2s; }
+.wave3 path { fill: rgba(0,24,58,0.3); animation-delay: 4s; }
+
 @keyframes waveMove {
   0% { transform: translateX(0) translateY(0); }
-  50% { transform: translateX(-25%) translateY(-10px); }
+  50% { transform: translateX(-25%) translateY(-8px); }
   100% { transform: translateX(0) translateY(0); }
 }
 
-/* 点击文字 */
+/* 海浪上的水母文字 */
 .back-text {
   position: absolute;
-  bottom: 15%;
+  bottom: 20%;
   width: 100%;
   text-align: center;
-  color: #fff;
-  font-size: 1.5rem;
-  text-shadow: 0 0 10px rgba(0,0,0,0.7);
+  font-size: 2rem;
   cursor: pointer;
-  z-index:3;
-  transition: transform 0.3s;
+  z-index:6;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  color: rgba(173, 216, 230, 0.7);
+  text-shadow: 0 0 10px rgba(0,0,0,0.5);
+  animation: float 6s ease-in-out infinite, sway 4s ease-in-out infinite, fade 8s ease-in-out infinite alternate;
 }
-.back-text:hover {
-  transform: scale(1.1);
+
+.back-text:hover { transform: scale(1.1); }
+
+/* 漂浮上下 */
+@keyframes float {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0); }
+}
+
+/* 漂浮左右 */
+@keyframes sway {
+  0% { transform: translateX(0); }
+  50% { transform: translateX(6px); }
+  100% { transform: translateX(0); }
+}
+
+/* 透明渐隐 */
+@keyframes fade {
+  0% { opacity:0.6; }
+  50% { opacity:0.9; }
+  100% { opacity:0.6; }
 }
 
 /* 右上角退出按钮 */
@@ -93,9 +137,7 @@ body {
   z-index:10;
   transition: transform 0.3s;
 }
-.home-btn:hover {
-  transform: scale(1.2);
-}
+.home-btn:hover { transform: scale(1.2); }
 </style>
 </head>
 <body>
@@ -106,15 +148,21 @@ body {
   <p>Because it is there!</p>
 </div>
 
-<!-- 海浪 -->
+<!-- 多层海浪 -->
 <div class="wave-container">
-  <svg viewBox="0 0 120 20" preserveAspectRatio="none">
-    <path d="M0 10 C 10 15 20 5 30 10 C 40 15 50 5 60 10 C 70 15 80 5 90 10 C 100 15 110 5 120 10 L120 20 L0 20 Z" fill="#00183a" />
+  <svg class="wave wave1" viewBox="0 0 120 20" preserveAspectRatio="none">
+    <path d="M0 10 C 10 15 20 5 30 10 C 40 15 50 5 60 10 C 70 15 80 5 90 10 C 100 15 110 5 120 10 L120 20 L0 20 Z"></path>
+  </svg>
+  <svg class="wave wave2" viewBox="0 0 120 20" preserveAspectRatio="none">
+    <path d="M0 12 C 10 18 20 8 30 12 C 40 18 50 8 60 12 C 70 18 80 8 90 12 C 100 18 110 8 120 12 L120 20 L0 20 Z"></path>
+  </svg>
+  <svg class="wave wave3" viewBox="0 0 120 20" preserveAspectRatio="none">
+    <path d="M0 8 C 10 12 20 2 30 8 C 40 12 50 2 60 8 C 70 12 80 2 90 8 C 100 12 110 2 120 8 L120 20 L0 20 Z"></path>
   </svg>
 </div>
 
-<!-- 海浪上的回到页面文字 -->
-<div class="back-text" onclick="goBack()">There and Back</div>
+<!-- 漂浮水母文字 -->
+<div class="back-text" onclick="goBack()">🪼 There and Back</div>
 
 <!-- 右上角退出按钮 -->
 <div class="home-btn" onclick="goHome()">🧗</div>
@@ -130,5 +178,4 @@ function goBack() {
 
 </body>
 </html>
-
 
