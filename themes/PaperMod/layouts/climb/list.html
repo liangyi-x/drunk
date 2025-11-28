@@ -8,14 +8,10 @@
 body {
   margin:0; padding:0;
   font-family: "Helvetica Neue", sans-serif;
-  background: linear-gradient(160deg,#0b0c17,#1a1c2a);
-  color:#fff;
-  height:100vh;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  overflow:hidden;
+  background: #0b0c17;
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
   position: relative;
 }
 
@@ -29,65 +25,52 @@ body {
     50% 0%, 55% 5%, 60% 10%, 65% 8%, 70% 12%, 75% 7%, 80% 15%, 
     85% 10%, 90% 20%, 95% 15%, 100% 40%, 100% 100%, 0% 100%, 0% 40%, 5% 20%, 10% 15%, 15% 10%, 20% 15%, 25% 7%, 30% 12%, 35% 8%, 40% 10%, 45% 5%
   );
-  display:flex;
+  display: flex;
   flex-direction: column;
-  align-items:center;
-  justify-content:flex-start;
+  align-items: center;
+  justify-content: flex-start;
   padding-top: 3rem;
   z-index:2;
 }
 
-
-/* 简单海洋波动效果 */
-.wave {
-  position:absolute;
-  bottom:0; left:0; width:100%;
-  height:120px;
-  background: rgba(255,255,255,0.06);
-  border-radius:100%;
-  animation: waveMove 4s infinite ease-in-out alternate;
+.mountain h1, .mountain p {
+  color: #fff;
+  text-align: center;
+  text-shadow: 0 0 15px rgba(0,0,0,0.7);
+  margin:0.3rem 0;
 }
+
+/* 海浪容器 */
+.wave-container {
+  position: absolute;
+  bottom:0;
+  width:100%;
+  height:30%;
+  z-index:1;
+  overflow: hidden;
+}
+
+/* 海浪SVG */
+.wave-container svg {
+  width: 200%;
+  height: 100%;
+  animation: waveMove 6s ease-in-out infinite alternate;
+}
+
 @keyframes waveMove {
-  0%{ transform: translateY(0) scaleX(1); }
-  50%{ transform: translateY(-12px) scaleX(1.02); }
-  100%{ transform: translateY(0) scaleX(1); }
+  0% { transform: translateX(0) translateY(0); }
+  50% { transform: translateX(-25%) translateY(-10px); }
+  100% { transform: translateX(0) translateY(0); }
 }
 
-/* 标题 */
-h1 {
-  font-size:2.5rem;
-  text-shadow:0 0 15px rgba(150,180,255,0.6);
-  margin-bottom:1rem;
-}
-
-p {
-  font-size: 1.2rem;
-  margin-bottom: 2rem;
-}
-
-/* 小提示按钮 */
-.back-btn {
-  padding:0.7rem 1.2rem;
-  background:rgba(255,255,255,0.1);
-  color:#fff;
-  border:none;
-  border-radius:12px;
-  cursor:pointer;
-  backdrop-filter:blur(6px) saturate(150%);
-  transition:0.3s;
-}
-.back-btn:hover { 
-  background:rgba(255,255,255,0.18); 
-  transform:translateY(-2px); 
-}
-
-/* 右上角表情按钮 */
+/* 右上角退出按钮 */
 .home-btn {
   position: absolute;
   top: 10px;
   right: 10px;
-  font-size: 32px;
+  font-size: 36px;
   cursor: pointer;
+  z-index:10;
   transition: transform 0.3s;
 }
 .home-btn:hover {
@@ -97,23 +80,25 @@ p {
 </head>
 <body>
 
-<h1>The mountains are calling and I must go.</h1>
-<p>Because it is there!</p>
+<!-- 山和文字 -->
+<div class="mountain">
+  <h1>The mountains are calling and I must go.</h1>
+  <p>Because it is there!</p>
+</div>
 
-<div class="wave"></div>
-
-<button class="back-btn" onclick="goBack()">There and Back</button>
-
-<!-- 右上角表情按钮 -->
+<!-- 右上角退出按钮 -->
 <div class="home-btn" onclick="goHome()">🧗</div>
 
-<script>
-function goBack() {
-  window.location.href="../index.html";
-}
+<!-- 海浪 -->
+<div class="wave-container">
+  <svg viewBox="0 0 120 20" preserveAspectRatio="none">
+    <path d="M0 10 C 10 15 20 5 30 10 C 40 15 50 5 60 10 C 70 15 80 5 90 10 C 100 15 110 5 120 10 L120 20 L0 20 Z" fill="#00183a" />
+  </svg>
+</div>
 
+<script>
 function goHome() {
-  window.location.href="https://liangyi-x.github.io/drunk/broadcast/";
+  window.location.href="https://liangyi-x.github.io/drunk/";
 }
 </script>
 
