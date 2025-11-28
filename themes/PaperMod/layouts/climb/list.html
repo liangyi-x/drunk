@@ -17,28 +17,23 @@ body {
   position: relative;
 }
 
-/* 山体 - 占屏 2/3 */
+/* 山体 */
 .mountain {
   position: absolute;
   bottom: 0;
   width: 100%;
-  height: 66%;
+  height: 50%;
   background: linear-gradient(#3a5f3a, #2c4d2c);
   clip-path: polygon(
     0% 100%, 0% 30%, 5% 15%, 10% 10%, 15% 8%, 20% 12%, 25% 6%, 30% 10%, 
     35% 5%, 40% 10%, 45% 3%, 50% 0%, 55% 5%, 60% 10%, 65% 8%, 70% 12%, 
     75% 7%, 80% 15%, 85% 10%, 90% 20%, 95% 15%, 100% 30%, 100% 100%
   );
-  display:flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  padding-top: 2rem;
   z-index:1;
   overflow: hidden;
 }
 
-/* 湿润效果 */
+/* 湿润山体效果 */
 .mountain::before {
   content:"";
   position:absolute;
@@ -50,19 +45,10 @@ body {
   animation: wetMountain 6s ease-in-out infinite alternate;
   z-index:2;
 }
-
 @keyframes wetMountain {
   0% { opacity:0; }
   50% { opacity:0.6; }
   100% { opacity:0; }
-}
-
-.mountain h1, .mountain p {
-  color: #fff;
-  text-align: center;
-  text-shadow: 0 0 12px rgba(0,0,0,0.6);
-  margin:0.3rem 0;
-  font-size: clamp(1.5rem,5vw,2.5rem);
 }
 
 /* 海浪容器 */
@@ -70,7 +56,7 @@ body {
   position: absolute;
   bottom:0;
   width:100%;
-  height:25%; 
+  height:50%; 
   z-index:5;
   overflow: visible;
 }
@@ -100,28 +86,26 @@ body {
 /* 水花飞溅 */
 .splash {
   position: absolute;
-  bottom:25%;
   width:2px;
   height:2px;
   background: rgba(173,216,230,0.5);
   border-radius:50%;
   animation: splashAnim 2s infinite;
 }
-
 @keyframes splashAnim {
   0% { transform: translateY(0) scale(0.5); opacity:0.5; }
   50% { transform: translateY(-15px) scale(1); opacity:1; }
   100% { transform: translateY(0) scale(0.5); opacity:0.5; }
 }
 
-/* 底部漂浮手写文字 + 闪光 */
+/* 底部漂浮水母文字 */
 .back-text {
   position: absolute;
-  bottom: 1rem;
+  bottom:8%; /* 提高一点，避开水花 */
   width: 100%;
   text-align: center;
   font-family: 'Pacifico', cursive;
-  font-size: 1.6rem;
+  font-size: clamp(1rem, 5vw, 1.6rem);
   font-style: italic;
   cursor: pointer;
   z-index:6;
@@ -130,105 +114,74 @@ body {
   align-items: center;
   gap: 0.3rem;
 
-  color: rgba(0,30,80,0.6); /* 深蓝色半透明 */
+  color: rgba(0,30,80,0.6);
   text-shadow: 
     0 0 12px rgba(255,255,255,0.6), 
     0 0 20px rgba(255,255,255,0.4),
-    0 0 28px rgba(255,255,255,0.3); /* 外发白光 */
-  
+    0 0 28px rgba(255,255,255,0.3);
+
   animation: float 6s ease-in-out infinite,
              glow 4s ease-in-out infinite alternate,
              sway 4s ease-in-out infinite,
              opacityPulse 5s ease-in-out infinite;
 }
 
-@keyframes float {
-  0% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
-  100% { transform: translateY(0); }
-}
-
-@keyframes sway {
-  0% { transform: translateX(0); }
-  50% { transform: translateX(2px); }
-  100% { transform: translateX(0); }
-}
-
+@keyframes float { 0% { transform: translateY(0); } 50% { transform: translateY(-6px); } 100% { transform: translateY(0); } }
+@keyframes sway { 0% { transform: translateX(0); } 50% { transform: translateX(2px); } 100% { transform: translateX(0); } }
 @keyframes glow {
-  0% { text-shadow: 0 0 12px rgba(255,255,255,0.5), 0 0 20px rgba(255,255,255,0.3), 0 0 28px rgba(255,255,255,0.2); }
-  50% { text-shadow: 0 0 18px rgba(255,255,255,0.7), 0 0 28px rgba(255,255,255,0.5), 0 0 38px rgba(255,255,255,0.4); }
-  100% { text-shadow: 0 0 12px rgba(255,255,255,0.5), 0 0 20px rgba(255,255,255,0.3), 0 0 28px rgba(255,255,255,0.2); }
+  0% { text-shadow: 0 0 12px rgba(255,255,255,0.5),0 0 20px rgba(255,255,255,0.3),0 0 28px rgba(255,255,255,0.2); }
+  50% { text-shadow: 0 0 18px rgba(255,255,255,0.7),0 0 28px rgba(255,255,255,0.5),0 0 38px rgba(255,255,255,0.4); }
+  100% { text-shadow: 0 0 12px rgba(255,255,255,0.5),0 0 20px rgba(255,255,255,0.3),0 0 28px rgba(255,255,255,0.2); }
 }
+@keyframes opacityPulse { 0% { opacity:0.5; } 50% { opacity:0.85; } 100% { opacity:0.5; } }
 
-@keyframes opacityPulse {
-  0% { opacity:0.5; }
-  50% { opacity:0.85; }
-  100% { opacity:0.5; }
-}
-
-/* 右上角退出按钮 */
+/* 右上角表情退出按钮 */
 .home-btn {
   position: absolute;
   top: 10px;
   right: 10px;
-  font-size: 36px;
+  font-size: 32px;
   cursor: pointer;
-  z-index:10;
   transition: transform 0.3s;
+  z-index:7;
 }
 .home-btn:hover { transform: scale(1.2); }
-
-/* 响应式 */
-@media(max-width:600px){
-  .mountain h1 { font-size:1.6rem; }
-  .mountain p { font-size:1rem; }
-  .back-text { font-size:1rem; }
-  .home-btn { font-size:28px; }
-}
 </style>
 </head>
 <body>
 
-<!-- 山 -->
-<div class="mountain">
-  <h1>The mountains are calling and I must go.</h1>
-  <p>Because it is there!</p>
-</div>
+<div class="mountain"></div>
 
-<!-- 海浪 -->
 <div class="wave-container">
-  <svg class="wave wave1" viewBox="0 0 120 20" preserveAspectRatio="none">
-    <path d="M0 10 C 10 13 20 7 30 10 C 40 13 50 7 60 10 C 70 13 80 7 90 10 C 100 13 110 7 120 10 L120 20 L0 20 Z"></path>
+  <svg class="wave wave1" viewBox="0 0 1200 120" preserveAspectRatio="none">
+    <path d="M0,60 C300,90 900,30 1200,60 L1200,120 L0,120 Z"></path>
   </svg>
-  <svg class="wave wave2" viewBox="0 0 120 20" preserveAspectRatio="none">
-    <path d="M0 11 C 10 15 20 7 30 11 C 40 15 50 7 60 11 C 70 15 80 7 90 11 C 100 15 110 7 120 11 L120 20 L0 20 Z"></path>
+  <svg class="wave wave2" viewBox="0 0 1200 120" preserveAspectRatio="none">
+    <path d="M0,60 C300,30 900,90 1200,60 L1200,120 L0,120 Z"></path>
   </svg>
-  <svg class="wave wave3" viewBox="0 0 120 20" preserveAspectRatio="none">
-    <path d="M0 12 C 10 16 20 8 30 12 C 40 16 50 8 60 12 C 70 16 80 8 90 12 C 100 16 110 8 120 12 L120 20 L0 20 Z"></path>
+  <svg class="wave wave3" viewBox="0 0 1200 120" preserveAspectRatio="none">
+    <path d="M0,60 C300,70 900,50 1200,60 L1200,120 L0,120 Z"></path>
   </svg>
 </div>
 
-<!-- 微小水花 -->
-<div class="splash" style="left:20%; animation-delay:0s;"></div>
-<div class="splash" style="left:35%; animation-delay:0.3s;"></div>
-<div class="splash" style="left:50%; animation-delay:0.6s;"></div>
-<div class="splash" style="left:65%; animation-delay:0.9s;"></div>
-<div class="splash" style="left:80%; animation-delay:1.2s;"></div>
+<!-- 水花飞溅 -->
+<div class="splash" style="left:25%; bottom:48%; animation-delay:0s;"></div>
+<div class="splash" style="left:50%; bottom:50%; animation-delay:1s;"></div>
+<div class="splash" style="left:75%; bottom:47%; animation-delay:0.5s;"></div>
 
-<!-- 底部漂浮手写文字 + 闪光 -->
+<!-- 底部漂浮文字 -->
 <div class="back-text" onclick="goBack()">🪼 There and Back</div>
 
-<!-- 右上角退出按钮 -->
+<!-- 右上角退出 -->
 <div class="home-btn" onclick="goHome()">🧗</div>
 
 <script>
-function goHome() {
-  window.location.href="https://liangyi-x.github.io/drunk/";
-}
 function goBack() {
   window.location.href="https://liangyi-x.github.io/drunk/broadcast/";
 }
+function goHome() {
+  window.location.href="https://liangyi-x.github.io/drunk/";
+}
 </script>
-
 </body>
 </html>
