@@ -15,7 +15,7 @@ body {
   position: relative;
 }
 
-/* 山 - 占页面 50% */
+/* 山 - 半屏 */
 .mountain {
   position: relative;
   width: 100%;
@@ -36,8 +36,9 @@ body {
 .mountain h1, .mountain p {
   color: #fff;
   text-align: center;
-  text-shadow: 0 0 15px rgba(0,0,0,0.7);
+  text-shadow: 0 0 12px rgba(0,0,0,0.6);
   margin:0.3rem 0;
+  font-size: clamp(1.5rem, 5vw, 2.5rem);
 }
 
 /* 山底渐变过渡 */
@@ -56,7 +57,7 @@ body {
   position: absolute;
   bottom:0;
   width:100%;
-  height:25%; /* 海浪占比减少 */
+  height:25%;
   z-index:5;
   overflow: hidden;
 }
@@ -82,13 +83,13 @@ body {
   100% { transform: translateX(0) translateY(0); }
 }
 
-/* 底部水母文字 - 深海漂浮感 */
+/* 底部水母文字 */
 .back-text {
   position: absolute;
   bottom: 1rem;
   width: 100%;
   text-align: center;
-  font-size: 1.3rem;
+  font-size: 1.2rem;
   font-style: italic;
   cursor: pointer;
   z-index:6;
@@ -96,8 +97,8 @@ body {
   justify-content: center;
   align-items: center;
   gap: 0.3rem;
-  color: rgba(173, 216, 230, 0.4); /* 半透明蓝色 */
-  text-shadow: 0 0 10px rgba(0,0,0,0.3);
+  color: rgba(173, 216, 230, 0.35);
+  text-shadow: 0 0 6px rgba(0,0,0,0.3);
   animation: float 6s ease-in-out infinite, sway 4s ease-in-out infinite, fade 8s ease-in-out infinite alternate;
 }
 
@@ -106,12 +107,12 @@ body {
 /* 漂浮动画 */
 @keyframes float {
   0% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
+  50% { transform: translateY(-5px); }
   100% { transform: translateY(0); }
 }
 @keyframes sway {
   0% { transform: translateX(0); }
-  50% { transform: translateX(4px); }
+  50% { transform: translateX(3px); }
   100% { transform: translateX(0); }
 }
 @keyframes fade {
@@ -131,6 +132,14 @@ body {
   transition: transform 0.3s;
 }
 .home-btn:hover { transform: scale(1.2); }
+
+/* 响应式适配 - 手机 */
+@media(max-width:600px) {
+  .mountain h1 { font-size: 1.6rem; }
+  .mountain p { font-size: 1rem; }
+  .back-text { font-size: 1rem; }
+  .home-btn { font-size: 28px; }
+}
 </style>
 </head>
 <body>
@@ -141,7 +150,7 @@ body {
   <p>Because it is there!</p>
 </div>
 
-<!-- 多层海浪 -->
+<!-- 海浪 -->
 <div class="wave-container">
   <svg class="wave wave1" viewBox="0 0 120 20" preserveAspectRatio="none">
     <path d="M0 10 C 10 15 20 5 30 10 C 40 15 50 5 60 10 C 70 15 80 5 90 10 C 100 15 110 5 120 10 L120 20 L0 20 Z"></path>
@@ -168,4 +177,3 @@ function goBack() {
 
 </body>
 </html>
-
