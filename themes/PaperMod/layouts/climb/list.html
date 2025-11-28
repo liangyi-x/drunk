@@ -13,61 +13,43 @@
     align-items: center;
     height: 100vh;
     font-family: sans-serif;
-    user-select: none;
   }
 
   .climbing-wall {
     position: relative;
     width: 600px;
     height: 800px;
-    background: linear-gradient(#222, #555);
-    border: 5px solid #444;
+    background: #222;
     border-radius: 15px;
     overflow: hidden;
   }
 
+  /* 山形 */
+  .mountain {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    clip-path: polygon(50% 0%, 90% 70%, 70% 100%, 30% 100%, 10% 70%);
+    background: linear-gradient(#555, #333);
+  }
+
+  /* 岩点 */
   .hold {
     position: absolute;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #e74c3c;
     cursor: pointer;
-    animation: float 3s ease-in-out infinite alternate;
-    box-shadow: 0 0 10px rgba(255,255,255,0.5);
-    transition: transform 0.3s, box-shadow 0.3s;
+    transition: transform 0.3s;
   }
 
   .hold:hover {
-    transform: scale(1.3) rotate(5deg);
-    box-shadow: 0 0 20px rgba(255,255,255,0.8);
+    transform: scale(1.3);
   }
 
-  @keyframes float {
-    0% { transform: translateY(0px); }
-    100% { transform: translateY(-10px); }
-  }
-
-  .hold.red { background: #e74c3c; width: 40px; height: 40px; border-radius: 50%; }
-  .hold.blue { background: #3498db; width: 35px; height: 35px; border-radius: 50% / 40%; }
-  .hold.green { background: #2ecc71; width: 30px; height: 30px; border-radius: 60% 40% 50% 50%; }
-  .hold.purple { background: #9b59b6; width: 45px; height: 45px; border-radius: 50% / 60%; }
-
-  canvas {
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 0;
-  }
-
-  .tooltip {
-    position: absolute;
-    padding: 5px 10px;
-    background: rgba(255,255,255,0.9);
-    color: #111;
-    border-radius: 5px;
-    font-size: 14px;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.3s;
-  }
-
+  /* 右上角🧗表情 */
   .home-btn {
     position: absolute;
     top: 10px;
@@ -79,92 +61,30 @@
   }
 
   .home-btn:hover {
-    transform: scale(1.2) rotate(-10deg);
+    transform: scale(1.2);
   }
 </style>
 </head>
 <body>
 
-<div class="climbing-wall" id="wall">
-  <canvas id="lines" width="600" height="800"></canvas>
+<div class="climbing-wall">
+  <div class="mountain"></div>
 
-  <div class="hold red" style="top: 50px; left: 50px;" data-name="线路A"></div>
-  <div class="hold blue" style="top: 150px; left: 200px;" data-name="线路B"></div>
-  <div class="hold green" style="top: 300px; left: 100px;" data-name="线路C"></div>
-  <div class="hold purple" style="top: 400px; left: 300px;" data-name="线路D"></div>
-  <div class="hold red" style="top: 550px; left: 250px;" data-name="线路E"></div>
+  <!-- 岩点示例 -->
+  <div class="hold" style="top: 100px; left: 280px;" title="线路A"></div>
+  <div class="hold" style="top: 200px; left: 320px;" title="线路B"></div>
+  <div class="hold" style="top: 300px; left: 250px;" title="线路C"></div>
+  <div class="hold" style="top: 400px; left: 300px;" title="线路D"></div>
 
-  <div class="home-btn" onclick="goHome()">🪼</div>
+  <!-- 右上角表情按钮 -->
+  <div class="home-btn" onclick="goHome()">🧗</div>
 </div>
 
-<div class="tooltip" id="tooltip"></div>
-
 <script>
-const wall = document.getElementById('wall');
-const tooltip = document.getElementById('tooltip');
-const canvas = document.getElementById('lines');
-const ctx = canvas.getContext('2d');
-
-let holds = Array.from(document.querySelectorAll('.hold')).filter(h => !h.classList.contains('home-btn'));
-let lines = []; // 存储连线
-
-let dragging = null;
-
-// 绘制所有线路
-function drawLines() {
-  ctx.clearRect(0,0,canvas.width, canvas.height);
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
-  ctx.lineWidth = 3;
-  ctx.beginPath();
-  lines.forEach(l => {
-    const r1 = l.from.getBoundingClientRect();
-    const r2 = l.to.getBoundingClientRect();
-    const wallRect = wall.getBoundingClientRect();
-    const x1 = r1.left - wallRect.left + r1.width/2;
-    const y1 = r1.top - wallRect.top + r1.height/2;
-    const x2 = r2.left - wallRect.left + r2.width/2;
-    const y2 = r2.top - wallRect.top + r2.height/2;
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(x2, y2);
-  });
-  ctx.stroke();
+function goHome() {
+  window.location.href = "https://liangyi-x.github.io/drunk/";
 }
-
-// 初始化鼠标事件
-holds.forEach(hold => {
-  hold.addEventListener('mouseenter', e => {
-    tooltip.style.opacity = 1;
-    tooltip.innerText = hold.dataset.name;
-  });
-  hold.addEventListener('mousemove', e => {
-    tooltip.style.left = e.pageX + 10 + 'px';
-    tooltip.style.top = e.pageY + 10 + 'px';
-  });
-  hold.addEventListener('mouseleave', e => {
-    tooltip.style.opacity = 0;
-  });
-
-  hold.addEventListener('click', () => {
-    if(dragging) return;
-    if(!dragging) {
-      dragging = hold;
-    } else if(dragging !== hold) {
-      lines.push({from: dragging, to: hold});
-      dragging = null;
-      drawLines();
-    }
-  });
-});
-
-// 回主页函数
-function goHome(){
-  window.location.href="https://liangyi-x.github.io/drunk/";
-}
-
-// 初始绘制
-drawLines();
 </script>
 
 </body>
 </html>
-
