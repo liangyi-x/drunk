@@ -88,6 +88,51 @@ body {
 @keyframes glowPulse { 0%{opacity:0.7;}50%{opacity:1;}100%{opacity:0.7;} }
 
 #wave { position:absolute; bottom:0; left:0; width:100%; height:80px; background:#001f3f; border-top-left-radius:50% 20px; border-top-right-radius:50% 20px; transform:translateY(100%); opacity:0; transition:opacity 1s;}
+
+
+/* 透明玻璃入口 */
+.glass-entry {
+  width: 260px;
+  height: 60px;
+  margin: 40px auto 0;
+  backdrop-filter: blur(8px) saturate(150%);
+  background: rgba(255,255,255,0.08);
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.15);
+  box-shadow: 0 0 20px rgba(0,0,0,0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: 0.4s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.glass-entry:hover {
+  background: rgba(255,255,255,0.15);
+  transform: translateY(-2px);
+}
+
+.glass-entry::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(150,190,255,0.15),
+    rgba(60,90,140,0.05) 60%
+  );
+  mix-blend-mode: screen;
+}
+
+.glass-inner {
+  font-size: 15px;
+  color: rgba(255,255,255,0.85);
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  text-shadow: 0 0 6px rgba(255,255,255,0.25);
+}
 </style>
 </head>
 <body>
@@ -96,13 +141,22 @@ body {
 
 <div class="container" id="main-container">
   <h1 class="page-title">LOST & FOUND</h1>
+  
   <div class="broadcast-input-wrapper">
     <input id="broadcast-input" placeholder="it hasn't pass…" />
     <button id="broadcast-send">See you Sunday？</button>
   </div>
+  
   <div class="broadcast-list" id="broadcasts"></div>
+ 
   <div id="lostfound">在不可能之海里</div>
+
+    <!-- 透明玻璃入口放这里 -->
+  <div class="glass-entry" onclick="enterClimb()">
+  <div class="glass-inner">tap to enter the wall</div>
 </div>
+</div>
+
 
 <div id="spell-overlay">
   <div id="vinyl-container">
