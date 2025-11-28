@@ -3,88 +3,100 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CLIMBING WALL</title>
+<title>Climb Wall</title>
 <style>
-  body {
-    margin: 0;
-    background: #111;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    font-family: sans-serif;
-  }
+body {
+  margin:0; padding:0;
+  font-family: "Helvetica Neue", sans-serif;
+  background: linear-gradient(160deg,#0b0c17,#1a1c2a);
+  color:#0b3d0b; /* 暗绿色文字 */
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  position: relative;
+}
 
-  .climbing-wall {
-    position: relative;
-    width: 600px;
-    height: 800px;
-    background: #222;
-    border-radius: 15px;
-    overflow: hidden;
-  }
+/* 山形 */
+.mountain {
+  position: relative;
+  width: 100%;
+  height: 60%;
+  clip-path: polygon(50% 0%, 90% 70%, 70% 100%, 30% 100%, 10% 70%);
+  background: linear-gradient(#3a5f3a, #2c4d2c); /* 暗绿色渐变 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding-top: 2rem;
+}
 
-  /* 山形 */
-  .mountain {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    height: 100%;
-    clip-path: polygon(50% 0%, 90% 70%, 70% 100%, 30% 100%, 10% 70%);
-    background: linear-gradient(#555, #333);
-  }
+/* 标题和文字 */
+h1 {
+  font-size:2.5rem;
+  margin:0 1rem;
+  text-shadow: 0 0 8px rgba(0,0,0,0.5);
+}
 
-  /* 岩点 */
-  .hold {
-    position: absolute;
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    background: #e74c3c;
-    cursor: pointer;
-    transition: transform 0.3s;
-  }
+p {
+  font-size:1.2rem;
+  margin-top: 0.5rem;
+  text-shadow: 0 0 6px rgba(0,0,0,0.5);
+}
 
-  .hold:hover {
-    transform: scale(1.3);
-  }
+/* 简单海洋波动效果 */
+.wave {
+  position:absolute;
+  bottom:0; left:0; width:100%;
+  height:120px;
+  background: rgba(255,255,255,0.06);
+  border-radius:100%;
+  animation: waveMove 4s infinite ease-in-out alternate;
+}
+@keyframes waveMove {
+  0%{ transform: translateY(0) scaleX(1); }
+  50%{ transform: translateY(-12px) scaleX(1.02); }
+  100%{ transform: translateY(0) scaleX(1); }
+}
 
-  /* 右上角🧗表情 */
-  .home-btn {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    font-size: 32px;
-    cursor: pointer;
-    z-index: 10;
-    transition: transform 0.3s;
-  }
-
-  .home-btn:hover {
-    transform: scale(1.2);
-  }
+/* 右上角退出按钮 */
+.home-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 32px;
+  cursor: pointer;
+  transition: transform 0.3s;
+  z-index:10;
+}
+.home-btn:hover {
+  transform: scale(1.2);
+}
 </style>
 </head>
 <body>
 
-<div class="climbing-wall">
-  <div class="mountain"></div>
-
-  <!-- 岩点示例 -->
-  <div class="hold" style="top: 100px; left: 280px;" title="线路A"></div>
-  <div class="hold" style="top: 200px; left: 320px;" title="线路B"></div>
-  <div class="hold" style="top: 300px; left: 250px;" title="线路C"></div>
-  <div class="hold" style="top: 400px; left: 300px;" title="线路D"></div>
-
-  <!-- 右上角表情按钮 -->
-  <div class="home-btn" onclick="goHome()">🧗</div>
+<!-- 山形容器 -->
+<div class="mountain">
+  <h1>The mountains are calling and I must go.</h1>
+  <p>Because it is there!</p>
 </div>
+
+<div class="wave"></div>
+
+<!-- 右上角退出按钮 -->
+<div class="home-btn" onclick="goHome()">🧗</div>
 
 <script>
 function goHome() {
-  window.location.href = "https://liangyi-x.github.io/drunk/";
+  window.location.href="https://liangyi-x.github.io/drunk/";
 }
 </script>
 
 </body>
 </html>
+
+
