@@ -15,11 +15,11 @@ body {
   position: relative;
 }
 
-/* 山 - 占页面 2/3 */
+/* 山 - 占页面 50% */
 .mountain {
   position: relative;
   width: 100%;
-  height: 66%;
+  height: 50%;
   background: linear-gradient(#3a5f3a, #2c4d2c);
   clip-path: polygon(
     50% 0%, 55% 5%, 60% 10%, 65% 8%, 70% 12%, 75% 7%, 80% 15%, 
@@ -29,7 +29,7 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  padding-top: 3rem;
+  padding-top: 2rem;
   z-index:1;
 }
 
@@ -46,7 +46,7 @@ body {
   position: absolute;
   bottom: 0;
   width: 100%;
-  height: 20%;
+  height: 15%;
   background: linear-gradient(to bottom, rgba(58,95,58,0) 0%, #00183a 100%);
   z-index:1;
 }
@@ -56,12 +56,12 @@ body {
   position: absolute;
   bottom:0;
   width:100%;
-  height:35%;
+  height:25%; /* 海浪占比减少 */
   z-index:5;
   overflow: hidden;
 }
 
-/* 多层海浪 */
+/* 海浪 */
 .wave {
   position: absolute;
   width:200%;
@@ -75,21 +75,20 @@ body {
 
 .wave1 path { fill: rgba(0,24,58,0.8); animation-delay: 0s; }
 .wave2 path { fill: rgba(0,24,58,0.5); animation-delay: 2s; }
-.wave3 path { fill: rgba(0,24,58,0.3); animation-delay: 4s; }
 
 @keyframes waveMove {
   0% { transform: translateX(0) translateY(0); }
-  50% { transform: translateX(-25%) translateY(-8px); }
+  50% { transform: translateX(-25%) translateY(-6px); }
   100% { transform: translateX(0) translateY(0); }
 }
 
-/* 底部水母文字 */
+/* 底部水母文字 - 深海漂浮感 */
 .back-text {
   position: absolute;
-  bottom: 1.5rem;
+  bottom: 1rem;
   width: 100%;
   text-align: center;
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   font-style: italic;
   cursor: pointer;
   z-index:6;
@@ -97,32 +96,28 @@ body {
   justify-content: center;
   align-items: center;
   gap: 0.3rem;
-  color: rgba(173, 216, 230, 0.5); /* 半透明蓝色水母效果 */
-  text-shadow: 0 0 8px rgba(0,0,0,0.3);
+  color: rgba(173, 216, 230, 0.4); /* 半透明蓝色 */
+  text-shadow: 0 0 10px rgba(0,0,0,0.3);
   animation: float 6s ease-in-out infinite, sway 4s ease-in-out infinite, fade 8s ease-in-out infinite alternate;
 }
 
 .back-text:hover { transform: scale(1.1); }
 
-/* 漂浮上下 */
+/* 漂浮动画 */
 @keyframes float {
   0% { transform: translateY(0); }
-  50% { transform: translateY(-5px); }
+  50% { transform: translateY(-6px); }
   100% { transform: translateY(0); }
 }
-
-/* 漂浮左右 */
 @keyframes sway {
   0% { transform: translateX(0); }
-  50% { transform: translateX(3px); }
+  50% { transform: translateX(4px); }
   100% { transform: translateX(0); }
 }
-
-/* 透明渐隐 */
 @keyframes fade {
-  0% { opacity:0.4; }
-  50% { opacity:0.7; }
-  100% { opacity:0.4; }
+  0% { opacity:0.3; }
+  50% { opacity:0.6; }
+  100% { opacity:0.3; }
 }
 
 /* 右上角退出按钮 */
@@ -154,9 +149,6 @@ body {
   <svg class="wave wave2" viewBox="0 0 120 20" preserveAspectRatio="none">
     <path d="M0 12 C 10 18 20 8 30 12 C 40 18 50 8 60 12 C 70 18 80 8 90 12 C 100 18 110 8 120 12 L120 20 L0 20 Z"></path>
   </svg>
-  <svg class="wave wave3" viewBox="0 0 120 20" preserveAspectRatio="none">
-    <path d="M0 8 C 10 12 20 2 30 8 C 40 12 50 2 60 8 C 70 12 80 2 90 8 C 100 12 110 2 120 8 L120 20 L0 20 Z"></path>
-  </svg>
 </div>
 
 <!-- 底部水母文字 -->
@@ -176,3 +168,4 @@ function goBack() {
 
 </body>
 </html>
+
