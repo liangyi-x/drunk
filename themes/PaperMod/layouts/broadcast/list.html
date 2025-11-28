@@ -5,9 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LOST & FOUND</title>
 <style>
-/* ===========================================
-   电影化深海背景（渐变 + 细颗粒）
-=========================================== */
 body {
   margin: 0;
   padding: 0;
@@ -16,32 +13,10 @@ body {
   color: #f0f0f0;
   font-family: "Helvetica Neue", sans-serif;
 }
+#mist { position: fixed; inset: 0; background: url('https://raw.githubusercontent.com/liyuppp/cdn/main/mist.png'); background-size: 200% 200%; opacity: 0.22; animation: mistMove 25s ease-in-out infinite alternate; pointer-events:none; }
+@keyframes mistMove { 0% { background-position:40% 40%; } 100% { background-position:60% 80%; } }
+#particles { position: fixed; inset: 0; pointer-events:none; z-index:1; }
 
-/* 深海流动迷雾层 */
-#mist {
-  position: fixed;
-  inset: 0;
-  background: url('https://raw.githubusercontent.com/liyuppp/cdn/main/mist.png');
-  background-size: 200% 200%;
-  opacity: 0.22;
-  animation: mistMove 25s ease-in-out infinite alternate;
-  pointer-events:none;
-}
-
-@keyframes mistMove {
-  0% { background-position: 40% 40%; }
-  100% { background-position: 60% 80%; }
-}
-
-/* 光粒子层 */
-#particles {
-  position: fixed;
-  inset: 0;
-  pointer-events:none;
-  z-index: 1;
-}
-
-/* 页面主体容器 */
 .container {
   position: relative;
   max-width: 800px;
@@ -51,106 +26,48 @@ body {
   opacity: 0;
   animation: pageFadeIn 1.8s ease forwards;
 }
+@keyframes pageFadeIn { to { opacity:1; } }
 
-@keyframes pageFadeIn {
-  to { opacity: 1; }
-}
+.page-title { text-align:center; font-size:2.4rem; letter-spacing:2px; margin-bottom:1.6rem; color:#fff; text-shadow:0 0 12px rgba(150,150,255,0.3); }
 
-.page-title {
-  text-align: center;
-  font-size: 2.4rem;
-  letter-spacing: 2px;
-  margin-bottom: 1.6rem;
-  color: #fff;
-  text-shadow: 0 0 12px rgba(150,150,255,0.3);
-}
+.broadcast-input-wrapper { display:flex; gap:0.6rem; margin-bottom:1.6rem; }
+#broadcast-input { flex:1; padding:0.65rem; border:none; border-radius:8px; background:rgba(255,255,255,0.08); color:#eee; }
+#broadcast-send { padding:0.6rem 0.9rem; border:none; border-radius:8px; cursor:pointer; background:rgba(255,255,255,0.1); color:#fff; }
 
-/* 输入框区域 */
-.broadcast-input-wrapper {
-  display: flex;
-  gap: 0.6rem;
-  margin-bottom: 1.6rem;
-}
+.broadcast-list { display:flex; flex-direction:column; gap:14px; max-height:360px; overflow-y:auto; padding-right:4px; }
 
-#broadcast-input {
-  flex: 1;
-  padding: 0.65rem;
-  border: none;
-  border-radius: 8px;
-  background: rgba(255,255,255,0.08);
-  color: #eee;
-}
-
-#broadcast-send {
-  padding: 0.6rem 0.9rem;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  background: rgba(255,255,255,0.1);
-  color: #fff;
-}
-
-/* 广播列表 */
-.broadcast-list {
-  display:flex;
-  flex-direction:column;
-  gap:14px;
-  max-height: 360px;
-  overflow-y:auto;
-  padding-right:4px;
-}
-
-/* 卡片风格：电影感毛玻璃 */
 .broadcast-card {
   position: relative;
-  padding: 16px 14px 14px 14px;
-  padding-right: 46px;
-  border-radius: 10px;
-  background: rgba(255,255,255,0.06);
-  backdrop-filter: blur(6px);
-  transition: 0.35s;
-  cursor: pointer;
- }
-.broadcast-card:hover {
-  background: rgba(255,255,255,0.12);
-  transform: translateY(-3px);
+  padding:16px 14px 14px 14px;
+  padding-right:46px;
+  border-radius:10px;
+  background:rgba(255,255,255,0.06);
+  backdrop-filter:blur(6px);
+  transition:0.35s;
+  cursor:pointer;
 }
-
-/* 小黑猫删除键 */
+.broadcast-card:hover { background:rgba(255,255,255,0.12); transform:translateY(-3px); }
 .delete-btn {
-  position: absolute;
-  top: 6px;
-  right: 10px;
-  font-size: 1.25rem;
-  cursor: pointer;
-  opacity: 0.55;
-  transition: 0.25s;
-  user-select: none;
+  position:absolute;
+  top:6px; right:10px;
+  font-size:1.25rem; cursor:pointer;
+  opacity:0.55; transition:0.25s; user-select:none;
 }
-.delete-btn:hover {
-  opacity:1;
-  transform: scale(1.1);
-}
-  
-/* 海水吞没（删除）动画 */
-.broadcast-card.delete-effect {
-  animation: oceanFade 1.2s forwards;
-}
-@keyframes oceanFade {
-  0%   { opacity:1; filter:blur(0px); transform:translateY(0);}
-  40%  { opacity:0.8; filter:blur(2px); transform:translateY(3px);}
-  70%  { opacity:0.4; filter:blur(6px); transform:translateY(12px);}
-  100% { opacity:0; filter:blur(12px); transform:translateY(28px);}
-}
+.delete-btn:hover { opacity:1; transform:scale(1.1); }
+
+.broadcast-card.dissolve { animation: cardFade 0.65s forwards; }
+@keyframes cardFade { 0% { opacity:1; transform:rotate(0deg) scale(1); } 100% { opacity:0; transform:rotate(4deg) scale(0.85); } }
+
+.broadcast-card.delete-effect { animation: oceanFade 1.2s forwards; }
+@keyframes oceanFade { 0% {opacity:1; filter:blur(0px); transform:translateY(0);} 40% {opacity:0.8; filter:blur(2px); transform:translateY(3px);} 70% {opacity:0.4; filter:blur(6px); transform:translateY(12px);} 100% {opacity:0; filter:blur(12px); transform:translateY(28px);} }
 
 .broadcast-message { font-size:1rem; margin-bottom:0.4rem; }
 .broadcast-time { font-size:0.85rem; color:#aaa; text-align:right; }
 
-  /* footer */
-#lostfound { text-align:center; margin:2rem 0; font-style:italic; color:rgba(200,200,200,0.7); cursor:pointer; transition:0.3s; }
-#lostfound:hover { color:#7fffd4; }
-#spell-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.35); pointer-events:none; opacity:0; transition:opacity 1.2s ease-in-out; z-index:999; }
+#lostfound { text-align:center; margin:2rem 0; font-style:italic; cursor:pointer; transition:0.3s; opacity:0.8; }
+#lostfound:hover { opacity:1; }
 
+#spell-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.35); pointer-events:none; opacity:0; transition:opacity 1.2s ease-in-out; z-index:999; }
 #vinyl-container { position:absolute; top:50%; left:50%; transform:translate(-50%, -50%) scale(0.8); width:200px; height:200px; opacity:0; }
 .vinyl-ring { position:absolute; border-radius:50%; top:50%; left:50%; transform:translate(-50%, -50%); }
 #outer-ring { width:200px; height:200px; background:#001f3f; }
@@ -159,28 +76,28 @@ body {
 #vinyl-text { position:absolute; bottom:-25px; width:100%; text-align:center; color:#ffe0b2; font-size:1rem; opacity:0; transition:opacity 0.5s ease-in-out; }
 
 #people-text {
-  position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); font-size:1.8rem; font-weight:bold; opacity:0; text-align:center;
+  position:absolute; top:50%; left:50%; transform:translate(-50%, -50%);
+  font-size:1.8rem; font-weight:bold; opacity:0; text-align:center;
   background: linear-gradient(90deg, #330000, #550000, #330000);
   -webkit-background-clip:text; color:transparent;
   text-shadow:0 0 6px #440000, 0 0 12px #220000;
   animation: floatText 2s ease-in-out infinite alternate, bloodFlow 3s linear infinite, glowPulse 2s ease-in-out infinite alternate;
 }
 @keyframes floatText { 0%{transform:translate(-50%, -50%);} 50%{transform:translate(-50%, -48%);} 100%{transform:translate(-50%, -50%);} }
-@keyframes bloodFlow {
-  0% { background-position:0 0; }
-  50% { background-position:50% 0; }
-  100% { background-position:100% 0; }
-}
+@keyframes bloodFlow { 0% { background-position:0 0; } 50% { background-position:50% 0; } 100% { background-position:100% 0; } }
 @keyframes glowPulse { 0%{opacity:0.7;}50%{opacity:1;}100%{opacity:0.7;} }
 
 #wave { position:absolute; bottom:0; left:0; width:100%; height:80px; background:#001f3f; border-top-left-radius:50% 20px; border-top-right-radius:50% 20px; transform:translateY(100%); opacity:0; transition:opacity 1s;}
 </style>
 </head>
 <body>
+<div id="mist"></div>
+<canvas id="particles"></canvas>
+
 <div class="container" id="main-container">
   <h1 class="page-title">LOST & FOUND</h1>
   <div class="broadcast-input-wrapper">
-    <input type="text" id="broadcast-input" placeholder="it hasn't pass…"/>
+    <input id="broadcast-input" placeholder="it hasn't pass…" />
     <button id="broadcast-send">See you Sunday？</button>
   </div>
   <div class="broadcast-list" id="broadcasts"></div>
@@ -198,6 +115,7 @@ body {
   <div id="wave"></div>
 </div>
 
+<!-- Firebase -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-app.js";
 import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-firestore.js";
@@ -213,104 +131,87 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-const ref = collection(db,"broadcasts");
+const ref = collection(db, "broadcasts");
 
 const inputEl = document.getElementById("broadcast-input");
 const sendBtn = document.getElementById("broadcast-send");
 const listEl = document.getElementById("broadcasts");
 
+/* 发送广播 */
 sendBtn.onclick = async () => {
   const v = inputEl.value.trim();
-  if(!v) return;
-  await addDoc(ref, { message:v, timestamp:new Date() });
-  inputEl.value="";
+  if (!v) return;
+  await addDoc(ref, { message: v, timestamp: new Date() });
+  inputEl.value = "";
 };
+inputEl.addEventListener("keydown", e => { if(e.key==="Enter") sendBtn.click(); });
 
-inputEl.addEventListener("keydown",e=>{
-  if(e.key==="Enter") sendBtn.click();
-});
-
-const q=query(ref,orderBy("timestamp","desc"));
-onSnapshot(q,snap=>{
+/* 渲染广播 */
+const q = query(ref, orderBy("timestamp","desc"));
+onSnapshot(q, snap => {
   listEl.innerHTML="";
-  snap.forEach(docSnap=>{
-    const data=docSnap.data();
+  snap.forEach(docSnap => {
+    const data = docSnap.data();
+    const card = document.createElement("div");
+    card.className="broadcast-card";
 
-    const d=document.createElement("div");
-    d.className="broadcast-card";
+    const del = document.createElement("div");
+    del.className="delete-btn";
+    del.textContent="🐈‍⬛";
 
-    d.innerHTML=`
-      <div class="delete-btn">🐈‍⬛</div>
-      <div class="broadcast-message">${data.message}</div>
-      <div class="broadcast-time">${data.timestamp.toDate().toLocaleString()}</div>
-    `;
-
-    // 点击卡片本体 = 淡出，不删除
-    d.onclick = (e)=>{
-      if(e.target.classList.contains("delete-btn")) return;
-      d.classList.add("dissolve");
-    };
-
-    // 点击小黑猫 = 真删除 + 溶解成海水
-    d.querySelector(".delete-btn").onclick = async (e)=>{
+    /* 点击小黑猫 = 真删除 */
+    del.onclick = async e => {
       e.stopPropagation();
-      d.classList.add("delete-effect");
-      setTimeout(async ()=>{
-        await deleteDoc(doc(db,"broadcasts", docSnap.id));
+      card.classList.add("delete-effect");
+      setTimeout(async () => {
+        await deleteDoc(doc(db,"broadcasts",docSnap.id));
       },1100);
     };
 
-    listEl.appendChild(d);
-  });
-});
+    /* 点击卡片本体 = 淡出移除DOM */
+    card.onclick = () => {
+      card.classList.add("dissolve");
+      setTimeout(()=>card.remove(),650);
+    };
 
-window.addEventListener("load",()=>{
-  document.getElementById("main-container").style.opacity="1";
+    const time = data.timestamp?.toDate ? data.timestamp.toDate() : new Date(data.timestamp);
+    card.innerHTML = `<div class="broadcast-message">${data.message}</div>
+                      <div class="broadcast-time">${time.toLocaleString()}</div>`;
+    card.appendChild(del);
+    listEl.appendChild(card);
+  });
 });
 </script>
 
-  <!-- 光粒子效果 canvas -->
+<!-- 光粒子效果 canvas -->
 <script>
 const canvas = document.getElementById("particles");
 const ctx = canvas.getContext("2d");
+function resize(){ canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
+resize(); window.onresize=resize;
 
-function resize() {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+let particles=[];
+for(let i=0;i<90;i++){
+  particles.push({ x:Math.random()*canvas.width, y:Math.random()*canvas.height, r:Math.random()*2.4+0.6, dx:(Math.random()-0.5)*0.3, dy:(Math.random()-0.5)*0.3 });
 }
-resize();
-window.onresize = resize;
-
-let particles = [];
-for (let i = 0; i < 90; i++) {
-  particles.push({
-    x: Math.random()*canvas.width,
-    y: Math.random()*canvas.height,
-    r: Math.random()*2.4 + 0.6,
-    dx: (Math.random()-0.5)*0.3,
-    dy: (Math.random()-0.5)*0.3
-  });
-}
-
-function draw() {
+function draw(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
-  ctx.fillStyle = "rgba(255,255,255,0.7)";
-  particles.forEach(p => {
+  ctx.fillStyle="rgba(255,255,255,0.7)";
+  particles.forEach(p=>{
     ctx.beginPath();
     ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
     ctx.fill();
-    p.x += p.dx;
-    p.y += p.dy;
-    if (p.x<0||p.x>canvas.width) p.dx*=-1;
-    if (p.y<0||p.y>canvas.height) p.dy*=-1;
+    p.x+=p.dx; p.y+=p.dy;
+    if(p.x<0||p.x>canvas.width)p.dx*=-1;
+    if(p.y<0||p.y>canvas.height)p.dy*=-1;
   });
   requestAnimationFrame(draw);
 }
 draw();
 </script>
 
+<!-- 点击触发唱片机特效 -->
 <script>
-/* 保留你原来的特效 */
 const lostfound = document.getElementById("lostfound");
 const spellOverlay = document.getElementById("spell-overlay");
 const vinylContainer = document.getElementById("vinyl-container");
@@ -319,39 +220,37 @@ const peopleText = document.getElementById("people-text");
 const wave = document.getElementById("wave");
 
 lostfound.onclick = () => {
-  spellOverlay.style.opacity = "1";
-  vinylContainer.style.opacity = "1";
-  vinylText.style.opacity = "1";
-  wave.style.opacity = "1";
+  spellOverlay.style.opacity="1";
+  vinylContainer.style.opacity="1";
+  vinylText.style.opacity="1";
+  wave.style.opacity="1";
   wave.style.transform="translateY(0)";
 
   const duration = 3600;
-  let start = null;
-  let wavePhase = 0;
-
+  let start=null, wavePhase=0;
   function animateFrame(t){
-    if(!start) start = t;
+    if(!start) start=t;
     const progress = Math.min((t-start)/duration,1);
     const rotation = 360*progress;
-    const scale = 0.8 + 0.2*progress;
-    vinylContainer.style.transform = `translate(-50%, -50%) scale(${scale}) rotate(${rotation}deg)`;
-    wave.style.transform = `translateY(${Math.sin(wavePhase)*6}px)`;
-    wavePhase += 0.06;
+    const scale = 0.8+0.2*progress;
+    vinylContainer.style.transform=`translate(-50%,-50%) scale(${scale}) rotate(${rotation}deg)`;
+    wave.style.transform=`translateY(${Math.sin(wavePhase)*6}px)`;
+    wavePhase+=0.06;
     if(progress<1) requestAnimationFrame(animateFrame);
   }
   requestAnimationFrame(animateFrame);
 
   setTimeout(()=>{
-    const fadeDur = 800;
-    let fadeStart = performance.now();
+    const fadeDur=800;
+    let fadeStart=performance.now();
     function fadeFrame(t2){
       const prog = Math.min((t2-fadeStart)/fadeDur,1);
-      const rot = 360 + 360*prog;
-      const sc = 1 - 0.3*prog;
-      const op = 1 - prog;
-      vinylContainer.style.transform = `translate(-50%, -50%) scale(${sc}) rotate(${rot}deg)`;
-      vinylContainer.style.opacity = op;
-      wave.style.opacity = op;
+      const rot = 360+360*prog;
+      const sc = 1-0.3*prog;
+      const op = 1-prog;
+      vinylContainer.style.transform=`translate(-50%,-50%) scale(${sc}) rotate(${rot}deg)`;
+      vinylContainer.style.opacity=op;
+      wave.style.opacity=op;
       if(prog<1) requestAnimationFrame(fadeFrame);
     }
     requestAnimationFrame(fadeFrame);
@@ -364,12 +263,10 @@ lostfound.onclick = () => {
         spellOverlay.style.opacity="0";
         wave.style.opacity="0";
         vinylContainer.style.opacity="0";
-        setTimeout(()=>{ window.location.href = "https://liangyi-x.github.io/drunk/"; },800);
+        setTimeout(()=>{ window.location.href="https://liangyi-x.github.io/drunk/"; },800);
       },1800);
-
-    }, fadeDur);
-
-  }, duration);
+    },fadeDur);
+  },duration);
 };
 </script>
 </body>
