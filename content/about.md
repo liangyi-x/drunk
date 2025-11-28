@@ -2,6 +2,7 @@
 title: "那些事情是真的有意思吗" 
 date: "2019-09-01" 
 tags: ["climb", "read", "life", "music", "drunk", "pain", "death", "travel" , "friend"] 
+categories: ["Poetry","TIME","Daily"]
 ---
 
 在不可能之海里
