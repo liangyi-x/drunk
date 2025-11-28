@@ -13,6 +13,9 @@ body {
   height: 100vh;
   width: 100vw;
   position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
 }
 
 /* 山 */
@@ -45,7 +48,7 @@ body {
   position: absolute;
   bottom:0;
   width:100%;
-  height:30%;
+  height:40%;
   z-index:1;
   overflow: hidden;
 }
@@ -61,6 +64,23 @@ body {
   0% { transform: translateX(0) translateY(0); }
   50% { transform: translateX(-25%) translateY(-10px); }
   100% { transform: translateX(0) translateY(0); }
+}
+
+/* 点击文字 */
+.back-text {
+  position: absolute;
+  bottom: 15%;
+  width: 100%;
+  text-align: center;
+  color: #fff;
+  font-size: 1.5rem;
+  text-shadow: 0 0 10px rgba(0,0,0,0.7);
+  cursor: pointer;
+  z-index:3;
+  transition: transform 0.3s;
+}
+.back-text:hover {
+  transform: scale(1.1);
 }
 
 /* 右上角退出按钮 */
@@ -86,9 +106,6 @@ body {
   <p>Because it is there!</p>
 </div>
 
-<!-- 右上角退出按钮 -->
-<div class="home-btn" onclick="goHome()">🧗</div>
-
 <!-- 海浪 -->
 <div class="wave-container">
   <svg viewBox="0 0 120 20" preserveAspectRatio="none">
@@ -96,12 +113,22 @@ body {
   </svg>
 </div>
 
+<!-- 海浪上的回到页面文字 -->
+<div class="back-text" onclick="goBack()">There and Back</div>
+
+<!-- 右上角退出按钮 -->
+<div class="home-btn" onclick="goHome()">🧗</div>
+
 <script>
 function goHome() {
   window.location.href="https://liangyi-x.github.io/drunk/";
+}
+function goBack() {
+  window.location.href="https://liangyi-x.github.io/drunk/broadcast/";
 }
 </script>
 
 </body>
 </html>
+
 
