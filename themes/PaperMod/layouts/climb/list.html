@@ -10,14 +10,17 @@ body {
   font-family: "Helvetica Neue", sans-serif;
   background: #0b0c17;
   overflow: hidden;
-  position: relative;
   height: 100vh;
+  display:flex;
+  justify-content:center;
+  align-items:flex-end;
+  position: relative;
 }
 
-/* 文字在山上，自适应屏幕 */
+/* 文字在山上 */
 .text-container {
   position: absolute;
-  top: 10%;
+  top: 15%;
   width: 90%;
   max-width: 600px;
   text-align: center;
@@ -52,24 +55,16 @@ body {
   transform: scale(1.2);
 }
 
-/* 山 + 海浪容器 */
-.scene {
-  position: absolute;
-  bottom:0;
+/* 山 SVG */
+.mountain {
   width: 100%;
-  height: 60%;
+  height: 80%;
   z-index:1;
 }
 
-/* 海浪动画 */
-.wave path {
-  animation: waveMove 4s infinite linear alternate;
-}
-
-@keyframes waveMove {
-  0% { transform: translateX(0); }
-  50% { transform: translateX(-5%); }
-  100% { transform: translateX(0); }
+.mountain svg {
+  width: 100%;
+  height: 100%;
 }
 </style>
 </head>
@@ -84,13 +79,10 @@ body {
 <!-- 右上角退出按钮 -->
 <div class="home-btn" onclick="goHome()">🧗</div>
 
-<!-- 山和海浪 -->
-<div class="scene">
-  <svg viewBox="0 0 100 50" preserveAspectRatio="none" width="100%" height="100%">
-    <!-- 多峰山 -->
-    <polygon points="0,50 15,20 30,50 45,15 60,50 75,25 90,50 100,10 100,50 0,50" fill="#3a5f3a"/>
-    <!-- 海浪 -->
-    <path d="M0 50 C 10 40 20 60 30 50 C 40 40 50 60 60 50 C 70 40 80 60 90 50 C 100 40 100 100 0 100 Z" fill="#00183a" class="wave"/>
+<!-- 放大的山 -->
+<div class="mountain">
+  <svg viewBox="0 0 100 50" preserveAspectRatio="xMidYMax meet">
+    <polygon points="0,50 10,20 20,35 30,15 40,40 50,10 60,35 70,20 80,45 90,15 100,50" fill="#3a5f3a"/>
   </svg>
 </div>
 
