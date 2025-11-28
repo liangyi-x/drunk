@@ -1,74 +1,53 @@
 <!DOCTYPE html>
-
 <html lang="zh">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Climb Wall</title>
+<meta charset="UTF-8" />
+<title>Climbing Wall</title>
+
 <style>
-body {
-  margin:0; padding:0;
-  font-family: "Helvetica Neue", sans-serif;
-  background: linear-gradient(160deg,#0b0c17,#1a1c2a);
-  color:#fff;
-  height:100vh;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  overflow:hidden;
-}
+  body {
+    margin: 0;
+    background: radial-gradient(circle at 50% 20%, #1a2238, #0a0f18);
+    overflow: hidden;
+    font-family: sans-serif;
+  }
 
-/* 简单海洋波动效果 */
-.wave {
-position:absolute;
-bottom:0; left:0; width:100%;
-height:120px;
-background: rgba(255,255,255,0.06);
-border-radius:100%;
-animation: waveMove 4s infinite ease-in-out alternate;
-}
-@keyframes waveMove {
-0%{ transform: translateY(0) scaleX(1); }
-50%{ transform: translateY(-12px) scaleX(1.02); }
-100%{ transform: translateY(0) scaleX(1); }
-}
+  .wall {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+  }
 
-/* 标题 */
-h1 {
-font-size:2.5rem;
-text-shadow:0 0 15px rgba(150,180,255,0.6);
-margin-bottom:1rem;
-}
+  .hold {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    background: radial-gradient(circle, #c94141, #6a0f0f);
+    border-radius: 40% 60% 50% 55%;
+    box-shadow: 0 0 12px rgba(255, 0, 0, 0.4);
+    cursor: pointer;
+    transition: 0.2s ease;
+  }
 
-/* 小提示按钮 */
-.back-btn {
-margin-top:2rem;
-padding:0.7rem 1.2rem;
-background:rgba(255,255,255,0.1);
-color:#fff;
-border:none;
-border-radius:12px;
-cursor:pointer;
-backdrop-filter:blur(6px) saturate(150%);
-transition:0.3s;
-}
-.back-btn:hover { background:rgba(255,255,255,0.18); transform:translateY(-2px); } </style>
-
+  .hold:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 18px rgba(255, 90, 90, 0.7);
+  }
+</style>
 </head>
+
 <body>
-
-<h1>Welcome to the Climb Wall</h1>
-<p>在这里，你可以自由攀登，探索未知。</p>
-
-<div class="wave"></div>
-
-<button class="back-btn" onclick="goBack()">← Back to LOST & FOUND</button>
+<div class="wall" id="wall"></div>
 
 <script>
-// 返回主页
-function goBack() {
-  window.location.href="../index.html";
+// 随机生成 25 个岩点
+const wall = document.getElementById("wall");
+for (let i = 0; i < 25; i++) {
+  const h = document.createElement("div");
+  h.className = "hold";
+  h.style.top = Math.random() * 90 + "vh";
+  h.style.left = Math.random() * 90 + "vw";
+  wall.appendChild(h);
 }
 </script>
 
