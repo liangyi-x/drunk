@@ -174,6 +174,16 @@ body {
 
   <div id="lostfound">在不可能之海里</div>
 </div>
+ <div id="spell-overlay">
+  <div id="vinyl-container">
+    <div class="vinyl-ring" id="outer-ring"></div>
+    <div class="vinyl-ring" id="middle-ring"></div>
+    <div class="vinyl-ring" id="inner-ring"></div>
+    <div id="vinyl-text">Tomorrow is another day</div>
+  </div>
+  <div id="people-text">People make mistakes.</div>
+  <div id="wave"></div>
+</div>
 
 <!-- Firebase -->
 <script type="module">
@@ -287,6 +297,71 @@ function draw() {
 }
 draw();
 </script>
+   
+   <script>
+/* 保留你原来的特效 */
+const lostfound = document.getElementById("lostfound");
+const spellOverlay = document.getElementById("spell-overlay");
+const vinylContainer = document.getElementById("vinyl-container");
+const vinylText = document.getElementById("vinyl-text");
+const peopleText = document.getElementById("people-text");
+const wave = document.getElementById("wave");
+
+lostfound.onclick = () => {
+  spellOverlay.style.opacity = "1";
+  vinylContainer.style.opacity = "1";
+  vinylText.style.opacity = "1";
+  wave.style.opacity = "1";
+  wave.style.transform="translateY(0)";
+
+  const duration = 3600;
+  let start = null;
+  let wavePhase = 0;
+
+  function animateFrame(t){
+    if(!start) start = t;
+    const progress = Math.min((t-start)/duration,1);
+    const rotation = 360*progress;
+    const scale = 0.8 + 0.2*progress;
+    vinylContainer.style.transform = `translate(-50%, -50%) scale(${scale}) rotate(${rotation}deg)`;
+    wave.style.transform = `translateY(${Math.sin(wavePhase)*6}px)`;
+    wavePhase += 0.06;
+    if(progress<1) requestAnimationFrame(animateFrame);
+  }
+  requestAnimationFrame(animateFrame);
+
+  setTimeout(()=>{
+    const fadeDur = 800;
+    let fadeStart = performance.now();
+    function fadeFrame(t2){
+      const prog = Math.min((t2-fadeStart)/fadeDur,1);
+      const rot = 360 + 360*prog;
+      const sc = 1 - 0.3*prog;
+      const op = 1 - prog;
+      vinylContainer.style.transform = `translate(-50%, -50%) scale(${sc}) rotate(${rot}deg)`;
+      vinylContainer.style.opacity = op;
+      wave.style.opacity = op;
+      if(prog<1) requestAnimationFrame(fadeFrame);
+    }
+    requestAnimationFrame(fadeFrame);
+    vinylText.style.opacity="0";
+
+    setTimeout(()=>{
+      peopleText.style.opacity="1";
+      setTimeout(()=>{
+        peopleText.style.opacity="0";
+        spellOverlay.style.opacity="0";
+        wave.style.opacity="0";
+        vinylContainer.style.opacity="0";
+        setTimeout(()=>{ window.location.href = "https://liangyi-x.github.io/drunk/"; },800);
+      },1800);
+
+    }, fadeDur);
+
+  }, duration);
+};
+</script>
+   
 
 </body>
 </html>
