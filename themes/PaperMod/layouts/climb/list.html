@@ -117,11 +117,11 @@ body {
 /* 底部漂浮手写文字 + 闪光 */
 .back-text {
   position: absolute;
-  bottom: 0.5rem;
+  bottom: 1rem;
   width: 100%;
   text-align: center;
   font-family: 'Pacifico', cursive;
-  font-size: 1.3rem;
+  font-size: 1.4rem;
   font-style: italic;
   cursor: pointer;
   z-index:6;
@@ -129,17 +129,22 @@ body {
   justify-content: center;
   align-items: center;
   gap: 0.3rem;
-  color: rgba(0,30,80,0.6);
-  text-shadow: 0 0 6px rgba(0,0,0,0.3);
-  animation: float 6s ease-in-out infinite, sway 4s ease-in-out infinite, fade 8s ease-in-out infinite alternate, glow 3s ease-in-out infinite alternate;
+  color: rgba(0,30,80,0.5);
+  text-shadow: 
+    0 0 8px rgba(0,50,120,0.5), 
+    0 0 14px rgba(0,70,200,0.4),
+    0 0 20px rgba(0,100,255,0.3);
+  animation: float 6s ease-in-out infinite, glow 4s ease-in-out infinite alternate, sway 4s ease-in-out infinite, opacityPulse 5s ease-in-out infinite;
 }
 
-.back-text:hover { transform: scale(1.1); }
-
 @keyframes float { 0% { transform: translateY(0); } 50% { transform: translateY(-5px); } 100% { transform: translateY(0); } }
-@keyframes sway { 0% { transform: translateX(0); } 50% { transform: translateX(3px); } 100% { transform: translateX(0); } }
-@keyframes fade { 0% { opacity:0.3; } 50% { opacity:0.6; } 100% { opacity:0.3; } }
-@keyframes glow { 0% { text-shadow: 0 0 6px rgba(0,30,80,0.4); } 50% { text-shadow: 0 0 14px rgba(0,30,80,0.9); } 100% { text-shadow: 0 0 6px rgba(0,30,80,0.4); } }
+@keyframes sway { 0% { transform: translateX(0); } 50% { transform: translateX(2px); } 100% { transform: translateX(0); } }
+@keyframes glow {
+  0% { text-shadow: 0 0 8px rgba(0,50,120,0.4),0 0 14px rgba(0,70,200,0.3),0 0 20px rgba(0,100,255,0.2); }
+  50% { text-shadow: 0 0 12px rgba(0,50,120,0.7),0 0 20px rgba(0,70,200,0.6),0 0 28px rgba(0,100,255,0.5); }
+  100% { text-shadow: 0 0 8px rgba(0,50,120,0.4),0 0 14px rgba(0,70,200,0.3),0 0 20px rgba(0,100,255,0.2); }
+}
+@keyframes opacityPulse { 0% { opacity:0.4; } 50% { opacity:0.8; } 100% { opacity:0.4; } }
 
 /* 右上角退出按钮 */
 .home-btn {
