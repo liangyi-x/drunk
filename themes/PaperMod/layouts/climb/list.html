@@ -8,90 +8,96 @@
 body {
   margin:0; padding:0;
   font-family: "Helvetica Neue", sans-serif;
-  background: #0b0c17;
-  overflow: hidden;
-  height: 100vh;
-  width: 100vw;
-  position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-/* 文字在山上 */
-.text-container {
-  position: absolute;
-  top: 15%;
-  width: 90%;
-  max-width: 600px;
-  text-align: center;
-  z-index: 2;
-}
-
-.text-container h1 {
-  font-size: calc(2rem + 2vw);
-  color: #fff;
-  text-shadow: 0 0 15px rgba(0,0,0,0.7);
-  margin:0;
-}
-
-.text-container p {
-  font-size: calc(1rem + 1.5vw);
+  background: linear-gradient(160deg,#0b0c17,#1a1c2a);
   color:#fff;
-  text-shadow: 0 0 10px rgba(0,0,0,0.7);
-  margin-top:0.5rem;
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  position: relative;
 }
 
-/* 右上角退出按钮 */
+/* 简单海洋波动效果 */
+.wave {
+  position:absolute;
+  bottom:0; left:0; width:100%;
+  height:120px;
+  background: rgba(255,255,255,0.06);
+  border-radius:100%;
+  animation: waveMove 4s infinite ease-in-out alternate;
+}
+@keyframes waveMove {
+  0%{ transform: translateY(0) scaleX(1); }
+  50%{ transform: translateY(-12px) scaleX(1.02); }
+  100%{ transform: translateY(0) scaleX(1); }
+}
+
+/* 标题 */
+h1 {
+  font-size:2.5rem;
+  text-shadow:0 0 15px rgba(150,180,255,0.6);
+  margin-bottom:1rem;
+}
+
+p {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+}
+
+/* 小提示按钮 */
+.back-btn {
+  padding:0.7rem 1.2rem;
+  background:rgba(255,255,255,0.1);
+  color:#fff;
+  border:none;
+  border-radius:12px;
+  cursor:pointer;
+  backdrop-filter:blur(6px) saturate(150%);
+  transition:0.3s;
+}
+.back-btn:hover { 
+  background:rgba(255,255,255,0.18); 
+  transform:translateY(-2px); 
+}
+
+/* 右上角表情按钮 */
 .home-btn {
   position: absolute;
   top: 10px;
   right: 10px;
-  font-size: 36px;
+  font-size: 32px;
   cursor: pointer;
-  z-index:10;
   transition: transform 0.3s;
 }
 .home-btn:hover {
   transform: scale(1.2);
 }
-
-/* 全屏山 */
-.mountain {
-  width: 100%;
-  height: 100%;
-  z-index:1;
-}
-
-.mountain svg {
-  width: 100%;
-  height: 100%;
-}
 </style>
 </head>
 <body>
 
-<!-- 文字 -->
-<div class="text-container">
-  <h1>The mountains are calling and I must go.</h1>
-  <p>Because it is there!</p>
-</div>
+<h1>The mountains are calling and I must go.</h1>
+<p>Because it is there!</p>
 
-<!-- 右上角退出按钮 -->
+<div class="wave"></div>
+
+<button class="back-btn" onclick="goBack()">There and Back</button>
+
+<!-- 右上角表情按钮 -->
 <div class="home-btn" onclick="goHome()">🧗</div>
 
-<!-- 放大的全屏山 -->
-<div class="mountain">
-  <svg viewBox="0 0 100 50" preserveAspectRatio="xMidYMax meet">
-    <polygon points="0,50 5,15 15,30 25,10 35,35 45,5 55,30 65,10 75,40 85,15 95,35 100,50" fill="#3a5f3a"/>
-  </svg>
-</div>
-
 <script>
+function goBack() {
+  window.location.href="../index.html";
+}
+
 function goHome() {
-  window.location.href="https://liangyi-x.github.io/drunk/";
+  window.location.href="https://liangyi-x.github.io/drunk/broadcast/";
 }
 </script>
 
 </body>
 </html>
+
