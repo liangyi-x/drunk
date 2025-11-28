@@ -1,0 +1,60 @@
+<script>
+function enterClimb() {
+  window.location.href = "/drunk/climb/";
+}
+</script>
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8" />
+<title>Climbing Wall</title>
+
+<style>
+  body {
+    margin: 0;
+    background: radial-gradient(circle at 50% 20%, #1a2238, #0a0f18);
+    overflow: hidden;
+    font-family: sans-serif;
+  }
+
+  .wall {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+  }
+
+  .hold {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    background: radial-gradient(circle, #c94141, #6a0f0f);
+    border-radius: 40% 60% 50% 55%;
+    box-shadow: 0 0 12px rgba(255, 0, 0, 0.4);
+    cursor: pointer;
+    transition: 0.2s ease;
+  }
+
+  .hold:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 18px rgba(255, 90, 90, 0.7);
+  }
+</style>
+</head>
+
+<body>
+<div class="wall" id="wall"></div>
+
+<script>
+// 随机生成 25 个岩点
+const wall = document.getElementById("wall");
+for (let i = 0; i < 25; i++) {
+  const h = document.createElement("div");
+  h.className = "hold";
+  h.style.top = Math.random() * 90 + "vh";
+  h.style.left = Math.random() * 90 + "vw";
+  wall.appendChild(h);
+}
+</script>
+
+</body>
+</html>
