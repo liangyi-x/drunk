@@ -1,5 +1,6 @@
 ---
 title: "Climb"
-type: "page"  # 或 "post" 根据模板情况
 url: "/climb/"
+type: "page"
+comments: false   # 关闭评论
 ---
