@@ -11,10 +11,11 @@ body {
   background: #0b0c17;
   overflow: hidden;
   height: 100vh;
-  display:flex;
-  justify-content:center;
-  align-items:flex-end;
+  width: 100vw;
   position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 /* 文字在山上 */
@@ -28,16 +29,16 @@ body {
 }
 
 .text-container h1 {
-  font-size: calc(1.5rem + 2vw);
+  font-size: calc(2rem + 2vw);
   color: #fff;
-  text-shadow: 0 0 10px rgba(0,0,0,0.7);
+  text-shadow: 0 0 15px rgba(0,0,0,0.7);
   margin:0;
 }
 
 .text-container p {
-  font-size: calc(1rem + 1vw);
+  font-size: calc(1rem + 1.5vw);
   color:#fff;
-  text-shadow: 0 0 8px rgba(0,0,0,0.7);
+  text-shadow: 0 0 10px rgba(0,0,0,0.7);
   margin-top:0.5rem;
 }
 
@@ -46,7 +47,7 @@ body {
   position: absolute;
   top: 10px;
   right: 10px;
-  font-size: 32px;
+  font-size: 36px;
   cursor: pointer;
   z-index:10;
   transition: transform 0.3s;
@@ -55,10 +56,10 @@ body {
   transform: scale(1.2);
 }
 
-/* 山 SVG */
+/* 全屏山 */
 .mountain {
   width: 100%;
-  height: 80%;
+  height: 100%;
   z-index:1;
 }
 
@@ -79,18 +80,13 @@ body {
 <!-- 右上角退出按钮 -->
 <div class="home-btn" onclick="goHome()">🧗</div>
 
-<!-- 放大的山 -->
+<!-- 放大的全屏山 -->
 <div class="mountain">
   <svg viewBox="0 0 100 50" preserveAspectRatio="xMidYMax meet">
-    <polygon points="0,50 10,20 20,35 30,15 40,40 50,10 60,35 70,20 80,45 90,15 100,50" fill="#3a5f3a"/>
+    <polygon points="0,50 5,15 15,30 25,10 35,35 45,5 55,30 65,10 75,40 85,15 95,35 100,50" fill="#3a5f3a"/>
   </svg>
 </div>
 
 <script>
 function goHome() {
-  window.location.href="https://liangyi-x.github.io/drunk/";
-}
-</script>
-
-</body>
-</html>
+  window.location.h
