@@ -44,7 +44,7 @@ body {
   position:absolute;
   bottom:0;
   width:100%;
-  height:40%;
+  height:25%;
   background: linear-gradient(to top, rgba(0,0,70,0.3), rgba(0,0,70,0));
   opacity:0;
   animation: wetMountain 6s ease-in-out infinite alternate;
@@ -70,7 +70,7 @@ body {
   position: absolute;
   bottom:0;
   width:100%;
-  height:66%; 
+  height:25%; 
   z-index:5;
   overflow: visible;
 }
@@ -93,14 +93,31 @@ body {
 
 @keyframes waveMove {
   0% { transform: translateX(0) translateY(0); }
-  50% { transform: translateX(-25%) translateY(-8px); } /* 上下幅度 */
+  50% { transform: translateX(-25%) translateY(-6px); }
   100% { transform: translateX(0) translateY(0); }
 }
 
-/* 底部漂浮手写文字 */
+/* 水花飞溅 */
+.splash {
+  position: absolute;
+  bottom:25%;
+  width:2px;
+  height:2px;
+  background: rgba(173,216,230,0.5);
+  border-radius:50%;
+  animation: splashAnim 2s infinite;
+}
+
+@keyframes splashAnim {
+  0% { transform: translateY(0) scale(0.5); opacity:0.5; }
+  50% { transform: translateY(-15px) scale(1); opacity:1; }
+  100% { transform: translateY(0) scale(0.5); opacity:0.5; }
+}
+
+/* 底部漂浮手写文字 + 闪光 */
 .back-text {
   position: absolute;
-  bottom: 1rem;
+  bottom: 0.5rem;
   width: 100%;
   text-align: center;
   font-family: 'Pacifico', cursive;
@@ -112,28 +129,17 @@ body {
   justify-content: center;
   align-items: center;
   gap: 0.3rem;
-  color: rgba(0,30,80,0.6); /* 深蓝色 */
+  color: rgba(0,30,80,0.6);
   text-shadow: 0 0 6px rgba(0,0,0,0.3);
-  animation: float 6s ease-in-out infinite, sway 4s ease-in-out infinite, fade 8s ease-in-out infinite alternate;
+  animation: float 6s ease-in-out infinite, sway 4s ease-in-out infinite, fade 8s ease-in-out infinite alternate, glow 3s ease-in-out infinite alternate;
 }
 
 .back-text:hover { transform: scale(1.1); }
 
-@keyframes float {
-  0% { transform: translateY(0); }
-  50% { transform: translateY(-5px); }
-  100% { transform: translateY(0); }
-}
-@keyframes sway {
-  0% { transform: translateX(0); }
-  50% { transform: translateX(3px); }
-  100% { transform: translateX(0); }
-}
-@keyframes fade {
-  0% { opacity:0.3; }
-  50% { opacity:0.6; }
-  100% { opacity:0.3; }
-}
+@keyframes float { 0% { transform: translateY(0); } 50% { transform: translateY(-5px); } 100% { transform: translateY(0); } }
+@keyframes sway { 0% { transform: translateX(0); } 50% { transform: translateX(3px); } 100% { transform: translateX(0); } }
+@keyframes fade { 0% { opacity:0.3; } 50% { opacity:0.6; } 100% { opacity:0.3; } }
+@keyframes glow { 0% { text-shadow: 0 0 6px rgba(0,30,80,0.4); } 50% { text-shadow: 0 0 14px rgba(0,30,80,0.9); } 100% { text-shadow: 0 0 6px rgba(0,30,80,0.4); } }
 
 /* 右上角退出按钮 */
 .home-btn {
@@ -167,17 +173,24 @@ body {
 <!-- 海浪 -->
 <div class="wave-container">
   <svg class="wave wave1" viewBox="0 0 120 20" preserveAspectRatio="none">
-    <path d="M0 10 C 10 15 20 5 30 10 C 40 15 50 5 60 10 C 70 15 80 5 90 10 C 100 15 110 5 120 10 L120 20 L0 20 Z"></path>
+    <path d="M0 10 C 10 13 20 7 30 10 C 40 13 50 7 60 10 C 70 13 80 7 90 10 C 100 13 110 7 120 10 L120 20 L0 20 Z"></path>
   </svg>
   <svg class="wave wave2" viewBox="0 0 120 20" preserveAspectRatio="none">
-    <path d="M0 12 C 10 18 20 8 30 12 C 40 18 50 8 60 12 C 70 18 80 8 90 12 C 100 18 110 8 120 12 L120 20 L0 20 Z"></path>
+    <path d="M0 11 C 10 15 20 7 30 11 C 40 15 50 7 60 11 C 70 15 80 7 90 11 C 100 15 110 7 120 11 L120 20 L0 20 Z"></path>
   </svg>
   <svg class="wave wave3" viewBox="0 0 120 20" preserveAspectRatio="none">
-    <path d="M0 14 C 10 20 20 10 30 14 C 40 20 50 10 60 14 C 70 20 80 10 90 14 C 100 20 110 10 120 14 L120 20 L0 20 Z"></path>
+    <path d="M0 12 C 10 16 20 8 30 12 C 40 16 50 8 60 12 C 70 16 80 8 90 12 C 100 16 110 8 120 12 L120 20 L0 20 Z"></path>
   </svg>
 </div>
 
-<!-- 底部漂浮手写文字 -->
+<!-- 微小水花 -->
+<div class="splash" style="left:20%; animation-delay:0s;"></div>
+<div class="splash" style="left:35%; animation-delay:0.3s;"></div>
+<div class="splash" style="left:50%; animation-delay:0.6s;"></div>
+<div class="splash" style="left:65%; animation-delay:0.9s;"></div>
+<div class="splash" style="left:80%; animation-delay:1.2s;"></div>
+
+<!-- 底部漂浮手写文字 + 闪光 -->
 <div class="back-text" onclick="goBack()">🪼 There and Back</div>
 
 <!-- 右上角退出按钮 -->
