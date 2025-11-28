@@ -57,7 +57,6 @@ body {
   100% { opacity:0; }
 }
 
-/* 山上文字 */
 .mountain h1, .mountain p {
   color: #fff;
   text-align: center;
@@ -71,9 +70,9 @@ body {
   position: absolute;
   bottom:0;
   width:100%;
-  height:66%; /* 从底部开始覆盖山底 */
+  height:66%; 
   z-index:5;
-  overflow: hidden;
+  overflow: visible;
 }
 
 /* 海浪 */
@@ -92,10 +91,9 @@ body {
 .wave2 path { fill: rgba(0,24,58,0.5); animation-delay: 2s; }
 .wave3 path { fill: rgba(0,24,58,0.3); animation-delay: 4s; }
 
-/* 海浪动画 */
 @keyframes waveMove {
   0% { transform: translateX(0) translateY(0); }
-  50% { transform: translateX(-25%) translateY(-6px); }
+  50% { transform: translateX(-25%) translateY(-8px); } /* 上下幅度 */
   100% { transform: translateX(0) translateY(0); }
 }
 
@@ -114,7 +112,7 @@ body {
   justify-content: center;
   align-items: center;
   gap: 0.3rem;
-  color: rgba(173, 216, 230, 0.35);
+  color: rgba(0,30,80,0.6); /* 深蓝色 */
   text-shadow: 0 0 6px rgba(0,0,0,0.3);
   animation: float 6s ease-in-out infinite, sway 4s ease-in-out infinite, fade 8s ease-in-out infinite alternate;
 }
@@ -196,4 +194,3 @@ function goBack() {
 
 </body>
 </html>
-
