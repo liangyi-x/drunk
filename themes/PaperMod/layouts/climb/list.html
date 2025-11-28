@@ -1,117 +1,150 @@
 <!DOCTYPE html>
-
 <html lang="zh">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>虚拟深海攀岩墙</title>
+<title>CLIMBING WALL</title>
 <style>
-body, html { margin:0; padding:0; width:100%; height:100%; overflow:hidden; font-family:sans-serif; background:linear-gradient(to bottom,#000014,#000833);}
-#climb-container { position:relative; width:100%; height:100%; overflow:hidden; }
-
-/* 光粒 */
-.particle { position:absolute; border-radius:50%; pointer-events:none; opacity:0.7; mix-blend-mode:screen; }
-
-/* 岩墙面板 */
-#wall { position:absolute; top:0; left:50%; transform:translateX(-50%); width:80%; height:100%; background:rgba(10,10,40,0.8); border-radius:12px; box-shadow:0 0 30px rgba(0,0,0,0.5); }
-
-.rock-point {
-position:absolute;
-width:24px;
-height:24px;
-background:radial-gradient(circle,#33ccff,#000);
-border-radius:50%;
-box-shadow:0 0 12px #33ccff,0 0 24px #115577;
-cursor:pointer;
-transition: transform 0.2s ease, box-shadow 0.3s ease;
-user-select:none;
+body {
+  margin:0; padding:0;
+  font-family:sans-serif;
+  background: linear-gradient(#0a0a1f, #050514);
+  overflow:hidden;
 }
-.rock-point:hover { transform:scale(1.4); box-shadow:0 0 24px #33ccff,0 0 48px #33ccff,0 0 60px #115577; }
-
-.glow { animation: glowPulse 2s ease-in-out infinite alternate; }
-@keyframes glowPulse {
-0% { transform:scale(1); box-shadow:0 0 12px #33ccff,0 0 24px #115577; }
-50% { transform:scale(1.2); box-shadow:0 0 20px #33ccff,0 0 40px #33ccff,0 0 60px #115577; }
-100% { transform:scale(1); box-shadow:0 0 12px #33ccff,0 0 24px #115577; }
+#wall {
+  position:relative;
+  width:100vw;
+  height:100vh;
+  background: url('https://raw.githubusercontent.com/liyuppp/cdn/main/mist.png');
+  background-size:cover;
 }
-
-/* 浮动迷雾 */
-#fog { position:absolute; width:200%; height:200%; top:-50%; left:-50%; background:radial-gradient(circle,#000a 0%,transparent 60%),radial-gradient(circle,#0010 0%,transparent 70%); animation: fogMove 30s linear infinite; pointer-events:none; }
-@keyframes fogMove { 0%{transform:translate(0,0);}100%{transform:translate(-20%,10%);} }
-
+.hold {
+  position:absolute;
+  cursor:pointer;
+  display:flex; justify-content:center; align-items:center;
+  color:#fff; font-size:12px; text-align:center;
+  transition: transform 0.2s;
+}
+.hold:hover { transform: scale(1.3); }
+#infoBox {
+  position:absolute; bottom:10px; left:50%; transform:translateX(-50%);
+  background:rgba(0,0,0,0.6); color:#fff;
+  padding:10px 16px; border-radius:8px; max-width:300px; text-align:center;
+  pointer-events:none;
+}
+#lines { position:absolute; top:0; left:0; width:100%; height:100%; z-index:0; }
+#jelly { position:absolute; top:20px; right:20px; width:50px; height:50px; cursor:pointer; z-index:10; }
+#jelly svg { width:100%; height:100%; }
 </style>
 </head>
 <body>
-<div id="climb-container">
-  <div id="fog"></div>
-  <div id="wall"></div>
+
+<div id="wall">
+  <canvas id="lines"></canvas>
+  <div id="jelly" onclick="goHome()">
+    <svg viewBox="0 0 64 64">
+      <circle cx="32" cy="32" r="30" fill="#3da4f5"/>
+      <path d="M20,40 C25,30 39,30 44,40" stroke="#fff" stroke-width="2" fill="none"/>
+    </svg>
+  </div>
 </div>
 
+<div id="infoBox">BETA</div>
+
 <script>
-// 光粒生成
-const container = document.getElementById('climb-container');
-const particleCount = 80;
-for(let i=0;i<particleCount;i++){
-  const p = document.createElement('div');
-  p.className='particle';
-  const size = Math.random()*3+1;
-  p.style.width = size+'px';
-  p.style.height = size+'px';
-  p.style.left = Math.random()*100+'%';
-  p.style.top = Math.random()*100+'%';
-  p.style.background = `rgba(50,200,255,${Math.random()*0.5+0.2})`;
-  container.appendChild(p);
-  animateParticle(p);
-}
+// 岩点示例数据
+const holds = [
+  {id:'A', x:10, y:20, shape:'circle', color:'#f55', info:'线路A: 初级'},
+  {id:'B', x:40, y:15, shape:'ellipse', color:'#5f5', info:'线路B: 中级'},
+  {id:'C', x:70, y:30, shape:'diamond', color:'#55f', info:'线路C: 高级'},
+  {id:'D', x:60, y:60, shape:'pentagon', color:'#fa0', info:'线路D: 技巧'},
+  {id:'E', x:20, y:50, shape:'circle', color:'#f0f', info:'线路E: 挑战'}
+];
 
-function animateParticle(el){
-  const x = Math.random()*window.innerWidth;
-  const y = Math.random()*window.innerHeight;
-  const dur = Math.random()*5000+5000;
-  el.animate([
-    { transform:`translate(${x}px,${y}px)` },
-    { transform:`translate(${x+Math.random()*30-15}px,${y+Math.random()*30-15}px)` }
-  ], {duration:dur, iterations:Infinity, direction:'alternate'});
-}
-
-// 岩点生成
+// 创建岩点
 const wall = document.getElementById('wall');
-const rockPoints = [];
-for(let i=0;i<20;i++){
-  const rp = document.createElement('div');
-  rp.className='rock-point glow';
-  rp.style.left=Math.random()*70+5+'%';
-  rp.style.top=Math.random()*85+5+'%';
-  wall.appendChild(rp);
-  rockPoints.push(rp);
+const infoBox = document.getElementById('infoBox');
 
-  // 可拖拽
-  let offsetX, offsetY, dragging=false;
-  rp.addEventListener('mousedown',e=>{
-    dragging=true;
-    offsetX=e.clientX-rp.offsetLeft;
-    offsetY=e.clientY-rp.offsetTop;
-    rp.style.transition='none';
-  });
-  window.addEventListener('mousemove',e=>{
-    if(dragging){
-      let nx=e.clientX-offsetX;
-      let ny=e.clientY-offsetY;
-      rp.style.left=nx+'px';
-      rp.style.top=ny+'px';
+holds.forEach(h=>{
+  const div = document.createElement('div');
+  div.className='hold';
+  div.dataset.id = h.id;
+  div.style.left = h.x + '%';
+  div.style.top = h.y + '%';
+  div.style.background = h.color;
+  div.style.width = '30px';
+  div.style.height = '30px';
+  div.style.zIndex = 5;
+  div.style.clipPath = shapeToClip(h.shape);
+  div.title = h.info;
+  wall.appendChild(div);
+
+  div.onmousedown = e=>{
+    e.preventDefault();
+    let offsetX = e.clientX - div.offsetLeft;
+    let offsetY = e.clientY - div.offsetTop;
+    function move(ev){
+      let newX = ev.clientX - offsetX;
+      let newY = ev.clientY - offsetY;
+      div.style.left = newX + 'px';
+      div.style.top = newY + 'px';
+      drawLines(); // 动态更新线路
     }
-  });
-  window.addEventListener('mouseup',e=>{
-    dragging=false;
-    rp.style.transition='';
-  });
+    function up(){ window.removeEventListener('mousemove', move); window.removeEventListener('mouseup', up);}
+    window.addEventListener('mousemove', move);
+    window.addEventListener('mouseup', up);
+  };
 
-  // 点击发光呼吸
-  rp.addEventListener('click',e=>{
-    rp.classList.toggle('glow');
+  div.onclick = e=>{
+    infoBox.textContent = h.info;
     e.stopPropagation();
+  };
+});
+
+// 不同形状对应 clip-path
+function shapeToClip(shape){
+  switch(shape){
+    case 'circle': return 'circle(50% at 50% 50%)';
+    case 'ellipse': return 'ellipse(50% 30% at 50% 50%)';
+    case 'diamond': return 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)';
+    case 'pentagon': return 'polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%)';
+    default: return 'circle(50%)';
+  }
+}
+
+// 多条线路示例
+const routes = [
+  {holds:['A','B','C'], color:'#fff'},
+  {holds:['D','E','C'], color:'#0ff'}
+];
+
+const canvas = document.getElementById('lines');
+const ctx = canvas.getContext('2d');
+function resizeCanvas(){ canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+resizeCanvas();
+window.addEventListener('resize', ()=>{ resizeCanvas(); drawLines(); });
+
+// 根据路线画线
+function drawLines(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  routes.forEach(route=>{
+    ctx.strokeStyle = route.color;
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    route.holds.forEach((id,i)=>{
+      const holdDiv = document.querySelector(`.hold[data-id="${id}"]`);
+      const rect = holdDiv.getBoundingClientRect();
+      const x = rect.left + rect.width/2;
+      const y = rect.top + rect.height/2;
+      if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    });
+    ctx.stroke();
   });
 }
+
+// 回主页
+function goHome(){ window.location.href="https://liangyi-x.github.io/drunk/"; }
+
 </script>
 
 </body>
