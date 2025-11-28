@@ -13,15 +13,50 @@ body { margin:0; padding:0; background:#1f1f1f; color:#ddd; font-family:sans-ser
 #broadcast-send { padding:0.5rem 0.9rem; border:none; border-radius:6px; background:rgba(80,80,80,0.6); color:#fff; cursor:pointer; }
 #broadcast-send:hover { background: rgba(100,100,100,0.8); }
 .broadcast-list { display:flex; flex-direction:column; gap:0.8rem; max-height:300px; overflow-y:auto; }
-.broadcast-card { background: rgba(255,255,255,0.05); padding:1rem; border-radius:8px; transition: all 0.3s ease; cursor:pointer; }
+
+/* 卡片 */
+.broadcast-card { 
+  position:relative;
+  background: rgba(255,255,255,0.05); 
+  padding:1rem; 
+  border-radius:8px; 
+  transition: all 0.3s ease; 
+  cursor:pointer; 
+  overflow:hidden;
+}
 .broadcast-card:hover { transform: translateY(-4px); backdrop-filter: blur(8px); box-shadow:0 4px 16px rgba(0,0,0,0.5);}
 .broadcast-card.dissolve { animation: cardFade 0.8s forwards; }
 @keyframes cardFade { 0%{transform:rotate(0deg);opacity:1;}100%{transform:rotate(6deg);opacity:0;} }
+
+/* 小黑猫按钮 */
+.delete-btn {
+  position:absolute;
+  top:6px;
+  right:8px;
+  font-size:18px;
+  cursor:pointer;
+  user-select:none;
+  opacity:0.7;
+  transition:0.2s;
+}
+.delete-btn:hover { opacity:1; transform:scale(1.2); }
+
+/* 海水吞没（删除）动画 */
+.broadcast-card.delete-effect {
+  animation: oceanFade 1.2s forwards;
+}
+@keyframes oceanFade {
+  0%   { opacity:1; filter:blur(0px); transform:translateY(0);}
+  40%  { opacity:0.8; filter:blur(2px); transform:translateY(3px);}
+  70%  { opacity:0.4; filter:blur(6px); transform:translateY(12px);}
+  100% { opacity:0; filter:blur(12px); transform:translateY(28px);}
+}
+
 .broadcast-message { font-size:1rem; margin-bottom:0.4rem; }
 .broadcast-time { font-size:0.85rem; color:#aaa; text-align:right; }
+
 #lostfound { text-align:center; margin:2rem 0; font-style:italic; color:rgba(200,200,200,0.7); cursor:pointer; transition:0.3s; }
 #lostfound:hover { color:#7fffd4; }
-
 #spell-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.35); pointer-events:none; opacity:0; transition:opacity 1.2s ease-in-out; z-index:999; }
 
 #vinyl-container { position:absolute; top:50%; left:50%; transform:translate(-50%, -50%) scale(0.8); width:200px; height:200px; opacity:0; }
@@ -32,43 +67,19 @@ body { margin:0; padding:0; background:#1f1f1f; color:#ddd; font-family:sans-ser
 #vinyl-text { position:absolute; bottom:-25px; width:100%; text-align:center; color:#ffe0b2; font-size:1rem; opacity:0; transition:opacity 0.5s ease-in-out; }
 
 #people-text {
-  position:absolute;
-  top:50%;
-  left:50%;
-  transform:translate(-50%, -50%);
-  font-size:1.8rem;
-  font-weight:bold;
-  opacity:0;
-  text-align:center;
+  position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); font-size:1.8rem; font-weight:bold; opacity:0; text-align:center;
   background: linear-gradient(90deg, #330000, #550000, #330000);
-  -webkit-background-clip:text;
-  color:transparent;
+  -webkit-background-clip:text; color:transparent;
   text-shadow:0 0 6px #440000, 0 0 12px #220000;
-  
-  animation:
-    floatText 2s ease-in-out infinite alternate,
-    bloodFlow 3s linear infinite,
-    glowPulse 2s ease-in-out infinite alternate;
+  animation: floatText 2s ease-in-out infinite alternate, bloodFlow 3s linear infinite, glowPulse 2s ease-in-out infinite alternate;
 }
-
-@keyframes floatText {
-  0% { transform:translate(-50%, -50%); }
-  50% { transform:translate(-50%, -48%); }
-  100% { transform:translate(-50%, -50%); }
-}
-
+@keyframes floatText { 0%{transform:translate(-50%, -50%);} 50%{transform:translate(-50%, -48%);} 100%{transform:translate(-50%, -50%);} }
 @keyframes bloodFlow {
-  0% { background-position:0 0; text-shadow:0 0 6px #330000,0 0 12px #220000,0 0 18px #110000; }
-  50% { background-position:50% 0; text-shadow:0 0 8px #550000,0 0 16px #440000,0 0 24px #330000; }
-  100% { background-position:100% 0; text-shadow:0 0 6px #330000,0 0 12px #220000,0 0 18px #110000; }
+  0% { background-position:0 0; }
+  50% { background-position:50% 0; }
+  100% { background-position:100% 0; }
 }
-
-@keyframes glowPulse {
-  0% { opacity:0.7; }
-  50% { opacity:1; }
-  100% { opacity:0.7; }
-}
-
+@keyframes glowPulse { 0%{opacity:0.7;}50%{opacity:1;}100%{opacity:0.7;} }
 
 #wave { position:absolute; bottom:0; left:0; width:100%; height:80px; background:#001f3f; border-top-left-radius:50% 20px; border-top-right-radius:50% 20px; transform:translateY(100%); opacity:0; transition:opacity 1s;}
 </style>
@@ -96,43 +107,78 @@ body { margin:0; padding:0; background:#1f1f1f; color:#ddd; font-family:sans-ser
 </div>
 
 <script type="module">
-// Firebase 广播功能保持
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-app.js";
-import { getFirestore, collection, addDoc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-firestore.js";
-const firebaseConfig = { apiKey:"AIzaSyCcerqGJVSsMwLs7eoRjATE8X7bplWsD54", authDomain:"drunk-broadcast.firebaseapp.com", projectId:"drunk-broadcast", storageBucket:"drunk-broadcast.firebasestorage.app", messagingSenderId:"998143016108", appId:"1:998143016108:web:87c3a60b853aaf75f27309" };
+import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey:"AIzaSyCcerqGJVSsMwLs7eoRjATE8X7bplWsD54",
+  authDomain:"drunk-broadcast.firebaseapp.com",
+  projectId:"drunk-broadcast",
+  storageBucket:"drunk-broadcast.firebasestorage.app",
+  messagingSenderId:"998143016108",
+  appId:"1:998143016108:web:87c3a60b853aaf75f27309"
+};
+
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const ref = collection(db,"broadcasts");
+
 const inputEl = document.getElementById("broadcast-input");
 const sendBtn = document.getElementById("broadcast-send");
 const listEl = document.getElementById("broadcasts");
 
-sendBtn.onclick=async()=>{
-  const v=inputEl.value.trim(); 
-  if(!v) return; 
-  await addDoc(ref,{message:v,timestamp:new Date()}); 
+sendBtn.onclick = async () => {
+  const v = inputEl.value.trim();
+  if(!v) return;
+  await addDoc(ref, { message:v, timestamp:new Date() });
   inputEl.value="";
 };
 
-inputEl.addEventListener("keydown",e=>{if(e.key==="Enter") sendBtn.click();});
+inputEl.addEventListener("keydown",e=>{
+  if(e.key==="Enter") sendBtn.click();
+});
 
 const q=query(ref,orderBy("timestamp","desc"));
 onSnapshot(q,snap=>{
   listEl.innerHTML="";
-  snap.forEach(doc=>{
-    const data=doc.data(); 
-    const d=document.createElement("div"); 
-    d.className="broadcast-card"; 
-    d.innerHTML=`<div class="broadcast-message">${data.message}</div><div class="broadcast-time">${data.timestamp.toDate().toLocaleString()}</div>`; 
-    d.onclick=()=>d.classList.add("dissolve"); 
+  snap.forEach(docSnap=>{
+    const data=docSnap.data();
+
+    const d=document.createElement("div");
+    d.className="broadcast-card";
+
+    d.innerHTML=`
+      <div class="delete-btn">🐈‍⬛</div>
+      <div class="broadcast-message">${data.message}</div>
+      <div class="broadcast-time">${data.timestamp.toDate().toLocaleString()}</div>
+    `;
+
+    // 点击卡片本体 = 淡出，不删除
+    d.onclick = (e)=>{
+      if(e.target.classList.contains("delete-btn")) return;
+      d.classList.add("dissolve");
+    };
+
+    // 点击小黑猫 = 真删除 + 溶解成海水
+    d.querySelector(".delete-btn").onclick = async (e)=>{
+      e.stopPropagation();
+      d.classList.add("delete-effect");
+      setTimeout(async ()=>{
+        await deleteDoc(doc(db,"broadcasts", docSnap.id));
+      },1100);
+    };
+
     listEl.appendChild(d);
   });
 });
 
-window.addEventListener("load",()=>{document.getElementById("main-container").style.opacity="1";});
+window.addEventListener("load",()=>{
+  document.getElementById("main-container").style.opacity="1";
+});
 </script>
 
 <script>
+/* 保留你原来的特效 */
 const lostfound = document.getElementById("lostfound");
 const spellOverlay = document.getElementById("spell-overlay");
 const vinylContainer = document.getElementById("vinyl-container");
@@ -163,10 +209,7 @@ lostfound.onclick = () => {
   }
   requestAnimationFrame(animateFrame);
 
-  vinylText.style.opacity="1";
-
   setTimeout(()=>{
-    // 黑胶淡出
     const fadeDur = 800;
     let fadeStart = performance.now();
     function fadeFrame(t2){
@@ -183,10 +226,8 @@ lostfound.onclick = () => {
     vinylText.style.opacity="0";
 
     setTimeout(()=>{
-      // people文字显示
       peopleText.style.opacity="1";
       setTimeout(()=>{
-        // 完整淡出回主页
         peopleText.style.opacity="0";
         spellOverlay.style.opacity="0";
         wave.style.opacity="0";
@@ -201,4 +242,3 @@ lostfound.onclick = () => {
 </script>
 </body>
 </html>
-
